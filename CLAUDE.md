@@ -207,7 +207,7 @@ défectueux, le signaler en fin de session au lieu de le corriger.
 ## 9. Réglages du propriétaire
 
 ```
-PUBLICATION_DIRECTE=oui
+PUBLICATION_DIRECTE=non
 ```
 
 Passer à `oui` pour que les articles soient créés directement en `statut: "publie"`,
