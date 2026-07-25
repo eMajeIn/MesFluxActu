@@ -183,7 +183,7 @@ Ensuite :
 1. `git add content/posts/<fichier>.json`
 2. Message de commit sur une ligne : `article : <titre court>` — ou
    `mise à jour : <slug>` pour une révision.
-3. Pousser.
+3. Committer directement sur `main` et pousser. Ne pas créer de branche.
 
 Le commit ne contient que le fichier de l'article. Ne jamais modifier `src/`,
 `public/`, `outils/` ou ce fichier de ta propre initiative : si le moteur te semble
@@ -207,7 +207,7 @@ défectueux, le signaler en fin de session au lieu de le corriger.
 ## 9. Réglages du propriétaire
 
 ```
-PUBLICATION_DIRECTE=non
+PUBLICATION_DIRECTE=oui
 ```
 
 Passer à `oui` pour que les articles soient créés directement en `statut: "publie"`,
