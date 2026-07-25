@@ -1,0 +1,518 @@
+/* =========================================================
+   Delta — feuille de style unique
+   Principe : un rail chronologique à gauche, des dates en
+   monospace, un marqueur coloré par laboratoire. Tout le
+   reste reste silencieux.
+   ========================================================= */
+
+:root {
+  --papier:      #ECEEF1;
+  --surface:     #F8F9FB;
+  --encre:       #15171D;
+  --encre-doux:  #5C6373;
+  --rail:        #C9CED6;
+  --accent:      #2F27C4;
+
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --serif:   "Source Serif 4", Georgia, serif;
+  --mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --largeur:   46rem;
+  --colonne:   5rem;   /* largeur du rail de dates */
+  --ecart:     1.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --papier:     #0F1116;
+    --surface:    #161A21;
+    --encre:      #E5E8EE;
+    --encre-doux: #969DAC;
+    --rail:       #2A303A;
+    --accent:     #9F98FF;
+  }
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+.evitement {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  z-index: 10;
+}
+.evitement:focus { left: 0; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Bandeau ------------------------------------- */
+
+.bandeau {
+  border-bottom: 1px solid var(--rail);
+}
+
+.bandeau__interieur,
+.page,
+.pied__interieur {
+  max-width: var(--largeur);
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.bandeau__interieur {
+  padding-top: 3.5rem;
+  padding-bottom: 1.75rem;
+}
+
+.bandeau__titre {
+  display: inline-block;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.5rem, 9vw, 3.75rem);
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  text-decoration: none;
+}
+
+.bandeau__accroche {
+  margin: 0.75rem 0 0;
+  max-width: 32rem;
+  color: var(--encre-doux);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* ---------- Filtres par laboratoire --------------------- */
+
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 2.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.filtre {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--encre-doux);
+  border: 1px solid var(--rail);
+  padding: 0.3rem 0.7rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.filtre:hover { color: var(--encre); border-color: var(--encre-doux); }
+
+.filtre.est-actif {
+  color: var(--papier);
+  background: var(--encre);
+  border-color: var(--encre);
+}
+
+/* ---------- Le journal : rail + entrées ------------------ */
+
+.journal { padding-top: 2.75rem; }
+
+.entree {
+  display: grid;
+  grid-template-columns: var(--colonne) 1fr;
+}
+
+.entree__date {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  text-align: right;
+  padding-right: var(--ecart);
+  padding-top: 0.2rem;
+  color: var(--encre-doux);
+  font-variant-numeric: tabular-nums;
+}
+
+.entree__jour {
+  display: block;
+  color: var(--encre);
+  font-weight: 500;
+}
+
+.entree__annee {
+  display: block;
+  font-size: 0.6875rem;
+  opacity: 0.7;
+}
+
+.entree__corps {
+  position: relative;
+  border-left: 1px solid var(--rail);
+  padding-left: var(--ecart);
+  padding-bottom: 3.25rem;
+}
+
+/* Le marqueur posé sur le rail : c'est lui qui porte la couleur du labo */
+.entree__corps::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 0.45rem;
+  width: 7px;
+  height: 7px;
+  background: var(--teinte, var(--rail));
+}
+
+.entree:last-child .entree__corps { padding-bottom: 1.5rem; }
+
+.jeton {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--teinte, var(--encre-doux));
+  text-decoration: none;
+  margin-bottom: 0.4rem;
+}
+
+.entree__titre {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.35rem, 3.6vw, 1.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+.entree__titre a {
+  text-decoration: none;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.25s ease;
+}
+
+.entree__titre a:hover { background-size: 100% 1px; }
+
+.entree__chapeau {
+  margin: 0 0 0.7rem;
+  color: var(--encre-doux);
+  font-size: 1rem;
+}
+
+.meta {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--encre-doux);
+  margin: 0;
+}
+
+/* ---------- Page article -------------------------------- */
+
+.retour {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--encre-doux);
+  text-decoration: none;
+  padding-top: 2.5rem;
+}
+
+.retour:hover { color: var(--encre); }
+
+.article__entete {
+  padding-top: 1.75rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--rail);
+}
+
+.article__titre {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2rem, 6.5vw, 3rem);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0.35rem 0 0.9rem;
+}
+
+.article__chapeau {
+  font-size: 1.1875rem;
+  line-height: 1.5;
+  color: var(--encre-doux);
+  margin: 0 0 1.25rem;
+  max-width: 34rem;
+}
+
+.prose {
+  max-width: 34rem;
+  padding-top: 2.25rem;
+  font-size: 1.125rem;
+  line-height: 1.72;
+}
+
+.prose > p { margin: 0 0 1.35rem; }
+
+.prose h2,
+.prose h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 2.75rem 0 0.85rem;
+}
+
+.prose h2 { font-size: 1.5rem; }
+.prose h3 { font-size: 1.1875rem; }
+
+.prose ul,
+.prose ol { margin: 0 0 1.35rem; padding-left: 1.25rem; }
+.prose li { margin-bottom: 0.45rem; }
+
+.prose a {
+  color: var(--encre);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1.5px;
+}
+
+.prose a:hover { color: var(--accent); }
+
+.prose blockquote {
+  margin: 1.75rem 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--accent);
+  font-style: italic;
+  color: var(--encre-doux);
+}
+
+.prose blockquote p { margin: 0; }
+
+.prose pre {
+  background: var(--surface);
+  border: 1px solid var(--rail);
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.35rem;
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.875em;
+}
+
+.prose :not(pre) > code {
+  background: var(--surface);
+  border: 1px solid var(--rail);
+  padding: 0.08em 0.35em;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--rail);
+  margin: 2.5rem 0;
+}
+
+/* ---------- Sources -------------------------------------- */
+
+.sources {
+  max-width: 34rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rail);
+}
+
+.sources__titre {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--encre-doux);
+  margin: 0 0 0.9rem;
+}
+
+.sources__liste { list-style: none; margin: 0; padding: 0; }
+
+.sources__liste li {
+  margin-bottom: 0.6rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.sources__liste a {
+  text-decoration: underline;
+  text-decoration-color: var(--rail);
+  text-underline-offset: 0.15em;
+}
+
+.sources__liste a:hover { text-decoration-color: var(--accent); }
+
+.sources__domaine {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--encre-doux);
+  display: block;
+}
+
+/* ---------- Étiquettes ----------------------------------- */
+
+.etiquettes {
+  max-width: 34rem;
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.etiquette {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.05em;
+  color: var(--encre-doux);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rail);
+  padding-bottom: 1px;
+}
+
+.etiquette:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- Navigation entre articles -------------------- */
+
+.voisins {
+  max-width: 34rem;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rail);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.voisin { text-decoration: none; }
+
+.voisin__role {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--encre-doux);
+  margin-bottom: 0.3rem;
+}
+
+.voisin__titre {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+.voisin:hover .voisin__titre { color: var(--accent); }
+
+.voisin.est-suivant { text-align: right; }
+
+/* ---------- Écran vide ----------------------------------- */
+
+.vide {
+  padding: 4rem 0;
+  max-width: 30rem;
+}
+
+.vide__titre {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.vide p { margin: 0; color: var(--encre-doux); }
+
+/* ---------- Pied ----------------------------------------- */
+
+.pied {
+  border-top: 1px solid var(--rail);
+  margin-top: 5rem;
+}
+
+.pied__interieur {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.pied__mention {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 0.875rem;
+  color: var(--encre-doux);
+}
+
+.pied__liens {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Mobile --------------------------------------- */
+
+@media (max-width: 40rem) {
+  .entree { grid-template-columns: 1fr; }
+
+  .entree__date {
+    text-align: left;
+    padding-right: 0;
+    padding-left: var(--ecart);
+    padding-top: 0;
+    margin-bottom: 0.15rem;
+  }
+
+  .entree__jour,
+  .entree__annee { display: inline; font-size: 0.75rem; }
+
+  .entree__annee::before { content: "."; }
+
+  .entree__corps { padding-bottom: 2.5rem; }
+
+  .voisins { grid-template-columns: 1fr; }
+  .voisin.est-suivant { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

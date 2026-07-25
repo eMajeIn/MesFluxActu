@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Article",
+  "description": "Un article du journal. Un fichier JSON par article, dans content/posts/.",
+  "type": "object",
+  "required": ["slug", "titre", "date", "labo", "chapeau", "corps", "sources", "statut"],
+  "additionalProperties": false,
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 80,
+      "description": "Identifiant d'URL. Minuscules, chiffres et tirets. Immuable une fois publié."
+    },
+    "titre": {
+      "type": "string",
+      "minLength": 15,
+      "maxLength": 95,
+      "description": "Annonce le changement, pas le sujet. Pas de superlatif, pas de point d'exclamation."
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de publication au format ISO 8601 avec fuseau, ex. 2026-07-25T08:00:00+02:00"
+    },
+    "maj": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de dernière mise à jour, si l'article a été révisé."
+    },
+    "labo": {
+      "type": "string",
+      "enum": ["anthropic", "openai", "mistral", "gemini", "autre"],
+      "description": "Acteur principal de l'article. 'autre' pour les sujets transverses."
+    },
+    "chapeau": {
+      "type": "string",
+      "minLength": 80,
+      "maxLength": 260,
+      "description": "Deux phrases : ce qui a changé, et pourquoi ça compte. Doit se suffire à lui-même."
+    },
+    "corps": {
+      "type": "string",
+      "minLength": 1200,
+      "description": "Le texte en Markdown. Titres à partir de ##. Pas de HTML brut."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9àâäéèêëîïôöùûüç]+([ -][a-z0-9àâäéèêëîïôöùûüç]+)*$" },
+      "minItems": 1,
+      "maxItems": 5
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["titre", "url"],
+        "additionalProperties": false,
+        "properties": {
+          "titre": { "type": "string", "minLength": 3 },
+          "url": { "type": "string", "pattern": "^https://" },
+          "consultee": { "type": "string", "format": "date" }
+        }
+      },
+      "description": "Au moins deux sources, dont une primaire (annonce officielle, documentation, publication)."
+    },
+    "statut": {
+      "type": "string",
+      "enum": ["brouillon", "publie"],
+      "description": "Seuls les articles en 'publie' apparaissent sur le site."
+    }
+  }
+}
