@@ -11,10 +11,11 @@
 
 set -eu
 
-DEPOT="${HOME}/blog-ia"
+DEPOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BRANCHE="main"
-VERROU="${HOME}/.blog-ia.verrou"
-JOURNAL="${HOME}/blog-ia-deploiement.log"
+NOM=$(basename "$DEPOT")
+VERROU="${HOME}/.${NOM}.verrou"
+JOURNAL="${HOME}/${NOM}-deploiement.log"
 
 trace() {
     printf '%s  %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "$JOURNAL"
