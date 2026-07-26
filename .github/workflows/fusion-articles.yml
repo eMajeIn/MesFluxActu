@@ -1,0 +1,50 @@
+name: Fusion automatique des articles
+
+# Se déclenche dès qu'une routine Claude pousse une branche claude/*.
+# Vérifie que seuls des articles sont concernés, fusionne dans main,
+# puis supprime la branche.
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+
+jobs:
+  fusionner:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refuser toute modification hors des articles
+        run: |
+          MODIFS=$(git diff --name-only origin/main..."${GITHUB_SHA}")
+          echo "Fichiers modifiés :"
+          echo "${MODIFS}"
+          if [ -z "${MODIFS}" ]; then
+            echo "Aucune modification : rien à fusionner."
+            exit 1
+          fi
+          if echo "${MODIFS}" | grep -qv '^content/posts/'; then
+            echo ""
+            echo "Des fichiers hors content/posts/ sont touchés."
+            echo "Fusion refusée : à examiner à la main."
+            exit 1
+          fi
+
+      - name: Fusionner dans main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git merge --no-ff "${GITHUB_SHA}" \
+            -m "articles : fusion automatique de ${GITHUB_REF_NAME}"
+          git push origin main
+
+      - name: Supprimer la branche fusionnée
+        run: git push origin --delete "${GITHUB_REF_NAME}"
