@@ -303,7 +303,7 @@ ouvertes, fonctionnalité retenue ou motif de l'abandon.
 ## 10. Réglages du propriétaire
 
 ```
-PUBLICATION_DIRECTE=non
+PUBLICATION_DIRECTE=oui
 ```
 
 Passer à `oui` pour que les articles soient créés directement en
