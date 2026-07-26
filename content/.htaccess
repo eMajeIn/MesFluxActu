@@ -1,0 +1,16 @@
+# Ce dossier ne doit jamais être servi par le serveur web.
+#
+# Second rempart, indépendant du .htaccess racine et de toute règle de
+# réécriture : même si le routage est modifié ou cassé, ce dossier reste
+# fermé. Ne pas supprimer.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+Options -Indexes
