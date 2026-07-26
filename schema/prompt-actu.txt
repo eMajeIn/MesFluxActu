@@ -1,0 +1,16 @@
+Tiens le journal décrit dans CLAUDE.md, à la lettre.
+
+Aujourd'hui tu écris une ACTU. Applique la section 2, sans en sauter d'étape.
+Fenêtre à couvrir : depuis la date de l'article de type "actu" le plus récent
+dans content/posts/.
+
+Trois rappels :
+— un article au maximum ; zéro est une issue normale et attendue ;
+— aucun fait sans source primaire réellement ouverte pendant cette exécution ;
+— `php outils/valider.php` doit sortir en code 0 avant le moindre commit.
+
+Le fichier produit porte "type": "actu" et n'a pas de champ fonctionnalite.
+
+Termine par un compte rendu : sources consultées, candidats envisagés, motif
+de chaque rejet, décision finale. Si une source a renvoyé une erreur, précise
+si l'en-tête x-deny-reason: host_not_allowed était présent.

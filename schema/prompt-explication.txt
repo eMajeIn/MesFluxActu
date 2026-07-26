@@ -1,0 +1,30 @@
+Tiens le journal décrit dans CLAUDE.md, à la lettre.
+
+Aujourd'hui tu écris des EXPLICATIONS. Applique la section 3, sans en sauter
+d'étape. Traite les quatre acteurs un par un : Anthropic, OpenAI, Mistral,
+Gemini.
+
+Pour chacun, explique une fonctionnalité qui n'a pas encore été traitée pour
+cet acteur — vérifie la liste des champs "fonctionnalite" déjà présents dans
+content/posts/ avant de choisir.
+
+Quatre rappels :
+
+— La documentation technique prime sur les billets d'annonce. C'est elle qui
+  permet de répondre aux cinq questions de la section 3.
+
+— Aucun exemple de code inventé. Tous les noms de paramètres, de champs et de
+  points d'entrée doivent figurer dans une page de documentation que tu as
+  réellement ouverte pendant cette exécution. Sinon, change de sujet.
+
+— Zéro à quatre articles. Trois est un résultat normal. Ne complète jamais à
+  quatre en dégradant un sujet.
+
+— `php outils/valider.php` doit sortir en code 0 avant le moindre commit.
+
+Chaque fichier produit porte "type": "explication" et un champ
+"fonctionnalite" renseigné.
+
+Termine par un compte rendu, acteur par acteur : sources ouvertes,
+fonctionnalité retenue ou motif de l'abandon. Si une source a renvoyé une
+erreur, précise si l'en-tête x-deny-reason: host_not_allowed était présent.

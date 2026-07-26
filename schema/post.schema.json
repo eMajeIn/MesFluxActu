@@ -1,52 +1,66 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Article",
-  "description": "Un article du journal. Un fichier JSON par article, dans content/posts/.",
+  "description": "Un article du journal. Un fichier JSON par article, dans content/posts/. Trois types coexistent, distingués par le champ 'type' : actu (brève de veille), explication (fonctionnalité expliquée avec exemples) et methode (billet sur le journal lui-même). Les contraintes de longueur et de structure varient selon le type ; c'est outils/valider.php qui les applique.",
   "type": "object",
-  "required": ["slug", "titre", "date", "labo", "chapeau", "corps", "sources", "statut"],
+  "required": ["slug", "titre", "date", "type", "labo", "chapeau", "corps", "sources", "statut"],
   "additionalProperties": false,
   "properties": {
     "slug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
       "maxLength": 80,
-      "description": "Identifiant d'URL. Minuscules, chiffres et tirets. Immuable une fois publié."
+      "description": "Identifiant d'URL. Préfixé par le nom du labo pour un article de type explication. Immuable une fois publié."
     },
     "titre": {
       "type": "string",
       "minLength": 15,
       "maxLength": 95,
-      "description": "Annonce le changement, pas le sujet. Pas de superlatif, pas de point d'exclamation."
+      "description": "En actu, annonce le changement. En explication, nomme la fonctionnalité. Pas de superlatif, pas de point d'exclamation."
     },
     "date": {
       "type": "string",
       "format": "date-time",
-      "description": "Date de publication au format ISO 8601 avec fuseau, ex. 2026-07-25T08:00:00+02:00"
+      "description": "Publication au format ISO 8601 avec fuseau, ex. 2026-07-27T08:00:00+02:00"
     },
     "maj": {
       "type": "string",
       "format": "date-time",
-      "description": "Date de dernière mise à jour, si l'article a été révisé."
+      "description": "Date de dernière révision. Utilisé quand une actu déjà publiée est complétée plutôt que dupliquée."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["actu", "explication", "methode"],
+      "description": "actu : 600-900 mots, 1500 caractères minimum, pas d'exemple obligatoire. explication : 900-1400 mots, 5000 caractères minimum, quatre sections en ## et au moins un bloc de code. methode : 1200 caractères minimum, labo = autre."
     },
     "labo": {
       "type": "string",
       "enum": ["anthropic", "openai", "mistral", "gemini", "autre"],
-      "description": "Acteur principal de l'article. 'autre' pour les sujets transverses."
+      "description": "Acteur traité. 'autre' est réservé au type methode."
+    },
+    "fonctionnalite": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 60,
+      "description": "Nom court et canonique du sujet, en minuscules, ex. 'cache de contexte'. OBLIGATOIRE pour le type explication, INTERDIT pour les autres. Clé anti-doublon : deux articles du même labo ne peuvent jamais porter la même valeur."
     },
     "chapeau": {
       "type": "string",
       "minLength": 80,
       "maxLength": 260,
-      "description": "Deux phrases : ce qui a changé, et pourquoi ça compte. Doit se suffire à lui-même."
+      "description": "Deux phrases qui se suffisent à elles-mêmes dans un flux RSS."
     },
     "corps": {
       "type": "string",
       "minLength": 1200,
-      "description": "Le texte en Markdown. Titres à partir de ##. Pas de HTML brut."
+      "description": "Markdown. Le minimum réel dépend du type, voir la description du champ 'type'. Aucun titre de niveau #, aucun HTML brut hors des blocs de code."
     },
     "tags": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^[a-z0-9àâäéèêëîïôöùûüç]+([ -][a-z0-9àâäéèêëîïôöùûüç]+)*$" },
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9àâäéèêëîïôöùûüç]+([ -][a-z0-9àâäéèêëîïôöùûüç]+)*$"
+      },
       "minItems": 1,
       "maxItems": 5
     },
@@ -63,7 +77,7 @@
           "consultee": { "type": "string", "format": "date" }
         }
       },
-      "description": "Au moins deux sources, dont une primaire (annonce officielle, documentation, publication)."
+      "description": "Deux sources minimum. En explication, au moins une page de documentation technique de l'acteur traité."
     },
     "statut": {
       "type": "string",
