@@ -1,0 +1,87 @@
+# =====================================================================
+#  Racine du dépôt exposée directement par l'hébergement.
+#
+#  Deux missions :
+#    1. refuser tout ce qui n'est pas le site public ;
+#    2. servir le site depuis public/ sans que « public » apparaisse
+#       dans les URL.
+#
+#  Ce fichier est le premier rempart, pas le seul : chaque dossier privé
+#  contient son propre .htaccess de refus. Si une règle ci-dessous est
+#  cassée un jour, le contenu reste inaccessible.
+# =====================================================================
+
+Options -Indexes -MultiViews
+AddDefaultCharset UTF-8
+DirectoryIndex public/index.php
+
+
+# ---------------------------------------------------------------------
+#  1. Refus explicites
+# ---------------------------------------------------------------------
+
+# Tout élément commençant par un point : .git, .github, .env, .gitignore.
+# C'est la règle la plus importante du fichier : un dossier .git servi en
+# clair expose l'intégralité du code et de son historique.
+RedirectMatch 404 "(?i)/\.(?!well-known/)"
+
+# Dossiers du moteur et du contenu : jamais servis, à aucune profondeur.
+RedirectMatch 404 "(?i)^/(content|src|outils|deploiement|schema|vendor|node_modules)(/|$)"
+
+# Fichiers de travail présents à la racine.
+RedirectMatch 404 "(?i)^/(CLAUDE\.md|README\.md|composer\.(json|lock)|package(-lock)?\.json)$"
+
+
+# ---------------------------------------------------------------------
+#  2. Extensions jamais servies, où qu'elles se trouvent
+# ---------------------------------------------------------------------
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(json|md|sh|ya?ml|lock|ini|log|bak|sql|sqlite|dist|example)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(json|md|sh|ya?ml|lock|ini|log|bak|sql|sqlite|dist|example)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+
+# ---------------------------------------------------------------------
+#  3. Routage vers public/
+# ---------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Garde-fou anti-boucle : après une réécriture interne, l'URL
+    # commence par « public/ ». On s'arrête ici sans rien retoucher.
+    RewriteRule ^public/ - [L]
+
+    # Routes du site
+    RewriteRule ^rss\.xml$              public/rss.php            [L]
+    RewriteRule ^a/([a-z0-9-]+)/?$      public/article.php?slug=$1 [L,QSA]
+    RewriteRule ^t/([^/]+)/?$           public/tag.php?tag=$1      [L,QSA]
+    RewriteRule ^labo/([a-z0-9_-]+)/?$  public/index.php?labo=$1   [L,QSA]
+
+    # Fichiers réellement présents dans public/ :
+    # /assets/style.css  ->  public/assets/style.css
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+    RewriteRule ^(.+)$ public/$1 [L]
+
+    # Accueil
+    RewriteRule ^$ public/index.php [L]
+</IfModule>
+
+
+# ---------------------------------------------------------------------
+#  4. En-têtes
+# ---------------------------------------------------------------------
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
