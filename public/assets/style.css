@@ -557,23 +557,35 @@ a { color: inherit; }
 /* ---------- Portail d'accès ------------------------------ */
 
 .portail {
-  max-width: 22rem;
-  margin: 0 auto;
-  padding: 4rem 0 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 2.5rem 0 4rem;
+}
+
+/* La modale : une carte posée sur le papier, rien de plus. */
+.portail__modale {
+  width: 100%;
+  max-width: 20rem;
+  background: var(--surface);
+  border: 1px solid var(--rail);
+  padding: 2.25rem 1.75rem 2rem;
   text-align: center;
+  box-shadow: 0 1.5rem 3rem -1.5rem rgba(0, 0, 0, 0.25);
 }
 
 .portail__titre {
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(2.25rem, 8vw, 3rem);
+  font-size: clamp(1.875rem, 7vw, 2.375rem);
   letter-spacing: -0.045em;
   line-height: 0.95;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.6rem;
 }
 
 .portail__intro {
-  margin: 0 0 2.25rem;
+  margin: 0 0 1.75rem;
   color: var(--encre-doux);
   font-size: 0.9375rem;
 }
@@ -591,8 +603,17 @@ a { color: inherit; }
 .portail__form {
   display: flex;
   flex-direction: column;
+}
+
+/* Saisie au clavier physique : seule visible en l'absence de JavaScript. */
+.portail__repli {
+  display: flex;
+  flex-direction: column;
   gap: 0.85rem;
 }
+
+/* Un display explicite annulerait l'attribut hidden : à répéter partout. */
+.portail__repli[hidden] { display: none; }
 
 .portail__label {
   font-family: var(--mono);
@@ -638,8 +659,116 @@ a { color: inherit; }
 .portail__bouton:hover:not(:disabled) { background: var(--accent); }
 .portail__bouton:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ---------- Clavier du portail --------------------------- */
+/*
+   Le clavier n'apparaît que si le script du portail l'a révélé ;
+   sans JavaScript, c'est le champ texte qui reste affiché.
+   Les témoins reprennent le marqueur carré du rail chronologique.
+*/
+
+.clavier {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.clavier[hidden] { display: none; }
+
+.clavier--envoi { opacity: 0.45; pointer-events: none; }
+
+.clavier__temoins {
+  display: flex;
+  gap: 0.7rem;
+  min-height: 0.75rem;
+  align-items: center;
+}
+
+.clavier__temoin {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid var(--rail);
+  background: transparent;
+  transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+.clavier__temoin--plein {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.12);
+}
+
+/* Message pour les lecteurs d'écran, sans occuper de place à l'écran. */
+.clavier__etat {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.clavier__grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.clavier__touche {
+  font-family: var(--mono);
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--encre);
+  background: var(--papier);
+  border: 1px solid var(--rail);
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+}
+
+.clavier__touche:hover:not(:disabled),
+.clavier__touche:active:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--papier);
+}
+
+.clavier__touche:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.clavier__touche--secondaire,
+.clavier__touche--valider {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--encre-doux);
+  background: transparent;
+  border-color: transparent;
+}
+
+.clavier__touche--secondaire:hover:not(:disabled),
+.clavier__touche--valider:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.clavier__creux { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .clavier__temoin,
+  .clavier__touche { transition: none; }
+  .clavier__temoin--plein { transform: none; }
+}
+
 @media (prefers-color-scheme: dark) {
   :root { --teinte-erreur: #F2B8B5; }
+
+  .portail__modale { box-shadow: 0 1.5rem 3rem -1.5rem rgba(0, 0, 0, 0.6); }
+  .clavier__touche:hover:not(:disabled),
+  .clavier__touche:active:not(:disabled) { color: var(--papier); }
 }
 
 /* ---------- Confort en mode application ------------------ */

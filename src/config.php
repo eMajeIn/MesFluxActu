@@ -34,6 +34,12 @@ $config = [
     // Nombre d'articles en page d'accueil
     'par_page'    => 20,
 
+    // Nombre de chiffres du code d'accès. Détermine le nombre de témoins
+    // affichés sur le clavier et déclenche l'envoi automatique du
+    // formulaire au dernier chiffre. Mettre 0 pour une longueur libre :
+    // le clavier affiche alors une touche de validation.
+    'pin_longueur' => 4,
+
     // Laboratoires suivis : clé technique => [libellé, couleur du marqueur]
     'labos'       => [
         'anthropic' => ['Anthropic',  '#8A6A4F'],

@@ -30,6 +30,8 @@ function acces_reglages(): array
         'fenetre'    => (int)    ($CONFIG['pin_fenetre'] ?? 900),           // 15 minutes
         'donnees'    => (string) ($CONFIG['pin_dossier_donnees'] ?? sys_get_temp_dir()),
         'rss_public' => !empty($CONFIG['rss_public']),
+        // 0 = longueur libre : le clavier propose alors une touche de validation.
+        'longueur'   => max(0, (int) ($CONFIG['pin_longueur'] ?? 4)),
     ];
 }
 

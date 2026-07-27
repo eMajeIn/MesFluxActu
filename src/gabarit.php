@@ -120,6 +120,12 @@ function pied(): void
   var attente = null;
   var recharge = false;
 
+  // Vrai si un service worker contrôlait déjà la page au chargement. À la
+  // toute première visite il n'y en a pas : clients.claim() déclenchera
+  // quand même « controllerchange », mais recharger serait inutile — et
+  // effacerait un code en cours de saisie sur le portail.
+  var controle_initial = !!navigator.serviceWorker.controller;
+
   function proposer(sw) {
     attente = sw;
     if (bandeau) bandeau.hidden = false;
@@ -147,7 +153,7 @@ function pied(): void
   }
 
   navigator.serviceWorker.addEventListener('controllerchange', function () {
-    if (recharge) return;
+    if (recharge || !controle_initial) return;
     recharge = true;
     window.location.reload();
   });
