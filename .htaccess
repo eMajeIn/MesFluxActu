@@ -60,6 +60,12 @@ RedirectMatch 404 "(?i)^/(CLAUDE\.md|README\.md|composer\.(json|lock)|package(-l
     # commence par « public/ ». On s'arrête ici sans rien retoucher.
     RewriteRule ^public/ - [L]
 
+    # Service worker, manifeste, portail, page hors ligne
+    RewriteRule ^sw\.js$                 public/sw.php             [L]
+    RewriteRule ^manifest\.webmanifest$   public/manifest.php       [L]
+    RewriteRule ^acces/?$                 public/acces.php          [L,QSA]
+    RewriteRule ^hors-ligne/?$            public/hors-ligne.php     [L]
+
     # Routes du site
     RewriteRule ^rss\.xml$              public/rss.php            [L]
     RewriteRule ^a/([a-z0-9-]+)/?$      public/article.php?slug=$1 [L,QSA]

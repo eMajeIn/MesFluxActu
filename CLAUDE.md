@@ -1,5 +1,12 @@
 # Charte du journal
 
+> **Aiguillage.** Ce fichier définit comment sont **rédigés les articles**.
+> Il s'adresse aux routines de veille.
+>
+> Si tu es ici pour travailler sur **le code** — moteur PHP, gabarits, CSS,
+> validateur, déploiement — arrête-toi et lis **`PROJET.md`** à la place.
+> Ne rédige aucun article et ne modifie pas `content/posts/`.
+
 Ce journal publie **deux formats d'articles**. Ils cohabitent, ils ne se
 remplacent pas.
 
@@ -306,7 +313,21 @@ ouvertes, fonctionnalité retenue ou motif de l'abandon.
 PUBLICATION_DIRECTE=oui
 ```
 
-Passer à `oui` pour que les articles soient créés directement en
-`statut: "publie"`, sans relecture. Tant que la valeur est `non`, tout article
-naît en `brouillon` et n'apparaît pas sur le site tant que le champ n'a pas été
-changé à la main.
+Ce réglage est à `oui` : **tout article que tu crées porte
+`"statut": "publie"`.** Il paraît sur le site dès que le dépôt est déployé, sans
+relecture préalable. N'écris jamais `brouillon` de ta propre initiative.
+
+En contrepartie, la barre de qualité monte. Avant de committer, vérifie une
+dernière fois :
+
+- chaque nom de paramètre des blocs de code figure dans une documentation que tu
+  as ouverte pendant cette exécution ;
+- chaque chiffre est attribuable à une source citée ;
+- aucune affirmation ne repose sur un souvenir plutôt que sur une page consultée.
+
+Au moindre doute sur un fait, retire la phrase concernée. Un article plus court
+est préférable à un article faux.
+
+Pour revenir à la relecture manuelle, repasser la valeur à `non` : les articles
+naîtront alors en `brouillon` et resteront invisibles jusqu'à modification à la
+main du champ `statut`.

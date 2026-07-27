@@ -43,14 +43,26 @@ function entete(string $titrePage, string $description = '', string $cheminCanon
 <html lang="<?= e($CONFIG['langue']) ?>">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?= e($titreComplet) ?></title>
 <meta name="description" content="<?= e($description) ?>">
 <link rel="canonical" href="<?= e(url_site($cheminCanonique)) ?>">
+
 <meta property="og:title" content="<?= e($titreComplet) ?>">
 <meta property="og:description" content="<?= e($description) ?>">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
+
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#ECEEF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1116" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="<?= e($CONFIG['titre']) ?>">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="/assets/icone-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icone-192.png">
+
 <link rel="alternate" type="application/rss+xml" title="<?= e($CONFIG['titre']) ?>" href="<?= e(url_site('/rss.xml')) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +71,11 @@ function entete(string $titrePage, string $description = '', string $cheminCanon
 </head>
 <body>
 <a class="evitement" href="#contenu">Aller au contenu</a>
+
+<div class="maj" id="maj" hidden>
+  <span class="maj__texte">Une nouvelle version est disponible.</span>
+  <button class="maj__bouton" type="button" id="maj-bouton">Recharger</button>
+</div>
 
 <header class="bandeau">
   <div class="bandeau__interieur">
@@ -74,6 +91,7 @@ function entete(string $titrePage, string $description = '', string $cheminCanon
 function pied(): void
 {
     global $CONFIG;
+    $verrouille = function_exists('acces_reglages') && acces_reglages()['actif'];
     ?>
 </main>
 
@@ -81,13 +99,73 @@ function pied(): void
   <div class="pied__interieur">
     <p class="pied__mention">
       <?= e($CONFIG['titre']) ?> — veille tenue par <?= e($CONFIG['auteur']) ?>.
-      Les articles sont rédigés par un agent et relus avant publication.
+      Les articles sont rédigés par un agent à partir de sources primaires.
     </p>
     <p class="pied__liens">
       <a href="/rss.xml">Flux RSS</a>
+      <?php if ($verrouille && function_exists('acces_ouvert') && acces_ouvert()): ?>
+        · <a href="/acces?sortie=1">Fermer la session</a>
+      <?php endif; ?>
     </p>
   </div>
 </footer>
+
+<script>
+(function () {
+  'use strict';
+  if (!('serviceWorker' in navigator)) return;
+
+  var bandeau = document.getElementById('maj');
+  var bouton  = document.getElementById('maj-bouton');
+  var attente = null;
+  var recharge = false;
+
+  function proposer(sw) {
+    attente = sw;
+    if (bandeau) bandeau.hidden = false;
+  }
+
+  function surveiller(sw) {
+    if (!sw) return;
+    sw.addEventListener('statechange', function () {
+      // Un contrôleur déjà en place signifie qu'il s'agit d'une mise à
+      // jour, et non de la toute première installation.
+      if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+        proposer(sw);
+      }
+    });
+  }
+
+  if (bouton) {
+    bouton.addEventListener('click', function () {
+      if (attente) {
+        attente.postMessage('ACTIVER_MAINTENANT');
+      } else {
+        window.location.reload();
+      }
+    });
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (recharge) return;
+    recharge = true;
+    window.location.reload();
+  });
+
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      if (reg.waiting && navigator.serviceWorker.controller) proposer(reg.waiting);
+      reg.addEventListener('updatefound', function () {
+        surveiller(reg.installing);
+      });
+      // Vérifie l'existence d'une nouvelle version à chaque retour sur l'onglet.
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') reg.update();
+      });
+    }).catch(function () { /* pas de service worker : le site fonctionne quand même */ });
+  });
+})();
+</script>
 </body>
 </html>
 <?php

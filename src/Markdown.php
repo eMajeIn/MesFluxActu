@@ -100,12 +100,14 @@ final class Markdown
             }
 
             // --- Titres ----------------------------------------------------
-            // Le titre de l'article occupe déjà le <h1> : on démarre à <h2>.
+            // La charte impose de commencer à ## : « ## » rend un <h2>,
+            // « ### » un <h3>. Le plancher à 2 protège le <h1> de la page
+            // au cas où un « # » passerait malgré le validateur.
             if (preg_match('/^(#{1,4})\s+(.*)$/', $nue, $m)) {
                 $viderParagraphe();
                 $fermerListe();
                 $viderCitation();
-                $niveau = min(strlen($m[1]) + 1, 5);
+                $niveau = max(2, min(strlen($m[1]), 5));
                 $html  .= '<h' . $niveau . '>' . self::inline(trim($m[2])) . '</h' . $niveau . ">\n";
                 continue;
             }
