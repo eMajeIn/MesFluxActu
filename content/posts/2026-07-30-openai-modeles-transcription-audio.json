@@ -1,0 +1,48 @@
+{
+  "slug": "openai-modeles-transcription-audio",
+  "titre": "OpenAI publie deux nouveaux modèles de transcription audio",
+  "date": "2026-07-30T09:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "OpenAI a ajouté le 28 juillet 2026 deux modèles de transcription à son API, gpt-transcribe pour les fichiers et gpt-live-transcribe pour le flux en direct, sans retirer les modèles existants.",
+  "corps": "OpenAI a ajouté deux modèles à son API le 28 juillet 2026 : `gpt-transcribe`, pour la transcription de fichiers audio et des tours déjà validés d'une session Realtime, et `gpt-live-transcribe`, pour le flux audio en direct. L'ajout figure dans le changelog de la plateforme développeurs, sans article de blog dédié.\n\nLes deux modèles deviennent le point d'entrée par défaut recommandé pour un nouveau projet de transcription, mais rien n'est retiré : la famille `gpt-4o-transcribe`, `gpt-4o-mini-transcribe` et `gpt-realtime-whisper` reste documentée et continue de fonctionner pour les intégrations déjà en place.\n\nLes deux nouveautés reprennent des paramètres de contexte déjà connus dans l'API de transcription — `prompt`, `keywords`, `languages` — mais la documentation précise pour la première fois leurs règles de validation.\n\n## Deux modèles pour deux régimes de flux audio\n\n`gpt-transcribe` s'utilise avec l'endpoint `v1/audio/transcriptions` pour un fichier déjà enregistré : formats mp3, mp4, mpeg, mpga, m4a, wav ou webm, jusqu'à 25 Mo, en réponse complète ou en flux texte pendant le traitement. Il fonctionne aussi avec `v1/realtime/transcription_sessions`, pour transcrire les tours déjà validés (« committed ») d'une session Realtime — mais pas la session Realtime elle-même : sa fiche modèle indique `v1/realtime` comme non pris en charge.\n\n`gpt-live-transcribe` suit la logique inverse : il ne prend en charge que `v1/realtime/transcription_sessions`, pas `v1/audio/transcriptions`. C'est le modèle à choisir quand l'audio arrive en direct depuis un micro, un appel ou un flux média et qu'il faut du texte au fur et à mesure. La documentation le décrit comme réglable en latence.\n\nLes deux modèles acceptent l'audio et le texte en entrée, ne produisent que du texte en sortie, et déclarent tous deux la fonctionnalité de streaming.\n\n## Contexte, mots-clés et langues : des règles de validation précisées\n\nLes deux modèles reprennent trois paramètres pour améliorer la reconnaissance : `prompt`, un contexte libre sur l'enregistrement (son sujet, son cadre) ; `keywords`, une liste de termes littéraux attendus, comme des noms de produits ou un identifiant de dossier ; et `languages`, la liste des langues attendues dans l'audio. Ce dernier remplace le champ singulier `language` des modèles plus anciens ; la documentation précise que les deux champs ne doivent pas être envoyés ensemble sur ces modèles.\n\nLa documentation ajoute une contrainte de validation qui n'apparaissait pas jusqu'ici : chaque mot-clé doit tenir sur une seule ligne, sans les caractères `<` ou `>`, ni retour chariot ni saut de ligne, et l'API rejette la requête entière si l'un de ces caractères apparaît, ou si `prompt` dépasse la limite de longueur du modèle. Les mots-clés restent des indices et non une sortie garantie : le transcript ne les reprend que si l'audio les contient réellement.\n\n## Ce que ça change en pratique\n\nCôté tarif, `gpt-transcribe` coûte 0,0045 $ la minute, moins cher que `gpt-4o-transcribe` (0,006 $) mais plus cher que `gpt-4o-mini-transcribe` (0,003 $). `gpt-live-transcribe` est facturé 0,017 $ la minute, le même tarif que `gpt-realtime-whisper`.\n\nPour une intégration qui tourne déjà avec `gpt-4o-transcribe` ou la famille Whisper, rien n'oblige à migrer : la page des dépréciations de la plateforme ne mentionne, à cette date, le retrait d'aucun de ces modèles. La documentation les présente désormais comme un choix secondaire, réservé aux besoins que les nouveaux modèles ne couvrent pas : étiquetage des locuteurs avec `gpt-4o-transcribe-diarize`, horodatage mot à mot ou sous-titres `srt`/`vtt`, et traduction vers l'anglais avec `whisper-1` sur l'endpoint de traduction.\n\nPour un nouveau projet, la documentation recommande de partir de `gpt-transcribe` pour un fichier déjà enregistré et de `gpt-live-transcribe` pour un flux en direct, et de ne changer de modèle que si un besoin précis — diarisation, horodatage, traduction — l'exige. Elle recommande aussi de tester avec un audio représentatif de l'usage réel (bruit de fond, qualité du micro, accents, changements de langue en cours de phrase) plutôt que de se fier au seul taux d'erreur mot à mot.",
+  "tags": [
+    "openai",
+    "audio",
+    "transcription",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI Developer Platform — Changelog",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-07-30"
+    },
+    {
+      "titre": "OpenAI Developer Platform — GPT Transcribe",
+      "url": "https://developers.openai.com/api/docs/models/gpt-transcribe",
+      "consultee": "2026-07-30"
+    },
+    {
+      "titre": "OpenAI Developer Platform — GPT Live Transcribe",
+      "url": "https://developers.openai.com/api/docs/models/gpt-live-transcribe",
+      "consultee": "2026-07-30"
+    },
+    {
+      "titre": "OpenAI Developer Platform — Transcription (guide)",
+      "url": "https://developers.openai.com/api/docs/guides/transcription",
+      "consultee": "2026-07-30"
+    },
+    {
+      "titre": "OpenAI Developer Platform — File transcription",
+      "url": "https://developers.openai.com/api/docs/guides/speech-to-text",
+      "consultee": "2026-07-30"
+    },
+    {
+      "titre": "OpenAI Developer Platform — Pricing",
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "consultee": "2026-07-30"
+    }
+  ],
+  "statut": "publie"
+}
