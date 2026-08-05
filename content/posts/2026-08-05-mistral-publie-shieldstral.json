@@ -1,0 +1,23 @@
+{
+  "slug": "mistral-publie-shieldstral",
+  "titre": "Mistral publie Shieldstral, un classifieur de modération en poids ouverts",
+  "date": "2026-08-05T09:00:00+02:00",
+  "type": "actu",
+  "labo": "mistral",
+  "chapeau": "Mistral a publié le 4 août 2026 Shieldstral, un classifieur de sécurité de 3 milliards de paramètres en poids ouverts. À la différence de sa Moderation API hébergée, il tourne sur un seul GPU et applique des politiques écrites en langage naturel.",
+  "corps": "Mistral a publié le 4 août 2026 Shieldstral-1.0-3B, un classifieur de sécurité de 3 milliards de paramètres, disponible en poids ouverts sous licence Apache 2.0 sur Hugging Face. Le modèle évalue si un texte, une image ou une combinaison des deux enfreint une politique de modération donnée, et renvoie un score de confiance calibré en une seule passe.\n\nLa différence avec la Moderation API que Mistral propose déjà par ailleurs (endpoint hébergé `POST /v1/moderations`, catégories de risque fixes) tient au mode de déploiement et à la formulation des règles : Shieldstral se télécharge et s'exécute sur une infrastructure propre, sur un seul GPU de 16 Go en précision BF16, via vLLM, llama.cpp ou la bibliothèque Transformers de Hugging Face. Il n'expose pas une liste fermée de catégories mais accepte une politique écrite en langage naturel au moment de l'inférence.\n\nSelon l'annonce, ce format de modération par question-réponse permet au même modèle de couvrir des cas non anticipés lors de l'entraînement, sans réentraînement ni ajustement fin : il suffit de reformuler la question posée au modèle pour changer de politique.\n\n## Une politique posée comme une question\n\nLe mécanisme décrit par Mistral assemble trois éléments dans le prompt envoyé au modèle : un message système fixe, un bloc d'instructions qui fixe le contexte d'évaluation et le niveau de sévérité attendu, et une question fermée, de type oui/non, associée au contenu à examiner. Le modèle répond par une probabilité calibrée plutôt que par une étiquette binaire, ce qui laisse à l'application appelante le soin de fixer son propre seuil de déclenchement.\n\nLe modèle couvre trois cas d'usage selon l'annonce : la classification d'un prompt utilisateur avant qu'il n'atteigne un modèle de production, la modération d'une réponse générée, et la détection de refus, c'est-à-dire repérer qu'un modèle a correctement refusé une requête plutôt que d'y avoir répondu. Il traite aussi bien du texte seul que des images ou des paires texte-image, dans douze langues selon Mistral.\n\nTechniquement, Shieldstral est construit à partir de Ministral-3-3B-Base, auquel une capacité de vision a été intégrée. Sur les benchmarks cités dans l'annonce, il atteint 88,1 % de F1 sur WildGuardTest, un test de classification de prompts, et 97,7 % sur VLGuard, une évaluation de sécurité multimodale : des scores que Mistral présente comme comparables à ceux de modèles allant jusqu'à sept fois sa taille sur la partie texte.\n\n## Ce que ça change en pratique\n\nPour une équipe qui filtre déjà les entrées ou les sorties d'un modèle de production, Shieldstral déplace le choix entre un endpoint hébergé aux catégories fixes et un modèle qu'on héberge soi-même et dont on définit les règles. Le second évite d'envoyer le contenu à modérer vers un service tiers, un point qui compte pour des données sensibles, et permet de changer une politique de modération sans attendre une mise à jour d'API : il suffit de reformuler la question posée au modèle.\n\nLa contrepartie est opérationnelle. Il faut réserver et maintenir un GPU dédié, d'au moins 16 Go de mémoire en BF16, choisir et exploiter un serveur d'inférence parmi vLLM, llama.cpp ou Transformers, et suivre soi-même les mises à jour du modèle plutôt que de bénéficier automatiquement des améliorations d'un service hébergé. Mistral indique par ailleurs, dans l'annonce, que la couverture multilingue, la robustesse sur des documents longs et la couverture multimodale restent des chantiers en cours, une réserve à prendre en compte avant un déploiement en production sur ces cas d'usage précis.\n\nLe modèle s'inscrit dans la participation de Mistral à l'Open Secure AI Alliance, une initiative menée avec NVIDIA, ce qui suggère qu'il ne restera pas isolé dans le catalogue du labo.",
+  "tags": ["mistral", "modération", "sécurité", "poids ouverts"],
+  "sources": [
+    {
+      "titre": "Mistral AI — Introducing Shieldstral",
+      "url": "https://mistral.ai/news/shieldstral",
+      "consultee": "2026-08-05"
+    },
+    {
+      "titre": "Hugging Face — mistralai/Shieldstral-1.0-3B",
+      "url": "https://huggingface.co/mistralai/Shieldstral-1.0-3B",
+      "consultee": "2026-08-05"
+    }
+  ],
+  "statut": "publie"
+}
