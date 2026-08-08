@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-plafond-depense-managed-agents",
+  "titre": "Anthropic plafonne en dollars les sessions Claude Managed Agents",
+  "date": "2026-08-08T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a ajouté, le 7 août 2026, un plafond de dépense en dollars pour les sessions Claude Managed Agents, qui se mettent en pause dès que leur coût atteint le montant fixé. Le mécanisme s'étend aux déploiements planifiés et aux sessions multi-agents.",
+  "corps": "Anthropic a publié, le 7 août 2026, une série de mises à jour pour Claude Managed Agents, la plateforme qui héberge des agents Claude de bout en bout — modèle, bac à sable et outils gérés par Anthropic. La plus notable porte sur la maîtrise des coûts : une session peut désormais recevoir un plafond de dépense strict, exprimé en dollars, qui interrompt automatiquement l'agent avant qu'il ne le dépasse.\n\nJusqu'ici, une session Managed Agents pouvait consommer des jetons, des recherches web et du temps de bac à sable sans limite fixée à l'avance côté plateforme ; seule une surveillance a posteriori du côté client permettait de repérer une dérive. Le nouveau champ budget, disponible à la création d'une session, ferme cette fenêtre : il fixe un plafond au coût calculé aux tarifs publics, et la session se met en pause dès qu'elle l'atteint.\n\n## Un plafond en centimes, calculé aux tarifs publics\n\nLe champ budget accepte un objet à deux clés : type, toujours \"limit\", et max_list_cost, qui porte le montant. Ce montant s'exprime en centimes de dollar, écrit en chaîne de caractères sans zéro non significatif — \"2500\" pour 25 dollars — précisément pour éviter tout arrondi flottant ; la devise currency ne peut valoir que USD. Un budget ne peut être posé qu'à la création de la session : en ajouter un après coup à une session qui n'en avait pas renvoie une erreur 400.\n\nLe montant est comparé au coût de liste (list cost) de la session, calculé en continu par la plateforme aux tarifs publics : les jetons de modèle au tarif de chaque modèle servi, les recherches web à 10 dollars pour 1 000 recherches, et le temps d'exécution de la session à 0,08 dollar de l'heure. Ce coût de liste ignore les remises négociées par l'organisation : la session s'arrête quand le total au tarif public atteint le plafond, même si la facture réelle reste inférieure.\n\nLe contrôle s'exerce entre deux requêtes au modèle, pas en cours de requête : la requête qui fait franchir le plafond se termine normalement, si bien que le coût constaté au moment de la pause peut légèrement dépasser max_list_cost. Une session qui atteint son budget passe à l'état idle avec un stop_reason de budget_reached ; elle n'est pas terminée, son historique et son bac à sable restent disponibles. Tant qu'elle reste à ce plafond, elle n'accepte plus que les événements qui closent un travail déjà engagé (confirmation d'outil, résultat d'outil, interruption) : un nouveau message utilisateur est rejeté par une erreur 400.\n\nModifier ou supprimer le budget relance automatiquement la session. Le relever exige toutefois de viser une valeur strictement supérieure au coût déjà consommé, sans quoi la mise à jour est elle-même rejetée. Supprimer le plafond, en revanche, est définitif : une fois retiré, un budget ne peut plus être réattribué à la même session — pour garder un contrôle, il faut le modifier plutôt que le supprimer.\n\n## Le même mécanisme sur les déploiements et les sessions multi-agents\n\nUn déploiement planifié accepte le même objet budget : le plafond est alors recopié sur chaque session que ce déploiement démarre, ce qui borne chaque exécution indépendamment plutôt que la dépense cumulée du déploiement dans son ensemble. Changer le budget d'un déploiement ne s'applique qu'aux sessions démarrées ensuite, pas à celles déjà en cours.\n\nDans une session multi-agents, le budget est unique et partagé entre tous les fils d'exécution (threads) : chaque fil est facturé au tarif de son propre modèle, et les fils se mettent en pause indépendamment à mesure que le plafond commun se rapproche. Les consultations du nouvel advisor — un modèle que le fil principal peut interroger en cours de tour pour de l'aide stratégique, également introduit dans cette même série de mises à jour — sont comptées dans ce même budget, au tarif du modèle consulté.\n\nLimite documentée : un budget ne peut suivre que ce que la plateforme sait tarifer. Si l'agent, ou tout modèle du roster multi-agents, n'a pas de prix public, la création d'une session budgétée est refusée par une erreur 400 ; si un tel modèle entre en jeu après coup, le budget ne peut plus être ni évalué ni modifié, et seule sa suppression permet de reprendre la session.\n\n## Ce que ça change en pratique\n\nAvant cette mise à jour, limiter la facture d'un agent long ou en boucle dépendait d'une surveillance côté client — couper la session à la main en observant sa consommation. Le plafond en dollars déplace ce contrôle côté plateforme et le rend automatique, y compris pour des sessions programmées sans supervision continue.\n\nLa contrepartie tient dans la marge de dépassement : parce que l'arrêt intervient entre deux requêtes et non pendant, un budget serré, de l'ordre de quelques dizaines de centimes, peut être dépassé par une requête entière avant la mise en pause effective. Anthropic recommande explicitement de traiter le plafond comme une limite sur le travail à venir plutôt que comme un point d'arrêt exact, et de prévoir cette marge en dimensionnant la valeur choisie. Le mécanisme reste par ailleurs propre à Claude Managed Agents : il est distinct des task budgets de l'API Messages, qui sont des budgets indicatifs en jetons que le modèle utilise pour s'autoréguler à l'intérieur d'une seule boucle agentique, sans effet contraignant côté plateforme.",
+  "tags": [
+    "anthropic",
+    "managed agents",
+    "tarifs",
+    "agents"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — Claude Platform release notes",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-08-08"
+    },
+    {
+      "titre": "Anthropic — Session budgets (Managed Agents)",
+      "url": "https://platform.claude.com/docs/en/managed-agents/budgets",
+      "consultee": "2026-08-08"
+    },
+    {
+      "titre": "Anthropic — Multiagent orchestration (advisor)",
+      "url": "https://platform.claude.com/docs/en/managed-agents/multiagent-orchestration",
+      "consultee": "2026-08-08"
+    }
+  ],
+  "statut": "publie"
+}
