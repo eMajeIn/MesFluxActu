@@ -1,0 +1,28 @@
+{
+  "slug": "anthropic-sonnet-5-hausse-tarif-annulee",
+  "titre": "Anthropic annule la hausse de tarif prévue pour Claude Sonnet 5",
+  "date": "2026-08-12T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a annoncé le 10 août 2026 que le tarif d'introduction de Claude Sonnet 5, 2 $ et 10 $ par million de jetons, devient le tarif standard. La hausse prévue au 1er septembre vers 3 $ et 15 $ n'aura pas lieu.",
+  "corps": "Anthropic a mis à jour sa page de tarification le 10 août 2026 : le tarif d'introduction de Claude Sonnet 5, 2 $ par million de jetons (MTok) en entrée et 10 $ en sortie, devient le tarif standard. La hausse prévue pour le 1er septembre 2026, qui devait porter ces prix à 3 $ et 15 $, n'aura pas lieu.\n\nCe tarif de 2 $ / 10 $ par MTok avait été présenté au lancement de Sonnet 5 comme un prix d'introduction, valable jusqu'au 31 août 2026 selon une note ajoutée à la documentation actuelle des tarifs. Passé cette date, un relèvement automatique était annoncé pour aligner Sonnet 5 sur un palier de prix supérieur. C'est ce relèvement que la mise à jour du 10 août annule explicitement : au 1er septembre, les prix resteront ceux d'aujourd'hui, sans nouvelle échéance mentionnée.\n\n## Le tarif gelé, chiffre par chiffre\n\nLe tableau de tarification d'Anthropic distingue plusieurs colonnes pour chaque modèle : le prix des jetons d'entrée de base, les écritures de cache à 5 minutes et à 1 heure, les lectures de cache, et le prix des jetons de sortie. Pour Claude Sonnet 5, ces valeurs sont désormais fixées à 2 $ pour l'entrée de base, 2,50 $ pour une écriture de cache de 5 minutes, 4 $ pour une écriture de cache d'une heure, 0,20 $ pour une lecture de cache, et 10 $ pour la sortie, toutes par MTok. La documentation précise que ces colonnes de cache restent des multiplicateurs du prix d'entrée de base — 1,25x pour une écriture à 5 minutes, 2x pour une écriture à une heure, 0,1x pour une lecture — de sorte que le gel du tarif de base gèle mécaniquement l'ensemble de ces chiffres.\n\nLe tarif par lot, via la Batch API, est de 1 $ en entrée et 5 $ en sortie par MTok pour Sonnet 5. Il bénéficie de la même stabilité : il correspond à la remise de 50 % habituellement appliquée au tarif standard, donc à la moitié du tarif désormais permanent plutôt qu'à la moitié d'un tarif qui aurait augmenté en septembre.\n\n## Ce que ça change en pratique\n\nLa conséquence directe touche les équipes qui avaient anticipé une hausse au 1er septembre dans leurs prévisions de coût : elle ne se produira pas, et les estimations construites sur le tarif actuel restent valables au-delà de cette date. La documentation ne précise pas les raisons de cette décision ; aucune justification commerciale ou concurrentielle n'accompagne la note de tarification.\n\nCette référence de tarif de liste dépasse le seul usage direct de l'API. Le 8 août, Anthropic avait introduit un plafond de dépense en dollars pour les sessions Claude Managed Agents, calculé précisément au coût de liste de chaque modèle servi. Un budget fixé pour une session qui s'appuie sur Sonnet 5 se fonde donc, au moins jusqu'à une éventuelle nouvelle annonce, sur des tarifs qui ne bougeront pas avant le 1er septembre — la marge entre budget fixé et consommation réelle ne se resserre pas non plus de ce côté.\n\nUn second effet se lit dans la table de prix elle-même. Claude Sonnet 4.6, toujours répertorié aux côtés de Sonnet 5 dans le tableau, reste facturé 3 $ / 15 $ par MTok — exactement le niveau que Sonnet 5 devait atteindre en septembre. En annulant la hausse, Anthropic maintient l'écart de prix entre les deux modèles, alors que leurs tarifs auraient dû converger à partir du 1er septembre. Pour un projet qui hésite encore entre les deux sur le seul critère du coût, l'écart ne se resserre donc pas.\n\nLa portée de ce gel reste limitée au tarif de liste standard de l'API Claude. Elle ne change rien aux remises négociées au cas par cas, aux tarifs propres à Claude Platform on AWS ou à Claude en Microsoft Foundry, ni au multiplicateur de 1,1x qui s'applique à l'inférence restreinte aux États-Unis via le paramètre inference_geo. Ces tarifs suivent leurs propres grilles, documentées séparément sur la même page.",
+  "tags": [
+    "anthropic",
+    "tarifs",
+    "claude sonnet 5",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — Claude Platform release notes",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-08-12"
+    },
+    {
+      "titre": "Anthropic — Pricing",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "consultee": "2026-08-12"
+    }
+  ],
+  "statut": "publie"
+}
