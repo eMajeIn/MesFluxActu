@@ -1,0 +1,38 @@
+{
+  "slug": "gemini-3-7-flash-lancement",
+  "titre": "Google DeepMind publie Gemini 3.7 Flash",
+  "date": "2026-08-13T09:00:00+02:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Google DeepMind a publié le 13 août 2026 Gemini 3.7 Flash, une révision de Gemini 3.6 Flash centrée sur le code et les workflows agentiques. Le modèle conserve la fenêtre de contexte et le tarif d'introduction de son prédécesseur.",
+  "corps": "Google DeepMind a publié le 13 août 2026 Gemini 3.7 Flash, identifiant d'API `gemini-3.7-flash`. La fiche modèle le décrit comme construit à partir de Gemini 3.6 Flash, avec des améliorations algorithmiques portant sur son socle de raisonnement. C'est la deuxième révision du palier Flash de la famille Gemini 3 publiée en moins d'un mois, après Gemini 3.6 Flash lui-même.\n\nLe modèle vise en priorité trois usages : le code en contexte agentique, la compréhension multimodale et les workflows de connaissance. La fiche modèle et la page produit mettent en avant des gains sur le débogage, la résolution de tickets et la génération de code prêt à l'emploi, ainsi qu'une meilleure conception de mises en page web et d'applications avec moins d'itérations de prompt.\n\nContrairement à ce que plusieurs relais de presse ont rapporté, la tarification n'est pas divisée par deux par rapport à Gemini 3.6 Flash : la page de tarification de l'API Gemini liste des tarifs d'introduction identiques pour les deux modèles.\n\n## Ce qui change et ce qui reste identique\n\nGemini 3.7 Flash reprend la fenêtre de contexte de son prédécesseur : jusqu'à 1 048 576 jetons en entrée et 65 536 jetons en sortie, selon la documentation des modèles de l'API Gemini. Les formats d'entrée pris en charge sont le texte, l'image, la vidéo, l'audio et le PDF ; la sortie reste limitée au texte. Le raisonnement configurable (« thinking ») accepte trois niveaux — faible, moyen, élevé — la documentation précisant explicitement que le niveau minimal n'est pas pris en charge et renvoie une erreur.\n\nLa liste des capacités documentées inclut la mise en cache, l'exécution de code, l'usage de l'ordinateur en préversion, la recherche de fichiers, l'appel de fonctions, l'ancrage avec la recherche Google et le contexte d'URL, ainsi que les sorties structurées. La Live API et la génération d'image ou d'audio ne sont pas prises en charge par ce modèle. La date de coupure des connaissances est fixée à mars 2026.\n\nCôté tarifs, la page de tarification de l'API Gemini indique pour Gemini 3.7 Flash un prix d'introduction de 0,75 $ par million de jetons en entrée et 3,75 $ par million de jetons en sortie, valable jusqu'au 31 décembre 2026 ; le tarif standard qui prendra le relais au 1er janvier 2027 est de 1,50 $ et 7,50 $. Ce sont exactement les mêmes chiffres, aux deux échéances, que ceux affichés pour Gemini 3.6 Flash sur la même page. La documentation ne mentionne aucune remise supplémentaire propre à 3.7 Flash — le chiffre de « 35 % moins cher » avancé par un partenaire cité sur la page produit du modèle porte sur le coût observé d'un agent complet, pas sur le tarif par jeton.\n\nLe modèle est disponible dans l'application Gemini, l'application Gemini Enterprise, la plateforme d'agents Gemini Enterprise, Google AI Studio, l'API Gemini et Google Antigravity, d'après la page produit de Google DeepMind.\n\n## Ce que ça change en pratique\n\nPour un projet déjà construit sur `gemini-3.6-flash`, le changement de modèle ne modifie ni le budget en jetons ni la facture : même fenêtre de contexte, même tarif d'introduction, mêmes formats d'entrée acceptés. Le seul arbitrage porte sur la qualité des réponses en code et en raisonnement multi-étapes, sur lesquelles Google DeepMind annonce des gains sans publier de protocole de mesure indépendant dans la documentation consultée.\n\nLa contrainte à noter pour les intégrations existantes est l'absence du niveau de raisonnement minimal, disponible sur d'autres modèles de la gamme mais explicitement exclu ici : un appel qui spécifierait ce niveau échouera. Les équipes qui s'appuient sur la Live API ou sur la génération d'image ou d'audio devront rester sur un autre modèle de la famille Gemini 3, ces capacités n'étant pas documentées pour Gemini 3.7 Flash.\n\nLa proximité des deux publications — Gemini 3.6 Flash puis 3.7 Flash à moins d'un mois d'écart — signale un rythme de révision resserré sur ce palier du catalogue Gemini, sans que la documentation officielle n'explique la cadence retenue.",
+  "tags": [
+    "gemini",
+    "modele",
+    "code",
+    "tarifs"
+  ],
+  "sources": [
+    {
+      "titre": "Google DeepMind — Gemini 3.7 Flash, fiche modèle",
+      "url": "https://deepmind.google/models/model-cards/gemini-3-7-flash/",
+      "consultee": "2026-08-14"
+    },
+    {
+      "titre": "Google DeepMind — Gemini 3.7 Flash, page produit",
+      "url": "https://deepmind.google/models/gemini/flash/",
+      "consultee": "2026-08-14"
+    },
+    {
+      "titre": "Google AI for Developers — Gemini 3.7 Flash",
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash",
+      "consultee": "2026-08-14"
+    },
+    {
+      "titre": "Google AI for Developers — Tarification de l'API Gemini",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "consultee": "2026-08-14"
+    }
+  ],
+  "statut": "publie"
+}
