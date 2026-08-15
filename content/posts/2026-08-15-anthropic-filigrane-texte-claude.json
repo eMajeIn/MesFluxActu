@@ -1,0 +1,28 @@
+{
+  "slug": "anthropic-filigrane-texte-claude",
+  "titre": "Anthropic explique comment Claude filigrane les textes qu'il génère",
+  "date": "2026-08-15T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a détaillé le 14 août 2026 le fonctionnement du filigrane qu'elle intègre aux réponses de Claude et aux fichiers générés. Invisible à la lecture, il s'appuie sur les choix de mots du modèle et suit la norme C2PA pour les images.",
+  "corps": "Anthropic a publié le 14 août 2026 un article détaillant le fonctionnement du filigrane qu'elle intègre désormais aux réponses générées par Claude. La marque est invisible à la lecture, ne modifie ni le sens ni la qualité du texte, et s'applique dans le monde entier, pas seulement dans l'Union européenne, dont la réglementation est à l'origine de la mesure.\n\nLe principe repose sur les choix équivalents que Claude fait en permanence pendant la génération : à de nombreux endroits d'un texte, plusieurs mots ou tournures conviennent aussi bien les uns que les autres. Claude penche pour l'un plutôt que l'autre selon une clé cryptographique combinée aux quelques mots qui précèdent, plutôt que selon le hasard. Répétée sur l'ensemble d'un texte, cette légère préférence dessine un motif statistique que seul le détenteur de la clé peut retrouver.\n\nEn juillet 2026, Anthropic a rejoint environ 190 autres signataires du Code de bonnes pratiques européen sur la transparence des contenus générés par IA, la déclinaison volontaire de l'article 50 du règlement européen sur l'IA. Ce texte a fixé au 2 août 2026 la date à partir de laquelle les modèles lancés dans l'Union européenne doivent intégrer un marquage repérable par une machine dès leur sortie.\n\n## Peser les mots plutôt qu'ajouter des caractères\n\nAnthropic insiste sur un point : le filigrane n'ajoute ni caractère caché ni jeton supplémentaire au texte, et n'a d'effet ni sur le coût ni sur la vitesse de génération. Il ne s'agit pas d'une marque collée après coup, mais d'une légère orientation des probabilités que le modèle applique déjà à chaque mot qu'il produit.\n\nLa méthode s'appuie sur SynthID-Text, publiée par Google DeepMind dans Nature en 2024, elle-même issue d'une proposition de 2022 du chercheur Scott Aaronson. Anthropic précise que la clé ne permet de répondre qu'à une seule question, formulée de façon probabiliste : quelle est la probabilité que ce texte ait été en partie écrit par Claude. Ce n'est pas une preuve binaire d'authorship.\n\nLa fiabilité du motif varie aussi selon le type de texte. Sur un passage factuel ou du code, où le nombre de formulations équivalentes est plus restreint, le modèle dispose de moins de choix pour glisser sa préférence, et le motif statistique se révèle plus difficile à retrouver que sur de la prose ordinaire.\n\n## Une signature différente pour les fichiers générés\n\nLe filigrane textuel n'est pas le seul mécanisme déployé. Quand Claude produit un fichier d'un type pris en charge, comme un .png, un .jpg ou un .svg, il y attache un certificat de contenu : une note signée cryptographiquement dans les métadonnées du fichier, indiquant qu'il a été produit ou modifié par Claude. Cette approche suit un standard industriel ouvert, C2PA, déjà utilisé par des fabricants d'appareils photo et des logiciels de retouche pour tracer l'origine d'une image. N'importe quel outil compatible C2PA peut lire cette information ; Anthropic indique préparer son propre outil de vérification, où déposer un fichier pour le consulter.\n\n## Ce que ça change en pratique\n\nAucune API de détection n'est disponible aujourd'hui : Anthropic annonce en préparer une, sans donner de date. Jusqu'à sa sortie, seul Anthropic dispose des moyens de vérifier la présence du filigrane textuel dans un contenu donné ; un tiers qui reçoit un texte ne peut pas, de son côté, confirmer ou infirmer qu'il provient de Claude.\n\nLa marque ne permet pas non plus de remonter à un utilisateur ou une organisation précise. Elle répond à une question binaire par nature probabiliste, « ce texte porte-t-il la signature de Claude », et rien de plus fin : pas d'identité, pas d'horodatage, pas de numéro de compte.\n\nLe déploiement n'est pas non plus complet. La loi européenne prévoit une période de transition pour les modèles Anthropic lancés avant le 2 août 2026, et l'entreprise indique travailler à leur ajouter aussi le filigrane. Un texte généré aujourd'hui par un modèle antérieur à cette date n'est donc pas nécessairement marqué, alors qu'un modèle lancé après l'est dès sa sortie.\n\nPour un usage concret, la portée reste donc limitée tant que la détection n'est pas ouverte à des tiers. Une rédaction, une plateforme de publication ou un établissement scolaire qui voudrait aujourd'hui vérifier si un texte a été généré par Claude n'a pas d'outil à disposition pour le faire ; ils devront attendre l'API de détection annoncée. La mesure établit surtout, dès maintenant, que le marquage existe et fonctionne sans coût de performance perceptible pour qui utilise Claude normalement.",
+  "tags": [
+    "anthropic",
+    "filigrane",
+    "eu ai act",
+    "c2pa"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — How Claude's text watermark works",
+      "url": "https://www.anthropic.com/news/claude-text-watermark",
+      "consultee": "2026-08-15"
+    },
+    {
+      "titre": "Anthropic — News",
+      "url": "https://www.anthropic.com/news",
+      "consultee": "2026-08-15"
+    }
+  ],
+  "statut": "publie"
+}
