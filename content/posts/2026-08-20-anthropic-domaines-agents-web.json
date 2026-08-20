@@ -1,0 +1,28 @@
+{
+  "slug": "anthropic-domaines-agents-web",
+  "titre": "Anthropic : Managed Agents peut restreindre les domaines du web",
+  "date": "2026-08-20T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Depuis le 19 août 2026, un agent Claude Managed Agents peut limiter les sites que ses outils web_search et web_fetch sont autorisés à atteindre, via une liste blanche ou noire de domaines propre à chaque outil.",
+  "corps": "Depuis le 19 août 2026, un agent Claude Managed Agents peut restreindre les sites que ses outils intégrés `web_search` et `web_fetch` sont autorisés à atteindre. La fonctionnalité s'ajoute aux notes de version de la Claude Platform sous forme d'un nouveau réglage dans la configuration de l'agent, documenté dans le guide des outils de Managed Agents.\n\nJusque-là, un opérateur qui voulait empêcher un agent de consulter certains sites n'avait qu'un seul levier : désactiver entièrement `web_search` ou `web_fetch`. Les réglages réseau d'un environnement sandbox, eux, ne s'appliquaient pas à ces deux outils : la documentation le précise explicitement, ces outils s'exécutent sur les serveurs d'Anthropic, pas dans le sandbox de l'agent, qu'il soit hébergé par Anthropic ou auto-hébergé.\n\n## Une liste par outil, blanche ou noire\n\nChaque entrée `web_search` ou `web_fetch` du tableau `configs`, à l'intérieur du toolset `agent_toolset_20260401`, accepte désormais `allowed_domains` ou `blocked_domains` — jamais les deux à la fois sur la même entrée, une requête qui fixe les deux est rejetée. Un domaine listé couvre l'hôte et ses sous-domaines : `example.com` couvre `docs.example.com`, mais l'inverse n'est pas vrai, et un sous-domaine `www.` n'est pas automatiquement couvert par le domaine nu.\n\n```json\n{\n  \"type\": \"agent_toolset_20260401\",\n  \"configs\": [\n    {\n      \"type\": \"web_search\",\n      \"name\": \"web_search\",\n      \"allowed_domains\": [\"docs.example.com\", \"arxiv.org\"],\n      \"user_location\": {\n        \"type\": \"approximate\",\n        \"country\": \"US\",\n        \"timezone\": \"America/Los_Angeles\"\n      }\n    },\n    {\n      \"type\": \"web_fetch\",\n      \"name\": \"web_fetch\",\n      \"blocked_domains\": [\"ads.example.com\"],\n      \"max_content_tokens\": 50000\n    }\n  ]\n}\n```\n\nLes deux outils ne réagissent pas de la même façon à une restriction. Un appel `web_fetch` vers une URL non permise renvoie un résultat d'erreur à l'agent (`is_error: true` sur l'événement `agent.tool_result`, avec un code `url_not_allowed`) ; `web_search`, lui, omet silencieusement les résultats qui tombent hors des listes, sans faire échouer l'appel. Chaque liste accepte de 1 à 64 domaines, les adresses IP sont refusées sous toute forme, et un domaine `web_fetch` ne peut pas porter de chemin — contrairement à `web_search`, qui accepte un suffixe de chemin comme `example.com/blog`. Une configuration invalide est rejetée à la création ou à la mise à jour de l'agent, ou d'une session qui fournit `tools`, avec une erreur `400 invalid_request_error` qui nomme le champ et la position fautive dans la liste.\n\n## Le cas des sessions multi-agents\n\nDans une session multi-agents, plusieurs listes peuvent s'appliquer au même appel d'outil : celle de l'agent qui exécute l'appel, celle de l'agent qui l'a sollicité dans la hiérarchie, et celle du coordinateur. La documentation précise comment elles se combinent : les listes blanches se croisent — un agent du roster ne peut que réduire ce que le coordinateur autorise, jamais l'élargir — tandis que les listes noires s'additionnent. Si le croisement des listes blanches ne laisse plus aucun domaine commun, l'outil reste proposé au modèle mais chaque appel échoue avec `url_not_allowed`, et sa description le signale. `max_content_tokens` et `user_location`, en revanche, ne se combinent pas : c'est la première valeur trouvée, dans l'ordre outil de l'agent courant, agent appelant, puis coordinateur, qui s'applique.\n\n## Ce que ça change en pratique\n\nAvant cette mise à jour, un agent Managed Agents avec `web_search` ou `web_fetch` activés pouvait, en théorie, atteindre n'importe quel site accessible depuis l'infrastructure d'Anthropic : la seule parade était de couper l'outil. Une équipe qui construit un agent de support technique voulant le limiter à la documentation interne et à quelques sites de référence externes peut désormais fixer `allowed_domains` sur `web_fetch` sans renoncer à l'outil, et localiser en même temps les résultats de `web_search` avec `user_location`.\n\nLa syntaxe reprend le vocabulaire du filtrage par domaine déjà disponible sur les outils serveur de l'API Messages (`allowed_domains`, `blocked_domains`), mais avec des différences propres à Managed Agents : le plafond est fixé à 64 domaines par liste, un domaine `web_fetch` ne peut pas inclure de chemin, et les réglages `max_uses`, `citations` et `cache_control` de l'API Messages n'existent pas sur ce toolset. La documentation ne précise pas si cette limite de 64 domaines est appelée à évoluer, ni si d'autres outils du toolset recevront un jour un filtrage comparable.",
+  "tags": [
+    "managed agents",
+    "outils",
+    "securite",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Docs — Tools (Managed Agents), Restrict web search and web fetch domains",
+      "url": "https://platform.claude.com/docs/en/managed-agents/tools",
+      "consultee": "2026-08-20"
+    },
+    {
+      "titre": "Claude Docs — Release notes, 19 août 2026",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-08-20"
+    }
+  ],
+  "statut": "publie"
+}
