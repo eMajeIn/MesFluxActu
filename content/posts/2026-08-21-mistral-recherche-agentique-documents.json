@@ -1,0 +1,28 @@
+{
+  "slug": "mistral-recherche-agentique-documents",
+  "titre": "Mistral publie Agentic Search, une recherche documentaire en boucle",
+  "date": "2026-08-21T09:00:00+02:00",
+  "type": "actu",
+  "labo": "mistral",
+  "chapeau": "Le 20 août 2026, Mistral a publié Agentic Search, sept outils qui remplacent l'extraction en un seul passage par une boucle de recherche et de vérification dans les documents. Les chiffres publiés montrent une précision en hausse et une latence en baisse.",
+  "corps": "Le 20 août 2026, Mistral a publié Agentic Search, une couche de récupération documentaire livrée sous forme d'outils plutôt que de modèle. La différence avec la recherche augmentée classique (RAG) tient au mécanisme : au lieu d'un unique passage d'embedding suivi d'une extraction des k passages les plus proches, l'agent dispose de sept outils — search, open, navigate, read, grep, ingest et delete — et boucle dessus jusqu'à avoir vérifié la réponse dans le document source.\n\nLa documentation technique, publiée sur docs.mistral.ai, détaille les paramètres de chaque outil : search prend query, top_k et exclude_ids pour éviter de retomber sur les mêmes passages ; grep accepte source_id et pattern pour une recherche lexicale exacte à l'intérieur d'un document déjà retrouvé ; navigate déplace le curseur en avant ou en arrière depuis un passage avec direction. Les sept outils sont exposés via un serveur MCP (Model Context Protocol), et un SDK Python, le Search Toolkit, fournit les classes QueryEngine, VectorRetriever et MistralEmbedder pour construire l'index en amont.\n\nCette annonce est distincte de l'outil de recherche web que Mistral avait ajouté aux agents de l'API en août : ce dernier interroge le web en direct pour un agent, tandis qu'Agentic Search organise la navigation dans une collection de documents déjà indexée, propre à une organisation. Les deux couvrent des cas d'usage différents et peuvent, en théorie, être combinés dans un même agent, mais la documentation ouverte aujourd'hui ne détaille pas cette combinaison.\n\n## Des gains mesurés sur deux jeux de test\n\nMistral a évalué la boucle sur deux benchmarks internes construits à partir de documents réels. Sur FinanceBench (368 dépôts SEC, 150 questions), la justesse des réponses passe de 26,7 % à 86 % avec Mistral Medium 3.5, soit un facteur trois. Le passage à la boucle agentique seule, sans changer de modèle, apporte +47,3 points pour Mistral Medium 3.5 et +52,6 points pour GLM-5.2, un modèle tiers, ce qui indique que le gain vient de l'outillage et non du modèle. La latence p90 recule de 255 à 154 secondes, la latence moyenne de 108 à 71 secondes, et la consommation de tokens baisse de 23,9 % pour Mistral Medium 3.5 et de 33,7 % pour GLM-5.2.\n\nSur OfficeQA Pro (696 bulletins du Trésor américain, 133 questions), GLM-5.2 gagne 45,6 points, de 6,3 % à 51,9 %, et Mistral Medium 3.5 gagne 27,1 points. Le nombre de tours de dialogue nécessaires diminue jusqu'à 7 % pour Mistral Medium 3.5, et la latence p90 baisse jusqu'à 39,6 %. Mistral ne publie pas de tarif ni de statut de disponibilité, bêta ou disponibilité générale, pour Agentic Search : l'annonce mentionne des déploiements « cloud et sur site », sans détail supplémentaire.\n\n## Ce que ça change en pratique\n\nAgentic Search est distribué comme un Search Toolkit indépendant, avec une application de démarrage, search-starter-app, publiée sur GitHub, qui configure l'infrastructure d'indexation : Vespa comme moteur de recherche, avec un mode d'indexation DOCUMENT_PER_CHUNK qui conserve les décalages d'origine dans chaque fragment pour permettre la navigation. La fonctionnalité est aussi intégrée directement dans Studio et dans Vibe, les deux environnements de développement de Mistral, via un mécanisme appelé Libraries.\n\nLe résultat concret pour un développeur qui interroge de longs documents structurés, rapports financiers, bulletins réglementaires, contrats, est un système qui ne se contente plus d'une seule extraction de passages avant de répondre : il peut chercher, ouvrir le contexte autour d'un passage, vérifier une valeur exacte avec une recherche lexicale, puis recommencer une recherche en excluant ce qu'il a déjà lu. Les chiffres publiés par Mistral montrent des gains à la fois sur la justesse des réponses et sur le coût, latence et tokens, ce qui distingue cette annonce d'une amélioration de précision obtenue au seul prix d'un temps de calcul plus long. La documentation ne précise pas si Agentic Search sera proposé comme service managé sur la plateforme API de Mistral, ni si les outils resteront limités à ce jeu de sept opérations.",
+  "tags": [
+    "recherche",
+    "agents",
+    "outils",
+    "rag"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral AI — Agentic Search: More accurate and efficient results from your AI systems",
+      "url": "https://mistral.ai/news/agentic-search",
+      "consultee": "2026-08-21"
+    },
+    {
+      "titre": "Documentation Mistral — Studio, Search, Agentic search",
+      "url": "https://docs.mistral.ai/studio/search/agentic-search",
+      "consultee": "2026-08-21"
+    }
+  ],
+  "statut": "publie"
+}
