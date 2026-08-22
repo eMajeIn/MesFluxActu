@@ -1,0 +1,33 @@
+{
+  "slug": "openai-baisse-tarif-gpt-5-6-sol",
+  "titre": "OpenAI baisse le tarif de GPT-5.6 Sol jusqu'en novembre",
+  "date": "2026-08-22T08:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 21 août 2026, OpenAI a réduit le tarif de GPT-5.6 Sol de 20 % en entrée et 33 % en sortie, un niveau promotionnel maintenu au moins jusqu'au 21 novembre 2026. La baisse s'applique automatiquement et se répercute aussi sur le tarif longue contexte.",
+  "corps": "Le 21 août 2026, OpenAI a inscrit dans le journal des modifications (changelog) de son API un nouveau tarif pour GPT-5.6 Sol, le modèle le plus capable de la famille GPT-5.6. Le prix standard passe de 5 $ à 4 $ le million de jetons en entrée, et de 30 $ à 20 $ le million de jetons en sortie, soit une baisse de 20 % côté entrée et de 33 % côté sortie, selon la page de tarification consultée le même jour.\n\nOpenAI qualifie ce tarif de « promotionnel » et précise qu'il reste en vigueur au moins jusqu'au 21 novembre 2026, sans engagement écrit au-delà de cette échéance. Les deux autres modèles de la famille ne sont pas concernés par cette annonce : Terra reste facturé 2 $ en entrée et 12 $ en sortie le million de jetons, et Luna 0,20 $ et 1,20 $, en tarif standard, d'après la même page de tarification.\n\n## Une baisse qui se répercute sur le tarif longue contexte\n\nLa grille tarifaire de GPT-5.6 Sol distingue un tarif standard d'un tarif longue contexte, qui s'applique aux requêtes dépassant 272 000 jetons en entrée. Ce second tarif n'est pas un montant fixé indépendamment : la fiche du modèle le décrit comme une surtaxe de deux fois le tarif d'entrée et d'une fois et demie le tarif de sortie, appliquée à l'ensemble de la requête dès que le seuil est franchi. Avec le nouveau tarif standard, la grille longue contexte recule dans les mêmes proportions, à 8 $ le million de jetons en entrée et 30 $ en sortie, contre 10 $ et 45 $ avant la baisse.\n\nLe prix des jetons mis en cache (cached input) reste distinct de ces deux grilles : 0,40 $ le million de jetons pour Sol, selon la fiche du modèle consultée le même jour. Le contexte maximal de Sol reste de 1 050 000 jetons, avec un plafond de 922 000 jetons en entrée et 128 000 en sortie, des valeurs que ce changement de tarif ne modifie pas. Aucune de ces deux caractéristiques, ni le seuil de 272 000 jetons qui déclenche le tarif longue contexte, n'est annoncée comme touchée par la mise à jour du 21 août.\n\n## Ce que ça change en pratique\n\nPour une application déjà en production sur GPT-5.6 Sol, la baisse s'applique automatiquement, sans changement de code ni de nom de modèle : le tarif est calculé au moment de la facturation, pas à l'appel. Un traitement qui consommait, par exemple, 10 millions de jetons en entrée et 2 millions en sortie chaque mois, en tarif standard, coûtait 50 $ plus 60 $, soit 110 $, avant le 21 août ; il coûte désormais 40 $ plus 40 $, soit 80 $, une baisse d'environ 27 % sur cet exemple précis.\n\nLe caractère promotionnel du tarif mérite d'être pris en compte dans un budget prévisionnel : la documentation ne garantit le maintien de ce niveau de prix que jusqu'au 21 novembre 2026, sans indication de ce qu'il adviendra ensuite. Une application dont le coût dépend fortement de Sol, et qui prévoit un usage au-delà de cette date, ne peut pas encore fonder ses projections sur ce tarif à long terme ; elle devra surveiller une éventuelle nouvelle entrée du changelog à l'approche de l'échéance.\n\nLa baisse rapproche aussi Sol de Terra sur le plan tarifaire, sans les confondre. En tarif standard, Sol coûtait 2,5 fois plus cher que Terra en entrée et 2,5 fois plus cher en sortie avant le 21 août ; l'écart tombe à 2 fois en entrée et environ 1,7 fois en sortie. Pour un développeur qui arbitre entre les deux modèles selon le coût plutôt que selon la seule capacité, la marge qui justifiait de réserver Sol aux tâches les plus exigeantes se resserre, au moins jusqu'à l'échéance de novembre. La documentation ne précise pas si ce rapprochement tarifaire est présenté par OpenAI comme durable ou comme un simple ajustement conjoncturel.",
+  "tags": [
+    "tarifs",
+    "api",
+    "modeles",
+    "openai"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Changelog",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-08-22"
+    },
+    {
+      "titre": "OpenAI API — Pricing",
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "consultee": "2026-08-22"
+    },
+    {
+      "titre": "OpenAI API — GPT-5.6 Sol model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+      "consultee": "2026-08-22"
+    }
+  ],
+  "statut": "publie"
+}
