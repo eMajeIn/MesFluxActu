@@ -1,0 +1,39 @@
+{
+  "slug": "anthropic-agents-geres",
+  "titre": "Anthropic : les agents gérés, une infrastructure pour Claude",
+  "date": "2026-08-25T08:00:00+02:00",
+  "type": "explication",
+  "labo": "anthropic",
+  "fonctionnalite": "agents gérés",
+  "chapeau": "Anthropic propose une infrastructure hébergée pour faire tourner des agents Claude autonomes dans un bac à sable, avec sessions à état et budget de dépense plafonnable. Explication à partir de la documentation technique.",
+  "corps": "Développer un agent autonome avec l'API Messages classique demande de gérer soi-même la boucle d'appels d'outils, le stockage de l'historique de conversation, et surtout l'environnement d'exécution : l'endroit où l'outil bash ou l'outil d'exécution de code doivent réellement tourner. Les **agents gérés** (Managed Agents) sont un service séparé de la plateforme Anthropic qui prend en charge cette dernière partie.\n\n## Ce que c'est\n\nLe service définit trois ressources. Un **agent** regroupe le modèle, le prompt système, les outils, les serveurs MCP et les skills : c'est une configuration versionnée et réutilisable, pas une instance en cours d'exécution. Un **environnement** définit où le bac à sable tourne : un environnement cloud géré par Anthropic, ou une machine que l'entreprise héberge elle-même. Une **session** est une instance en cours d'exécution d'un agent dans un environnement, avec un historique d'événements persistant. Le service reste en bêta : chaque requête doit porter l'en-tête `anthropic-beta: managed-agents-2026-04-01`, sauf les endpoints de mémoire qui utilisent `agent-memory-2026-07-22`.\n\n## Comment ça marche\n\nCréer un agent géré passe par trois appels successifs. D'abord `POST /v1/agents`, avec au minimum un `name` et un `model` ; le `system`, les `tools`, les `mcp_servers`, les `skills` et une déclaration `multiagent` (une liste d'agents auxquels celui-ci peut déléguer) sont optionnels. Le champ `model` accepte une simple chaîne (`\"claude-opus-5\"`) ou un objet qui ajoute `speed` (mode rapide), `effort` (niveau de raisonnement) et `inference_geo` (`\"us\"` ou `\"global\"`, pour épingler la zone d'inférence). La réponse renvoie un `id`, une `version` qui s'incrémente à chaque modification, et complète les champs de `model` omis avec leurs valeurs par défaut.\n\nEnsuite `POST /v1/environments` définit où le bac à sable tourne : `config.type` vaut `\"cloud\"` pour une infrastructure gérée par Anthropic, avec un sous-champ `networking` (`{\"type\": \"unrestricted\"}` dans le cas le plus simple), ou `\"self_hosted\"` pour exécuter le worker sur sa propre machine.\n\nEnfin `POST /v1/sessions` relie un agent à un environnement, avec un `title` optionnel. La session peut aussi recevoir un `budget`, un plafond de dépense en dollars — voir plus bas.\n\nUne fois la session créée, on ouvre un flux d'événements (`sessions.events.stream`) et on y envoie des messages (`sessions.events.send`, avec un événement `user.message`). Le flux retourne des événements typés : `agent.message` pour le texte produit, `agent.tool_use` quand l'agent invoque un outil du bac à sable, et `session.status_idle` quand l'agent a fini et attend une nouvelle instruction.\n\n## En pratique\n\nUne équipe qui construit un assistant de diagnostic interne veut que l'agent puisse écrire et exécuter un script, lire des fichiers de logs, puis rendre un rapport, sans gérer elle-même un conteneur d'exécution. Un agent géré avec le jeu d'outils prédéfini (`agent_toolset_20260401`, qui regroupe bash, opérations sur fichiers et recherche web) remplit ce rôle directement :\n\n```bash\ncurl -sS https://api.anthropic.com/v1/agents \\\n  -H \"x-api-key: $ANTHROPIC_API_KEY\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -H \"anthropic-beta: managed-agents-2026-04-01\" \\\n  -H \"content-type: application/json\" \\\n  -d '{\n    \"name\": \"Coding Assistant\",\n    \"model\": \"claude-opus-5\",\n    \"system\": \"You are a helpful coding assistant. Write clean, well-documented code.\",\n    \"tools\": [{\"type\": \"agent_toolset_20260401\"}]\n  }'\n```\n\nL'agent créé, on ouvre un environnement cloud puis une session, et on envoie un message :\n\n```python\nfrom anthropic import Anthropic\n\nclient = Anthropic()\n\nwith client.beta.sessions.events.stream(session.id) as stream:\n    client.beta.sessions.events.send(\n        session.id,\n        events=[{\n            \"type\": \"user.message\",\n            \"content\": [{\"type\": \"text\", \"text\": \"Analyse ce fichier de logs et résume les erreurs récurrentes.\"}],\n        }],\n    )\n    for event in stream:\n        if event.type == \"agent.tool_use\":\n            print(f\"[outil utilisé : {event.name}]\")\n        elif event.type == \"session.status_idle\":\n            break\n```\n\nLe bac à sable exécute réellement les commandes bash et les lectures de fichiers déclenchées par l'agent ; l'application n'a rien d'autre à orchestrer que l'ouverture du flux.\n\nPour éviter qu'une session qui boucle ne consomme un budget imprévu, on peut lui fixer un plafond de dépense dès sa création, avec le champ `budget` :\n\n```json\n{\n  \"agent\": \"agent_01HqR2k7vXbZ9mNpL3wYcT8f\",\n  \"environment_id\": \"env_...\",\n  \"budget\": {\n    \"type\": \"limit\",\n    \"max_list_cost\": {\"amount\": \"125\", \"currency\": \"USD\"}\n  }\n}\n```\n\n`amount` s'exprime en cents sous forme de chaîne (`\"125\"` pour 1,25 $). Une fois ce montant atteint, la session passe en attente (`stop_reason` à `\"budget_reached\"`) plutôt que d'être interrompue : son historique et son bac à sable restent intacts, et il suffit de relever ou de retirer le budget pour qu'elle reprenne.\n\n## Ce que ça change, et où ça s'arrête\n\nL'apport des agents gérés est de sortir la gestion du bac à sable, du stockage de session et du streaming d'événements du code applicatif : ce que l'outil bash ou l'outil d'exécution de code font pour un seul appel, le service le fait pour une session qui peut tourner plusieurs tours sans que l'application ait à rejouer l'historique à chaque fois.\n\nLe coût suit une logique de tarification publique continue : les tokens de modèle sont facturés au tarif catalogue de chaque modèle servi, les recherches web à 10 $ pour 1 000 requêtes, et le temps de fonctionnement de la session à 0,08 $ de l'heure. C'est cette somme, le « coût catalogue », que le plafond de budget surveille — pas nécessairement le montant réellement facturé si l'organisation a négocié une remise.\n\nLes limites documentées sont concrètes : le service est encore en bêta (en-tête `anthropic-beta` obligatoire), les endpoints de création sont limités à 300 requêtes par minute par organisation et les endpoints de lecture à 1 200, et un budget de session, une fois retiré, ne peut plus être réattaché — il faut le modifier plutôt que le supprimer si on veut garder un plafond. Un agent archivé devient définitivement en lecture seule : les sessions existantes continuent de tourner, mais aucune nouvelle session ne peut plus le référencer.",
+  "tags": [
+    "agents",
+    "api",
+    "sandbox",
+    "streaming"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Docs — Get started with Claude Managed Agents",
+      "url": "https://platform.claude.com/docs/en/managed-agents/quickstart",
+      "consultee": "2026-08-25"
+    },
+    {
+      "titre": "Claude Docs — Define your agent",
+      "url": "https://platform.claude.com/docs/en/managed-agents/agent-setup",
+      "consultee": "2026-08-25"
+    },
+    {
+      "titre": "Claude Docs — Session budgets",
+      "url": "https://platform.claude.com/docs/en/managed-agents/budgets",
+      "consultee": "2026-08-25"
+    },
+    {
+      "titre": "Claude Docs — Reference (Managed Agents)",
+      "url": "https://platform.claude.com/docs/en/managed-agents/reference",
+      "consultee": "2026-08-25"
+    }
+  ],
+  "statut": "publie"
+}
