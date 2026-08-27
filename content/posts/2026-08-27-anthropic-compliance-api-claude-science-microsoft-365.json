@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-compliance-api-claude-science-microsoft-365",
+  "titre": "Anthropic étend la Compliance API à Claude Science et Microsoft 365",
+  "date": "2026-08-27T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 26 août 2026, Anthropic sort de bêta les points d'entrée de session de sa Compliance API pour Cowork et Claude Code, et les étend, en bêta, à Claude Science et Claude for Microsoft 365, sans nouvelle clé d'accès.",
+  "corps": "Anthropic a mis à jour le 26 août 2026 les notes de version de sa plateforme pour annoncer deux changements sur les points d'entrée de session de la Compliance API. D'une part, la couverture de Cowork et de Claude Code, disponible en bêta depuis le 11 août, passe au statut stable. D'autre part, cette même famille d'endpoints s'étend, en bêta cette fois, à deux nouveaux produits : l'application de bureau Claude Science et les modules Claude for Microsoft 365 dans Excel, PowerPoint, Word et Outlook.\n\nLa Compliance API donne aux organisations Claude Enterprise un accès programmatique aux échanges que leurs utilisateurs ont avec Claude. Les équipes sécurité, juridiques et conformité s'en servent pour des exports eDiscovery ou pour faire appliquer des politiques de prévention de perte de données (DLP), selon la documentation d'Anthropic sur cette API.\n\n## Ce qui passe de bêta à stable, et ce qui reste en bêta\n\nLes points d'entrée de session se répartissent en deux familles selon l'endroit où tourne la session : les points d'entrée « locaux », pour les sessions qui s'exécutent sur la machine de l'utilisateur, et les points d'entrée « distants », pour celles qui tournent dans le cloud géré par Anthropic. Chaque session locale est identifiée par la valeur de son champ `product_surface` : `cowork`, `claude_code`, `claude_science`, ou une valeur commençant par `office_agents` pour désigner l'un des quatre modules Microsoft 365.\n\nSelon la documentation, la couverture des sessions Cowork et Claude Code par ces points d'entrée locaux est désormais stable. Celle des sessions Claude Science et Claude for Microsoft 365, en revanche, reste en bêta : ces deux surfaces de produit viennent d'être ajoutées au même tableau de correspondance que Cowork et Claude Code, mais avec un statut différent. La documentation précise que les produits sont ajoutés à ce tableau « au fur et à mesure que la couverture s'étend », ce qui laisse la porte ouverte à d'autres surfaces à l'avenir.\n\nAucune nouvelle clé n'est nécessaire pour accéder aux sessions ajoutées : la même Compliance Access Key, munie de la portée `read:compliance_user_data` déjà utilisée pour Cowork et Claude Code, couvre désormais aussi Claude Science et Microsoft 365. Les trois endpoints concernés restent `GET /v1/compliance/apps/sessions/local` pour lister les sessions, la même route suffixée d'un identifiant pour en récupérer une, et cette dernière suffixée de `/messages` pour en obtenir la transcription complète.\n\n## Une portée qui dépasse le chat et le code\n\nJusqu'ici, la visibilité de conformité côté sessions locales se limitait à deux usages : les conversations dans Cowork et les sessions de développement dans Claude Code. L'ajout de Claude Science et des modules Office déplace cette couverture vers deux contextes différents : la recherche scientifique assistée par IA d'un côté, la bureautique quotidienne dans Excel, PowerPoint, Word et Outlook de l'autre. Pour ces deux surfaces, la documentation indique en outre un cas particulier : sur Claude Science, un même fil de conversation qui traverse certaines mises à jour de l'application peut apparaître comme deux sessions distinctes dans les résultats, un comportement qualifié d'attendu plutôt que d'anomalie.\n\nChaque transcription de session locale reste soumise aux mêmes règles déjà en vigueur pour Cowork et Claude Code : les blocs de raisonnement ne sont jamais renvoyés, le prompt système est remplacé par un message-marqueur, et le contenu est conservé six ans par défaut, ou selon la durée de rétention personnalisée de l'organisation quand elle est plus courte.\n\n## Ce que ça change en pratique\n\nPour une équipe conformité qui a déjà construit une intégration sur les endpoints Cowork et Claude Code, le passage au statut stable signifie un contrat d'API sur lequel s'appuyer sans crainte d'un changement de comportement à venir sans préavis, ce qui compte pour un pipeline d'export eDiscovery mis en production. Pour les organisations qui déploient Claude dans des laboratoires de recherche via Claude Science, ou dans la suite Office via les modules Microsoft 365, l'ajout de ces deux surfaces comble un angle mort : ces usages n'étaient jusqu'alors pas couverts par la Compliance API, alors qu'ils génèrent des échanges avec Claude au même titre qu'une session Cowork ou Claude Code. Le statut bêta de cette partie de la couverture signale cependant que son comportement peut encore évoluer, ce qui invite à la traiter avec prudence dans une intégration destinée à durer. La documentation ne précise pas de date pour un passage de ces deux surfaces au statut stable.",
+  "tags": [
+    "compliance",
+    "entreprise",
+    "api",
+    "gouvernance"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Platform release notes",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-08-27"
+    },
+    {
+      "titre": "Anthropic — Retrieve session transcripts (Compliance API)",
+      "url": "https://platform.claude.com/docs/en/manage-claude/compliance-sessions",
+      "consultee": "2026-08-27"
+    },
+    {
+      "titre": "Anthropic — Compliance API overview",
+      "url": "https://platform.claude.com/docs/en/manage-claude/compliance-api",
+      "consultee": "2026-08-27"
+    }
+  ],
+  "statut": "publie"
+}
