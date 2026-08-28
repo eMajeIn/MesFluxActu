@@ -1,0 +1,38 @@
+{
+    "slug": "mistral-api-administration",
+    "titre": "Mistral : administrer une organisation par l'API plutôt qu'à la main",
+    "date": "2026-08-28T10:40:00+02:00",
+    "type": "explication",
+    "labo": "mistral",
+    "fonctionnalite": "api d'administration",
+    "chapeau": "Mistral documente une Admin API, réservée aux comptes Entreprise, pour provisionner des utilisateurs, gérer leurs rôles et leurs clés API par appels programmatiques plutôt que dans le Backoffice.",
+    "corps": "Mistral documente une Admin API qui permet de gérer une organisation Entreprise — utilisateurs, rôles, groupes, clés API — par appels programmatiques plutôt qu'à la main dans une interface. La fonctionnalité est en préversion et réservée aux comptes Entreprise.\n\n## Ce que c'est\n\nLa Admin API donne accès par API aux mêmes opérations que celles disponibles dans le Backoffice de Mistral (backoffice.mistral.ai) : gestion des utilisateurs et de leurs invitations, des rôles, des groupes d'utilisateurs, des clés API, ainsi que le suivi des dépenses, des limites de débit et des journaux d'usage. La documentation la distingue nettement de l'API applicative classique utilisée pour appeler les modèles : « la clé API standard d'un utilisateur ne donne jamais accès aux fonctions d'administration ». Il faut une clé Admin API dédiée, créée dans le Backoffice, passée dans l'en-tête `x-api-key` des requêtes.\n\nSur l'attribution des rôles, la documentation signale une évolution du format : les champs au singulier (`role`, `role_name`) sont dépréciés au profit des champs au pluriel (`roles`, `role_names`), qui acceptent une liste — un compte peut donc porter plusieurs rôles à la fois plutôt qu'un seul.\n\nLa documentation résume le périmètre couvert en une phrase : l'Admin API permet de « provisionner des utilisateurs, gérer les espaces de travail et les groupes, faire tourner les clés API, fixer des limites de dépense et de débit, et récupérer les journaux d'usage et d'audit ». Les pages ouvertes pendant cette recherche détaillent les endpoints pour les utilisateurs, les rôles, les clés API et les groupes ; celles consacrées aux limites de dépense, aux limites de débit et aux journaux d'audit n'ont pas été consultées ici et ne sont donc pas décrites plus loin dans cet article.\n\n## Comment ça marche\n\nLes endpoints vivent sous le préfixe `/v1/admin/`. Trois rôles d'organisation sont documentés : `member`, `billing_manager` et `organization_admin`. Pour les consulter avec leurs identifiants, un simple `GET /v1/admin/roles` suffit ; la documentation renvoie à cet appel pour récupérer les UUID de rôle à réutiliser ailleurs.\n\nInviter une personne dans l'organisation, avec un rôle déjà défini :\n\n```bash\ncurl -X POST https://api.mistral.ai/v1/admin/users-invite \\\n  -H \"Content-Type: application/json\" \\\n  -H \"x-api-key: $ADMIN_API_KEY\" \\\n  -d '{\"email\": \"grace@example.com\", \"role_names\": [\"member\"]}'\n```\n\nCréer directement un ou plusieurs comptes utilisateurs, sans passer par le circuit d'invitation par e-mail, accepte un tableau d'objets :\n\n```bash\ncurl -X POST https://api.mistral.ai/v1/admin/users \\\n  -H \"Content-Type: application/json\" \\\n  -H \"x-api-key: $ADMIN_API_KEY\" \\\n  -d '[{\"email\": \"ada@example.com\", \"first_name\": \"Ada\",\n  \"last_name\": \"Lovelace\", \"role_names\": [\"organization_admin\"]}]'\n```\n\nEt modifier les rôles d'un compte existant, identifié par son UUID :\n\n```bash\ncurl -X PATCH https://api.mistral.ai/v1/admin/users/<USER_UUID> \\\n  -H \"x-api-key: $ADMIN_API_KEY\" \\\n  -d '{\"role_names\": [\"member\"]}'\n```\n\nLe même préfixe `/v1/admin/` couvre aussi la gestion des clés API (`api-keys`, avec un `POST` acceptant `user_id` et `workspace_uuid` pour émettre une clé rattachée à un espace de travail précis, et un `DELETE /v1/admin/api-keys/{key_id}` pour la révoquer) et celle des groupes d'utilisateurs (`user-groups`, avec des sous-chemins `/members` et `/workspaces` pour peupler un groupe et le rattacher à un ou plusieurs espaces de travail).\n\n## En pratique\n\nUne équipe informatique qui intègre régulièrement de nouveaux ingénieurs peut automatiser l'arrivée et le départ plutôt que de créer chaque compte à la main dans le Backoffice. À l'arrivée d'une personne, un script appelle `POST /v1/admin/users-invite` avec son adresse e-mail et le rôle `member`, ce qui déclenche l'invitation standard sans intervention manuelle d'un administrateur ; si la personne a besoin d'un accès élargi (par exemple pour gérer la facturation d'une équipe), un `PATCH /v1/admin/users/<USER_UUID>` avec `role_names: [\"billing_manager\"]` ajuste son rôle après coup, sans recréer le compte. Au départ, le même pipeline peut révoquer les clés API associées à cette personne via `DELETE /v1/admin/api-keys/{key_id}`, plutôt que de compter sur la mémoire d'un administrateur pour penser à le faire.\n\n## Ce que ça change, et où ça s'arrête\n\nL'apport réel est de sortir la gestion des accès du clic manuel dans une console, pour la faire entrer dans un pipeline d'onboarding, d'offboarding ou d'audit scriptable — utile dès qu'une organisation dépasse la poignée d'utilisateurs qu'on peut encore suivre à l'œil dans une interface. Il n'y a pas de coût documenté propre à l'Admin API au-delà du plan Entreprise lui-même ; aucun tarif par appel n'est mentionné dans les pages consultées.\n\nLes limites sont posées explicitement par Mistral. La fonctionnalité est en préversion : « les endpoints et les champs peuvent changer à mesure que nous affinons l'API », donc pas de garantie de stabilité pour une automatisation critique construite dessus aujourd'hui. Elle est réservée aux comptes Entreprise, ce qui exclut d'emblée les usages individuels ou les petites équipes sur un plan standard — une clé Admin API ne peut être émise que depuis le Backoffice d'une Enterprise Account. Et la documentation consultée ne couvre que la gestion des utilisateurs, des rôles, des clés API et des groupes : la création d'un espace de travail lui-même est décrite comme une opération faite « par le Panneau d'administration » (admin.mistral.ai/organization/workspaces), sans endpoint de création correspondant relevé dans les pages ouvertes pendant cette recherche — un point que la documentation ne précise pas, à vérifier avant de construire une automatisation qui en dépendrait.\n",
+    "tags": [
+        "administration",
+        "api",
+        "entreprise"
+    ],
+    "sources": [
+        {
+            "titre": "Mistral — Admin API overview",
+            "url": "https://docs.mistral.ai/admin/admin-api/overview",
+            "consultee": "2026-08-28"
+        },
+        {
+            "titre": "Mistral — Manage users (Admin API)",
+            "url": "https://docs.mistral.ai/admin/admin-api/manage-users",
+            "consultee": "2026-08-28"
+        },
+        {
+            "titre": "Mistral — Beta Admin Api Keys Endpoints",
+            "url": "https://docs.mistral.ai/api/endpoint/beta/admin/api-keys",
+            "consultee": "2026-08-28"
+        },
+        {
+            "titre": "Mistral — Beta Admin User Groups Endpoints",
+            "url": "https://docs.mistral.ai/api/endpoint/beta/admin/user-groups",
+            "consultee": "2026-08-28"
+        }
+    ],
+    "statut": "publie"
+}
