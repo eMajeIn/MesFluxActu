@@ -1,0 +1,38 @@
+{
+  "slug": "gemini-omni-1-1-flash-disponibilite-generale",
+  "titre": "Gemini Omni Flash passe en disponibilité générale, avec extension vidéo",
+  "date": "2026-08-28T09:00:00+02:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Le 27 août 2026, Google fait sortir Gemini Omni Flash de préversion sous l'identifiant gemini-omni-1.1-flash, avec trois capacités nouvelles pour la génération et l'édition de vidéo, et programme le retrait de l'ancien point d'entrée de préversion.",
+  "corps": "Google a annoncé le 27 août 2026, dans les notes de version de l'API Gemini, le passage en disponibilité générale (GA) de son modèle de génération et d'édition de vidéo conversationnel. Le nouvel identifiant, `gemini-omni-1.1-flash`, remplace la préversion `gemini-omni-flash-preview`, disponible depuis le 30 juin 2026, que la documentation annonce comme retirée le 30 septembre 2026.\n\nLa sortie de préversion s'accompagne de trois capacités que les notes de version qualifient de nouvelles : une tâche d'extension de vidéo, une tâche d'interpolation entre deux images, et un paramètre de résolution de sortie. Un billet du blog officiel de Google publié le même jour précise l'ampleur du changement : le modèle analyse désormais jusqu'à dix secondes de contexte vidéo antérieur pour produire une continuation, contre une seule seconde pour les versions précédentes, ce qui améliore la cohérence visuelle d'un plan à l'autre.\n\n## Ce qui devient possible avec la version stable\n\nLa tâche `extend`, selon les notes de version, génère une continuation en fin de clip à partir d'une vidéo existante. La tâche `image_to_video`, utilisée avec deux images en entrée, produit une interpolation entre une image de départ et une image d'arrivée — un plan de transition entre deux points fixes plutôt qu'une génération libre à partir d'un seul prompt. Le nouveau paramètre `resolution`, dans l'objet `video_config`, accepte les valeurs `360p`, `720p` (la valeur par défaut), `1080p` et `4k` ; les deux résolutions les plus hautes sont obtenues par surclassement (upscaling) plutôt que générées nativement, précise la documentation.\n\nLa fiche du modèle sur la documentation Gemini API donne le reste des caractéristiques : une vidéo fournie en entrée pour l'édition ou l'extension peut atteindre dix secondes, la sortie dure de trois à dix secondes selon la résolution choisie, à 24 images par seconde, et le modèle partage la même fenêtre de contexte que le reste de la famille Gemini 3, soit 1 048 576 jetons. Le modèle est accessible via l'API Interactions, déjà utilisée par les autres modèles conversationnels de Google.\n\n## Ce que coûte une vidéo générée\n\nLa page tarifaire de l'API Gemini situe `gemini-omni-1.1-flash` uniquement sur le palier payant, sans palier gratuit. Elle indique un tarif d'entrée de 1,50 $ par million de jetons, quelle que soit la modalité (texte, image, vidéo ou audio), et deux tarifs de sortie distincts : 9 $ par million de jetons pour du texte, 17,50 $ par million de jetons pour de la vidéo. La documentation précise que la facturation vidéo se calcule sur le nombre de jetons de sortie consommés, à raison de 5 792 jetons par seconde de vidéo en 720p, ce qui revient à environ 0,10 $ la seconde au tarif standard.\n\n## Ce que ça change en pratique\n\nPour une équipe qui exploitait déjà `gemini-omni-flash-preview`, le passage en disponibilité générale fixe une échéance concrète : migrer vers `gemini-omni-1.1-flash` avant le 30 septembre 2026, date à laquelle l'ancien point d'entrée cesse de fonctionner selon les notes de version. La migration n'est pas qu'un changement de nom de modèle : les paramètres de la tâche `extend` et le nouveau contrôle de résolution n'existaient pas sur la préversion, ce qui signifie qu'une intégration construite pendant la période de préversion doit être révisée plutôt que simplement repointée vers le nouvel identifiant.\n\nLa capacité d'extension change surtout l'usage pour une production qui enchaîne plusieurs générations courtes : au lieu de raccorder des clips indépendants et de gérer les décrochages visuels d'un segment à l'autre, un studio ou une agence peut demander une continuation qui prend en compte dix secondes de contexte précédent plutôt qu'une seule image de fin, ce qui réduit le nombre d'essais nécessaires pour obtenir un raccord crédible. L'interpolation entre deux images cadrées répond à un besoin différent : produire une transition contrôlée entre un point de départ et un point d'arrivée déjà choisis, plutôt que de laisser le modèle inventer librement le contenu du plan.\n\nCe gain en contrôle a un prix qui reste identique aux tarifs déjà connus du modèle en préversion sur les mêmes points documentés : à 0,10 $ la seconde en 720p, un plan de dix secondes revient à environ 1 $, avant tout passage en 1080p ou 4K par surclassement, qui n'est pas facturé différemment par la documentation consultée. La disponibilité générale ne s'accompagne donc pas d'un nouveau palier tarifaire, mais d'un engagement de stabilité sur un point d'entrée que Google ne documentait jusqu'ici que comme expérimental.",
+  "tags": [
+    "video",
+    "generation",
+    "api",
+    "prix"
+  ],
+  "sources": [
+    {
+      "titre": "Gemini API — Changelog (27 août 2026)",
+      "url": "https://ai.google.dev/gemini-api/docs/changelog",
+      "consultee": "2026-08-28"
+    },
+    {
+      "titre": "Gemini API — Gemini Omni Flash (fiche modèle)",
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-omni-flash",
+      "consultee": "2026-08-28"
+    },
+    {
+      "titre": "Gemini API — Pricing",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "consultee": "2026-08-28"
+    },
+    {
+      "titre": "Google Blog — Build with Gemini Omni 1.1 Flash",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/build-with-gemini-omni-1-1-flash/",
+      "consultee": "2026-08-28"
+    }
+  ],
+  "statut": "publie"
+}
