@@ -1,0 +1,47 @@
+{
+  "slug": "gemini-robotics-er-1-6-retrait",
+  "titre": "Gemini Robotics ER 1.6 retiré, la relève facturée au double",
+  "date": "2026-08-31T09:00:00+02:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Le 31 août 2026, Google retire gemini-robotics-er-1.6-preview de l'API Gemini et impose gemini-robotics-er-2-preview, dont les tarifs déclarés doublent par rapport au modèle sortant.",
+  "corps": "Google a retiré le 31 août 2026 gemini-robotics-er-1.6-preview, un modèle de vision-langage pour la robotique disponible depuis le 14 avril 2026 dans l'API Gemini. La page des dépréciations de l'API fixe cette date comme fin de fonctionnement et désigne gemini-robotics-er-2-preview comme remplaçant recommandé, accompagné d'une variante en flux continu nommée gemini-robotics-er-2-streaming-preview.\n\nLes deux familles de modèles visent le même usage : permettre à un robot d'interpréter une scène filmée, de raisonner sur la position des objets, et de traduire une instruction en langage naturel en une suite d'appels de fonctions qui déclenchent une action physique, comme saisir un objet ou le déplacer. La documentation regroupe ces modèles sous l'appellation Robotics ER, pour embodied reasoning (raisonnement incarné).\n\nToute application encore appelée sur l'identifiant gemini-robotics-er-1.6-preview après le 31 août cesse de recevoir une réponse : la documentation ne prévoit pas de période de tolérance au-delà de la date de retrait indiquée.\n\n## Ce qui change dans l'offre de modèles\n\nLes trois modèles partagent la même enveloppe technique : une entrée en texte, image, vidéo et audio, une sortie en texte seul, une limite de 131 072 jetons en entrée et 65 536 en sortie. Le remplaçant standard, gemini-robotics-er-2-preview, ajoute selon sa fiche une capacité de recherche de moment dans une vidéo, une classification de la progression d'une tâche filmée, et une orchestration entre plusieurs robots, trois capacités absentes de la fiche de l'ancien modèle.\n\nLa variante gemini-robotics-er-2-streaming-preview constitue le changement le plus net : elle expose un point d'entrée dédié qui s'appuie sur l'API Live, avec une connexion WebSocket persistante acceptant de l'audio en PCM 16 bits à 16 kHz et des images JPEG à une fréquence maximale d'une image par seconde. Les actions physiques s'y déclarent avec un paramètre `behavior` réglé sur `BLOCKING`, qui fait attendre le modèle jusqu'à la fin d'exécution d'une tâche avant de poursuivre le raisonnement, et un mécanisme de battements de cœur envoie périodiquement une image de la caméra pour permettre au modèle de décider d'agir sans attendre une nouvelle instruction. Rien de comparable n'existe pour gemini-robotics-er-1.6-preview, dont la fiche modèle exclut explicitement l'API Live parmi les capacités prises en charge.\n\n## Un tarif qui double sur le modèle de remplacement\n\nLa page tarifaire de l'API Gemini distingue les deux générations sur un point documenté sans ambiguïté : le prix. Sur le palier payant, gemini-robotics-er-1.6-preview facture l'entrée 1 $ par million de jetons pour le texte, l'image et la vidéo, 2 $ pour l'audio, et 5 $ par million de jetons en sortie. gemini-robotics-er-2-preview et sa variante en flux continu portent ces tarifs à 2 $ par million de jetons en entrée quelle que soit la modalité, et 10 $ en sortie, soit un doublement sur chaque poste par rapport au modèle retiré. Le palier gratuit reste gratuit sur les deux générations, avec un quota de 5 000 requêtes de recherche Google Search par mois inclus sur le palier payant des trois modèles.\n\n## Ce que ça change en pratique\n\nPour une équipe qui a mis en service un pilote de robot sur gemini-robotics-er-1.6-preview entre avril et août 2026, la migration n'est pas qu'un changement d'identifiant : elle porte aussi sur le budget, puisque chaque jeton consommé sur le modèle de remplacement coûte deux fois plus cher, sans palier intermédiaire documenté pour amortir la transition.\n\nLa nouveauté la plus concrète touche les usages en boucle fermée. Avec gemini-robotics-er-1.6-preview, un robot ne pouvait interroger le modèle qu'en mode requête-réponse classique, sans flux continu. La variante gemini-robotics-er-2-streaming-preview permet de maintenir une session ouverte pendant qu'un robot se déplace ou manipule un objet, avec un flux vidéo et audio ininterrompu et des décisions déclenchées par le mécanisme de battements de cœur plutôt que par une nouvelle requête explicite, un mode qui rapproche l'usage du modèle d'un contrôleur réactif plutôt que d'un service consulté ponctuellement.\n\nLes capacités de recherche de moment dans une vidéo et de classification de progression, propres à gemini-robotics-er-2-preview, répondent à un besoin différent : vérifier après coup qu'une tâche filmée a bien été exécutée, ou retrouver l'instant où un geste a eu lieu dans un enregistrement, plutôt que de piloter un robot en direct. Ni l'une ni l'autre n'existait sur la génération retirée aujourd'hui.\n\nLes trois modèles restent au statut de préversion, ce que confirme leur identifiant : aucun n'est annoncé comme disponible en version stable, et la documentation consultée ne donne pas de date pour une éventuelle sortie de préversion des modèles Robotics ER 2.",
+  "tags": [
+    "robotique",
+    "api",
+    "prix"
+  ],
+  "sources": [
+    {
+      "titre": "Gemini API — Deprecations",
+      "url": "https://ai.google.dev/gemini-api/docs/deprecations",
+      "consultee": "2026-08-31"
+    },
+    {
+      "titre": "Gemini API — Gemini Robotics ER 1.6 (fiche modèle)",
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-robotics-er-1.6-preview",
+      "consultee": "2026-08-31"
+    },
+    {
+      "titre": "Gemini API — Gemini Robotics ER 2 preview (fiche modèle)",
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-robotics-er-2-preview",
+      "consultee": "2026-08-31"
+    },
+    {
+      "titre": "Gemini API — Gemini Robotics ER (vue d'ensemble)",
+      "url": "https://ai.google.dev/gemini-api/docs/robotics-overview",
+      "consultee": "2026-08-31"
+    },
+    {
+      "titre": "Gemini API — Robotics with streaming",
+      "url": "https://ai.google.dev/gemini-api/docs/robotics-streaming",
+      "consultee": "2026-08-31"
+    },
+    {
+      "titre": "Gemini API — Pricing",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "consultee": "2026-08-31"
+    }
+  ],
+  "statut": "publie"
+}
