@@ -1,0 +1,42 @@
+{
+  "slug": "anthropic-claude-fable-mythos-5-1",
+  "titre": "Anthropic lance Claude Fable 5.1 et Claude Mythos 5.1",
+  "date": "2026-09-02T09:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 1er septembre 2026, Anthropic remplace Claude Fable 5 par Claude Fable 5.1 et Claude Mythos 5 par Claude Mythos 5.1, avec trois changements cassants documentés pour les intégrations existantes.",
+  "corps": "Anthropic a mis en service le 1er septembre 2026 deux nouveaux modèles : Claude Fable 5.1, identifiant API `claude-fable-5-1`, et Claude Mythos 5.1, identifiant `claude-mythos-5-1`. Le premier remplace Claude Fable 5 et reste ouvert à tous les clients de l'API Claude, ainsi qu'à Amazon Bedrock, Google Cloud et Microsoft Foundry. Le second remplace Claude Mythos 5 et demeure réservé aux participants de Project Glasswing, un accès sur invitation limité aux praticiens de la cybersécurité et des sciences de la vie.\n\nLes deux modèles partagent les mêmes spécifications : une fenêtre de contexte de 1 million de jetons, une sortie maximale de 128 000 jetons, et un raisonnement adaptatif désormais permanent — la documentation précise qu'il ne peut plus être coupé, `thinking: {\"type\": \"disabled\"}` renvoyant une erreur 400. Le tarif de base reprend celui de Claude Fable 5 à un poste près : la lecture du cache tombe à 0,25 $ par million de jetons, contre un dixième du prix d'entrée sur les autres modèles Claude actuels, soit un quart du tarif que payait Claude Fable 5 pour la même opération.\n\nLa page de nouveautés du modèle cite six axes d'amélioration par rapport à Claude Fable 5 : le code agentique sur de longues sessions, le travail sur documents, tableurs et diaporamas, la recherche multi-étapes, la lecture de graphiques et tableaux imbriqués dans des PDF, le raisonnement sur l'intégralité de la fenêtre de 1 million de jetons, et le pilotage d'un navigateur ou d'applications de bureau.\n\n## Trois changements cassants pour qui migre\n\nLa documentation liste trois changements qui cassent un code déjà écrit pour Claude Fable 5. D'abord, l'appel d'outil forcé disparaît : un `tool_choice` de type `\"any\"` ou `\"tool\"` renvoie désormais une erreur `invalid_request_error` en HTTP 400, y compris sur le point d'entrée de comptage de jetons — seuls `\"auto\"` et `\"none\"` restent acceptés. Ensuite, les blocs de raisonnement (`thinking`) sont liés au modèle qui les a produits : Claude Fable 5.1 peut relire ceux d'un modèle antérieur, mais aucun modèle antérieur ne peut relire les siens. Dans une conversation qui bascule vers un modèle plus ancien, ces blocs sont retirés avant que le modèle ne les voie, silencieusement sauf à activer l'en-tête bêta `thinking-binding-controls-2026-08-01`, qui rapporte le retrait dans un champ `input_transformations`. Enfin, modifier un tour antérieur d'une conversation — le `system`, les `tools`, ou un message précédent — invalide les blocs de raisonnement qui suivent : cette vérification est appliquée aux comptes créés à partir du 31 août 2026, et seulement enregistrée, sans blocage automatique, pour les comptes plus anciens tant que le paramètre `thinking.block_binding.prefix_mismatch_behavior` n'est pas renseigné dans la requête.\n\n## Ce que ça change en pratique\n\nChanger l'identifiant de modèle de `claude-fable-5` à `claude-fable-5-1` tient en une ligne, mais la documentation recommande un audit préalable sur trois points. Toute intégration qui force un appel d'outil avec `tool_choice: {\"type\": \"any\"}` — un usage courant pour garantir un format de sortie — doit basculer vers l'appel d'outil strict (`strict: true`) ou vers les sorties structurées, sous peine d'échec systématique dès le premier appel. Tout code qui reconstruit lui-même le tableau `messages`, par exemple pour injecter un rappel temporaire puis le retirer au tour suivant, doit vérifier s'il modifie l'historique en amont d'un bloc de raisonnement : Claude Code, claude.ai, les agents gérés et le Claude Agent SDK préservent déjà ce préfixe, mais un harnais construit à la main peut ne pas le faire. La documentation recommande de rejouer une session avec `prefix_mismatch_behavior: \"drop_block\"` et d'observer le champ `input_transformations` pour détecter ce cas avant la mise en production.\n\nLe tarif inchangé sur les jetons d'entrée et de sortie limite l'impact budgétaire d'une migration ordinaire, mais les sessions agentiques longues qui relisent un préfixe de cache à chaque appel d'outil profitent directement du nouveau tarif de lecture, quatre fois moins cher qu'avant. Pour une équipe qui fait tourner un agent de code sur des sessions de plusieurs heures — le cas d'usage que la documentation met en avant pour ce modèle — cette baisse réduit mécaniquement le coût d'un motif d'appel déjà fréquent, sans changement de prompt ni de logique applicative.",
+  "tags": [
+    "modèles",
+    "tarifs",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — Introducing Claude Fable 5.1 and Claude Mythos 5.1",
+      "url": "https://www.anthropic.com/claude-fable-and-mythos-5-1",
+      "consultee": "2026-09-02"
+    },
+    {
+      "titre": "Claude Docs — Models overview",
+      "url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "consultee": "2026-09-02"
+    },
+    {
+      "titre": "Claude Docs — Claude Fable 5.1 overview",
+      "url": "https://platform.claude.com/docs/en/models/fable-5-1/overview",
+      "consultee": "2026-09-02"
+    },
+    {
+      "titre": "Claude Docs — What's new in Claude Fable 5.1",
+      "url": "https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1",
+      "consultee": "2026-09-02"
+    },
+    {
+      "titre": "Claude Docs — Model deprecations",
+      "url": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+      "consultee": "2026-09-02"
+    }
+  ],
+  "statut": "publie"
+}
