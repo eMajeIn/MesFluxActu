@@ -1,0 +1,42 @@
+{
+  "slug": "gemini-3-8-flash-lancement",
+  "titre": "Google DeepMind lance Gemini 3.8 Flash et une variante Cyber réservée",
+  "date": "2026-09-03T09:00:00+02:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Le 2 septembre 2026, Google DeepMind publie Gemini 3.8 Flash pour tous les développeurs et réserve Gemini 3.8 Flash Cyber, dédié à la détection et à la correction de vulnérabilités, aux participants du nouveau Fairwind Program.",
+  "corps": "Le 2 septembre 2026, Google DeepMind a mis à disposition Gemini 3.8 Flash, un nouveau modèle de la famille Gemini 3, ainsi qu'une variante restreinte nommée Gemini 3.8 Flash Cyber. Le premier est accessible à tous les développeurs via l'API Gemini, Google AI Studio, Android Studio, Gemini Enterprise et l'application grand public Gemini. Le second n'est ouvert qu'aux participants du nouveau Fairwind Program, un programme d'accès limité aux gouvernements et aux opérateurs d'infrastructures critiques, lancé le même jour.\n\nGemini 3.8 Flash reprend exactement les caractéristiques techniques de Gemini 3.7 Flash, publié en août : une fenêtre de contexte de 1 048 576 jetons en entrée, une sortie maximale de 65 536 jetons, la prise en charge du texte, de l'image, de la vidéo, de l'audio et du PDF en entrée, et un raisonnement réglable sur trois niveaux (faible, moyen, élevé). Le tarif ne change pas non plus : 0,75 dollar par million de jetons en entrée et 3,75 dollars en sortie jusqu'au 31 décembre 2026, avant un doublement au 1er janvier 2027 - des chiffres identiques à ceux affichés pour Gemini 3.7 Flash sur la page de tarification.\n\nCe qui change, selon le billet d'annonce, tient au comportement du modèle plutôt qu'à ses caractéristiques déclarées : Google explique que Gemini 3.8 Flash « travaille davantage » sur les tâches complexes, en exécutant plus d'étapes de raisonnement et en enchaînant plus d'appels d'outils avant de répondre. Là où Gemini 3.7 Flash était positionné pour le codage courant et l'usage agentique classique d'outils, la documentation présente Gemini 3.8 Flash comme destiné aux sessions d'ingénierie logicielle longues, aux agents autonomes et aux flux de travail d'entreprise complexes.\n\n## Un accès à deux vitesses\n\nGemini 3.8 Flash Cyber n'apparaît pas dans la liste des modèles de la documentation publique de l'API Gemini, consultée le jour de la rédaction de cet article : son accès passe exclusivement par le Fairwind Program. Google y revendique plus de 650 partenaires participants - agences gouvernementales, autorités nationales de cybersécurité, opérateurs d'infrastructures critiques dans la santé, les télécommunications, l'énergie et la finance, ainsi que des clients de Google Cloud et des partenaires en cybersécurité. Les organisations admises doivent restreindre l'accès aux équipes de cybersécurité, de réponse à incident ou de test d'intrusion, et déployer l'authentification à plusieurs facteurs.\n\nAssocié à l'outil CodeMender de Google, Gemini 3.8 Flash Cyber assure trois fonctions selon le billet d'annonce : la détection autonome de vulnérabilités dans du code, leur vérification, puis la génération de correctifs « prêts au déploiement en quelques minutes » plutôt qu'en semaines de remédiation manuelle. Google précise que le modèle fonctionne « à une fraction du coût d'exploitation des modèles frontières classiques », sans donner de tarif public - cohérent avec un modèle absent de la documentation de l'API grand public.\n\n## Ce que ça change en pratique\n\nPour une équipe qui utilise déjà Gemini 3.7 Flash sur des tâches de codage agentique, changer l'identifiant de modèle vers `gemini-3.8-flash` ne modifie ni le tarif au jeton, ni la taille du contexte disponible, ni la liste des capacités déclarées. Le changement annoncé porte sur le nombre d'étapes que le modèle exécute de lui-même pour une même requête : plus d'itérations de raisonnement et plus d'appels d'outils avant de renvoyer une réponse. Concrètement, cela peut faire monter la facture réelle d'une tâche agentique longue même à tarif au jeton inchangé, puisque chaque session consomme davantage de jetons pour un même prompt initial - un arbitrage que la documentation ne quantifie pas, à mesurer sur ses propres flux avant une migration en production.\n\nLa scission entre un modèle public et une variante à accès restreint reproduit, un jour après Claude Fable 5.1 et Claude Mythos 5.1 chez Anthropic, un motif qui devient courant chez les grands laboratoires : réserver les capacités les plus sensibles - ici la détection et la correction automatique de vulnérabilités - à un cercle de partenaires validés plutôt qu'à l'ensemble des développeurs de l'API. Pour un praticien hors de ce cercle, Gemini 3.8 Flash Cyber reste pour l'instant invisible : ni fiche modèle, ni tarif, ni point d'entrée documentés en dehors du Fairwind Program.",
+  "tags": [
+    "modèles",
+    "api",
+    "cybersécurité"
+  ],
+  "sources": [
+    {
+      "titre": "Google — Introducing Gemini 3.8 Flash and 3.8 Flash Cyber",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/",
+      "consultee": "2026-09-03"
+    },
+    {
+      "titre": "Gemini API — Release notes / changelog",
+      "url": "https://ai.google.dev/gemini-api/docs/changelog",
+      "consultee": "2026-09-03"
+    },
+    {
+      "titre": "Gemini API — Gemini 3.8 Flash model page",
+      "url": "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash",
+      "consultee": "2026-09-03"
+    },
+    {
+      "titre": "Gemini API — Pricing",
+      "url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "consultee": "2026-09-03"
+    },
+    {
+      "titre": "Google — Proactive cyber defense for governments and enterprises (Fairwind Program)",
+      "url": "https://blog.google/innovation-and-ai/technology/safety-security/fairwind-program/",
+      "consultee": "2026-09-03"
+    }
+  ],
+  "statut": "publie"
+}
