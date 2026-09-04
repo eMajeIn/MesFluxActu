@@ -1,0 +1,38 @@
+{
+  "slug": "openai-gpt-6-astra-lancement",
+  "titre": "OpenAI lance GPT-6 Astra, d'abord réservé aux entreprises",
+  "date": "2026-09-04T08:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 3 septembre 2026, OpenAI a mis en production GPT-6 Astra, son modèle le plus capable, d'abord réservé aux entreprises du programme Trusted Access. L'accès par API et par les offres Plus, Pro, Business et Enterprise doit suivre dans les jours à venir.",
+  "corps": "Le 3 septembre 2026, OpenAI a inscrit dans le journal des modifications de son API la mise en production de GPT-6 Astra, présenté comme « notre modèle le plus capable, conçu pour les tâches complètes les plus exigeantes ». Le modèle cible le raisonnement, la programmation, l'usage d'ordinateur, la recherche et la production de documents, selon la fiche technique consultée le même jour sur developers.openai.com.\n\nL'accès n'est pas immédiat pour tous. La documentation précise : « GPT-6 Astra est disponible dès aujourd'hui pour les entreprises de notre programme Trusted Access, l'accès par API et par nos offres Plus, Pro, Business et Enterprise arrivant dans les jours qui viennent ». Au moment de la rédaction, GPT-6 Astra n'est donc accessible qu'à un sous-ensemble d'entreprises partenaires ; ni le changelog ni la fiche du modèle ne donnent de date précise pour l'ouverture à l'API publique.\n\nGPT-6 Astra succède à GPT-5.6 Sol, dont ce journal avait suivi la baisse de tarif fin août. La fiche du nouveau modèle affirme qu'il est « plus intelligent et plus capable que les modèles précédents comme GPT-5.6 Sol », sans publier de chiffre de benchmark à l'appui : la documentation se limite à indiquer que, sur plusieurs évaluations, Astra atteint de meilleurs résultats en utilisant sensiblement moins de jetons de sortie, pour un coût estimé par tâche inférieur à celui des modèles antérieurs malgré un tarif au jeton plus élevé.\n\n## Des paramètres d'appel qui changent\n\nLa migration vers GPT-6 Astra impose des ajustements de code. Le modèle ne prend plus en charge le niveau de raisonnement « none » : les cinq valeurs disponibles sont désormais low, medium, high, xhigh et max. Les paramètres `temperature`, `top_p` et `top_logprobs` ne sont plus acceptés, une rupture pour toute application qui les définissait explicitement sur les modèles précédents. L'appel d'outils (tool calling) nécessite l'API Responses ; il n'est plus prévu via l'API Chat Completions, même si celle-ci reste utilisable pour le reste du modèle.\n\nLe modèle introduit aussi des mécanismes absents des versions précédentes : l'appel d'outils asynchrone, qui laisse le modèle poursuivre son travail pendant qu'une fonction s'exécute, un pilotage en cours de tour (« mid-turn steering ») par WebSocket pour ajuster les instructions en temps réel, et la possibilité de changer le niveau de raisonnement en cours de conversation sans perdre le bénéfice de la mise en cache des invites. La documentation mentionne par ailleurs une surveillance asynchrone du désalignement, capable de déclencher une alerte de sécurité ou d'interrompre une conversation pour examen, sans détailler les critères qui la déclenchent.\n\nLe modèle est limité à des entrées texte et image ; les points de terminaison temps réel, les Assistants, le fine-tuning, les embeddings, la génération d'images et les services audio ne sont pas pris en charge par GPT-6 Astra selon sa fiche technique.\n\n## Fenêtre de contexte et tarification\n\nGPT-6 Astra offre une fenêtre de contexte de 1 050 000 jetons, avec un maximum de 922 000 jetons en entrée et 128 000 en sortie, et une date de coupure des connaissances au 30 avril 2026. Le tarif standard, selon la page de tarification consultée le même jour, est de 10 $ le million de jetons en entrée et 50 $ en sortie pour les requêtes sous le seuil de 272 000 jetons ; au-delà, il passe à 20 $ en entrée et 75 $ en sortie, soit une surtaxe de deux fois le tarif d'entrée et d'une fois et demie le tarif de sortie, la même logique de seuil que sur GPT-5.6 Sol. Les jetons mis en cache coûtent 1 $ le million. Le traitement par lots (batch) et le traitement flexible (flex) appliquent une réduction de 50 % sur le tarif standard, tandis que le mode rapide (fast mode) double ce tarif — sauf pour les requêtes soumises à la résidence des données dans l'Union européenne, où la page de tarification indique que le mode rapide n'est pas disponible pour GPT-6 Astra.\n\n## Ce que ça change en pratique\n\nPour une équipe qui migre une intégration existante vers GPT-6 Astra, le changement ne se limite pas à remplacer le nom du modèle dans l'appel : tout code qui fixait `temperature` ou `top_p`, ou qui appelait des outils via Chat Completions, doit être modifié pour ne pas échouer. La documentation ne précise pas si ces appels renvoient une erreur explicite ou sont silencieusement ignorés, un point à vérifier avant une bascule en production.\n\nLe déploiement en deux temps — entreprises du programme Trusted Access d'abord, API et offres grand public ensuite — signifie qu'une application qui dépend de l'API publique ne peut pas encore s'appuyer sur GPT-6 Astra : elle devra surveiller le changelog pour connaître la date d'ouverture. Enfin, l'argument de coût mis en avant par OpenAI — un prix au jeton plus élevé compensé par une consommation de jetons de sortie réduite — ne peut pas être vérifié sur la seule documentation : elle ne publie ni le montant de la réduction ni le protocole des évaluations citées, si bien qu'une estimation de coût par tâche réelle nécessite un test sur charge propre plutôt qu'un calcul à partir des seuls tarifs affichés.",
+  "tags": [
+    "modeles",
+    "api",
+    "openai",
+    "tarifs"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Changelog",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-09-04"
+    },
+    {
+      "titre": "OpenAI API — GPT-6 Astra model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "consultee": "2026-09-04"
+    },
+    {
+      "titre": "OpenAI API — Latest model",
+      "url": "https://developers.openai.com/api/docs/guides/latest-model",
+      "consultee": "2026-09-04"
+    },
+    {
+      "titre": "OpenAI API — Pricing",
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "consultee": "2026-09-04"
+    }
+  ],
+  "statut": "publie"
+}
