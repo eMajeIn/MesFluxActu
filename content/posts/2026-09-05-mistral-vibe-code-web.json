@@ -1,0 +1,53 @@
+{
+  "slug": "mistral-vibe-code-web",
+  "titre": "Mistral : Vibe Code Web, l'agent de codage dans un bac à sable distant",
+  "date": "2026-09-05T10:00:00+02:00",
+  "type": "explication",
+  "labo": "mistral",
+  "fonctionnalite": "vibe code web",
+  "chapeau": "Vibe Code Web déplace l'agent de codage Vibe dans un bac à sable cloud piloté depuis le navigateur : on démarre une session depuis le web, depuis le CLI, ou en téléportant une session locale, et on relit la branche ou la pull request produite dans GitHub.",
+  "corps": "## Ce que c'est\n\nVibe Code Web est la version navigateur de l'agent de codage Vibe Code de Mistral : un poste de pilotage à distance depuis lequel on démarre une tâche, on suit l'agent pendant qu'il travaille, puis on relit la branche ou la pull request qu'il produit. La documentation la décrit comme le même moteur que le CLI Vibe, mais exécuté dans un bac à sable géré dans le cloud plutôt que sur la machine de la personne qui l'utilise. CLI, extension VS Code et version web partagent d'ailleurs le même moteur, la même configuration et la même couche de personnalisation — agents, skills, serveurs MCP.\n\nLa documentation recommande Vibe Code Web pour des tâches qui peuvent s'exécuter sans fichiers, services ou secrets locaux, qui durent assez longtemps pour qu'on ne veuille pas garder son ordinateur ouvert, et qui se terminent par une branche ou une pull request à relire. À l'inverse, elle recommande le CLI ou l'extension VS Code dès qu'une tâche dépend de fichiers locaux, de secrets locaux, d'un environnement d'exécution non pris en charge dans le bac à sable, ou d'un accès direct à la machine.\n\n## Comment ça marche\n\nUn projet Vibe Code Web regroupe un ou plusieurs dépôts GitHub, à condition qu'ils appartiennent tous au même propriétaire GitHub (compte ou organisation) ; travailler sur des dépôts de propriétaires différents demande de créer des projets séparés. La première création de projet déclenche l'installation de la Mistral GitHub App et son autorisation sur le compte ou l'organisation choisie, avec le choix d'y donner accès à tous les dépôts ou seulement à certains ; les responsables d'une organisation peuvent devoir approuver cette installation avant que leurs membres ne puissent l'utiliser sur les dépôts de l'organisation.\n\nCette application GitHub s'authentifie de deux façons distinctes, selon la documentation : un jeton d'accès utilisateur, pour le travail de lecture et d'écriture sur le dépôt pour le compte de la personne — cloner, créer une branche, committer, pousser, ouvrir une pull request —, dont la portée effective est la plus restrictive entre les permissions GitHub de la personne et les portées accordées à l'application ; et un jeton d'accès d'installation, pour des actions au niveau de l'application ou d'un bot, limité aux portées accordées à l'installation et aux dépôts qu'elle couvre. Les commits et pull requests produits par l'agent sont attribués au compte GitHub de la personne : l'auteur du commit provient du jeton d'accès utilisateur et de la configuration Git locale au moment où l'agent effectue le commit, tandis que l'auteur de la pull request est directement le compte GitHub de la personne.\n\nUne session — une exécution de l'agent sur un projet — démarre par l'un de trois points d'entrée documentés : cliquer sur « New session » dans un projet, depuis le web ; préfixer une invite par `&` depuis le CLI Vibe pour l'envoyer directement vers une session cloud ; ou téléporter une session CLI déjà active en y exécutant la commande `/teleport`, ce qui la fait continuer dans le bac à sable distant avec son historique et l'état de sa branche préservés. La documentation présente le téléport comme la manière la plus propre d'échapper à une session locale devenue trop longue pour tourner sur un ordinateur portable.\n\nChaque session obtient son propre bac à sable dans le cloud : mono-locataire pour la durée de la session, sans partage de données avec d'autres sessions ou d'autres personnes, supprimé une fois la session terminée, et sans accès possible à la machine locale — l'agent travaille uniquement à partir du dépôt, de l'image par défaut et des appels réseau sortants. Le déroulement d'une session suit cinq phases documentées : démarrage du bac à sable, clonage du dépôt et de la branche choisis, exécution (l'agent lit des fichiers, lance des commandes, modifie du code et pose des questions de clarification si besoin), relecture, puis fin — le bac à sable est supprimé quand la session s'arrête, expire ou échoue. Une branche ou une pull request poussée ne met pas fin à la session automatiquement : on peut continuer à itérer avec de nouvelles invites, des commentaires de relecture ou des échecs d'intégration continue. Pendant qu'elle est active, une session est dans l'un de quatre états — active, en attente d'une réponse, inactive après avoir terminé l'étape en cours, ou arrêtée — et une session arrêtée l'est pour l'une de trois raisons : tâche terminée normalement, expiration par durée ou inactivité, ou erreur d'initialisation ou d'exécution. Dans tous les cas, les branches et pull requests déjà créées restent dans le dépôt.\n\n## En pratique\n\nUne équipe qui maintient un service historique reçoit régulièrement des tickets bien cadrés — corriger une limite de débit manquante sur un point de terminaison, par exemple — qui ne demandent ni fichier local ni secret particulier. Plutôt que de garder un poste ouvert pendant l'exécution, la personne envoie la tâche vers une session cloud directement depuis le CLI :\n\n```\n& Ajoute une limitation de débit sur le point de terminaison /login, avec les tests associés\n```\n\nSi la tâche a été commencée en local et s'annonce plus longue que prévu, elle peut être basculée en cours de route sans perdre l'historique ni l'état de la branche :\n\n```\n/teleport\n```\n\nDans les deux cas, la session tourne dans son bac à sable pendant que la personne s'occupe d'autre chose, et revient avec une branche ou une pull request à relire dans GitHub. Comme l'agent lit du contenu qui n'est pas sous le contrôle direct de l'invite d'origine — fichiers du dépôt, sortie de commandes, pages web récupérées, commentaires de relecture ou tickets recopiés dans une invite de suivi —, la documentation traite ce contenu comme une source de risque d'injection de prompt et recommande de garder les invites précisément cadrées, de relire le flux d'activité pendant l'exécution, et de s'appuyer sur les protections de branche GitHub, les revues obligatoires et les fichiers `CODEOWNERS` avant de fusionner : ces protections s'appliquent à tout ce que Vibe Code Web pousse, comme à n'importe quelle autre contribution.\n\n## Ce que ça change, et où ça s'arrête\n\nL'apport documenté est de sortir la tâche du poste de travail : plus besoin de garder un terminal ouvert pour une tâche longue, et la possibilité de suivre ou de relancer une session depuis un autre appareil. Les pages consultées ne mentionnent aucune tarification propre à Vibe Code Web, distincte de celle du CLI ou du plan Mistral souscrit.\n\nLes limites sont posées explicitement. Le téléport est présenté comme faisant partie d'un ensemble encore en préversion publique, dont les capacités, les limites et l'interface peuvent changer avant la disponibilité générale. Aucun contrôle d'annulation, d'interruption ou d'arrêt manuel n'est disponible pour l'instant : une session va jusqu'à son terme, jusqu'à expiration, ou jusqu'à erreur. Rien ne survit à la session en dehors de ce qui a été committé dans le dépôt — le bac à sable est supprimé à la fin, donc tout fichier ou résultat intermédiaire resté en dehors du dépôt est perdu. L'activité de la session — invites, messages de l'agent, sortie des commandes, historique des modifications de fichiers — est conservée selon le plan souscrit et la politique de données de Mistral, mais la documentation consultée ne précise pas de durée de rétention exacte. Enfin, la protection contre l'injection de prompt reste largement une discipline à la charge de la personne qui relit : la documentation ne décrit aucune détection automatique de contenu malveillant, seulement des recommandations de vigilance et le filet des protections GitHub existantes.",
+  "tags": [
+    "agents",
+    "codage",
+    "github"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral — Get started with Vibe Code Web",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/get-started",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Vibe Code Web: Sessions",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/sessions",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Vibe Code Web: Sandbox environment",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/sandbox-environment",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Vibe Code Web: Security",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/security",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Vibe Code Web: Limits and lifecycle",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/limits-and-lifecycle",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Vibe Code Web: GitHub repositories and permissions",
+      "url": "https://docs.mistral.ai/vibe/code/vibe-code-web/github-repositories-permissions",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Mistral — Teleport from CLI to web",
+      "url": "https://docs.mistral.ai/vibe/code/cli/teleport-cli-web",
+      "consultee": "2026-09-05"
+    }
+  ],
+  "statut": "publie"
+}
