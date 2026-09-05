@@ -1,0 +1,33 @@
+{
+  "slug": "claude-code-limite-sortie-bash-skill-doctor",
+  "titre": "Claude Code : la sortie des commandes Bash passe à 128 000 caractères",
+  "date": "2026-09-05T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 4 septembre 2026, Anthropic a publié la version 2.1.261 de Claude Code, qui porte à 128 000 caractères le plafond de sortie inline des commandes Bash, contre 30 000 jusque-là, et ajoute un diagnostic dédié aux skills inutilisés.",
+  "corps": "Le 4 septembre 2026, Anthropic a publié la version 2.1.261 de Claude Code, son outil d'agent en ligne de commande. Le journal des modifications officiel liste plus de soixante-dix changements, mais deux d'entre eux touchent directement la façon dont l'outil traite les commandes longues et les skills chargés en mémoire : un nouveau réglage relève le plafond de sortie inline des commandes Bash, et une nouvelle commande audite les skills qui occupent du contexte sans être utilisés.\n\nJusqu'à cette version, la sortie d'une commande Bash réussie était limitée à 30 000 caractères avant d'être basculée dans un fichier de session. La version 2.1.261 introduit le réglage `bashOutputMaxChars` dans `settings.json`, qui permet de relever ce plafond jusqu'à 128 000 caractères. Le changelog présente cet ajout comme un moyen de recevoir « davantage de la sortie des commandes et des tâches en arrière-plan en ligne, avant qu'elle ne soit sauvegardée dans un fichier ».\n\n## Un plafond de sortie qui grimpe à 128 000 caractères\n\nLa page de référence des outils de Claude Code détaille le comportement aux limites. Pour une commande dont le code de sortie est normal, jusqu'à environ 30 000 caractères sont retournés directement dans la conversation ; au-delà, la sortie est sauvegardée dans un fichier de la session, Claude ne recevant que le chemin du fichier et un court aperçu du début, avec une troncature à 64 Mio au maximum. Pour une commande en échec, le seuil inline tombe à 10 000 caractères, et le dépassement produit un extrait tête-et-queue de 10 000 caractères plutôt qu'un chemin de fichier. Une limite physique globale de 5 Go de sortie totale entraîne l'arrêt forcé de la commande, quel que soit le réglage.\n\nAvant cette version, ce comportement se réglait uniquement par la variable d'environnement `BASH_MAX_OUTPUT_LENGTH`, dont le plafond dur est de 150 000 caractères et qui est désormais ignorée dès que `bashOutputMaxChars` est défini dans `settings.json`. Le changelog indique que le même réglage s'applique aussi à la sortie des tâches en arrière-plan, via un second paramètre, `taskOutputMaxChars` ; la page de référence des outils, elle, ne documente pour l'instant que le cas des commandes Bash et ne précise ni valeur par défaut ni plafond pour ce second réglage — la documentation n'a apparemment pas encore rattrapé le changelog sur ce point.\n\n```json\n{\n  \"bashOutputMaxChars\": 64000\n}\n```\n\n## Un diagnostic dédié aux skills\n\nLa même version ajoute la commande `/skill-doctor`, décrite dans le changelog comme un moyen de « montrer quels skills chargés ne sont pas utilisés et ce qu'ils coûtent en contexte, pour pouvoir les élaguer ». Claude Code disposait déjà d'un diagnostic plus large, `/doctor` (alias `/checkup`), qui vérifie entre autres les skills, serveurs MCP et plugins inutilisés par rapport à leur coût en contexte, en plus de la santé de l'installation, des hooks lents ou des fichiers `CLAUDE.md` dupliqués. `/skill-doctor` en isole donc le volet skills dans une commande à part. Au moment de la rédaction, la page de référence des commandes de Claude Code ne liste pas encore `/skill-doctor` séparément de `/doctor` : seul le changelog en fait mention pour l'instant.\n\nLa version ajoute par ailleurs une ligne « Organization policy » dans `/status` et `claude doctor`, qui explique pourquoi la politique d'une organisation n'a pas pu être chargée — par exemple un proxy qui ne relaie pas le bon point de terminaison —, ainsi qu'un indicateur `--append-subagent-system-prompt-file` pour charger le prompt système d'un sous-agent depuis un fichier plutôt que sur la ligne de commande, utile quand ce prompt dépasse la longueur praticable en argument.\n\n## Ce que ça change en pratique\n\nPour une équipe qui fait tourner de longues suites de tests ou des builds verbeux à travers l'outil Bash de Claude Code, le relèvement du plafond à 128 000 caractères réduit les cas où la sortie bascule dans un fichier séparé que Claude doit rouvrir pour continuer son diagnostic : une erreur de compilation ou un test qui échoue loin dans un journal long reste davantage susceptible d'apparaître directement dans le contexte. Le gain dépend cependant de la configuration : le réglage par défaut reste à 30 000 caractères, il faut explicitement relever `bashOutputMaxChars` dans `settings.json` pour en profiter, et le comportement précis de `taskOutputMaxChars` pour les tâches en arrière-plan reste à vérifier une fois que la documentation dédiée sera publiée.\n\n`/skill-doctor` répond à un problème différent : à mesure qu'un projet accumule des skills personnalisés ou installés via des plugins, chacun consomme du contexte dès son chargement, qu'il serve ou non pendant la session. Une commande qui isole ce diagnostic, plutôt que de le noyer dans le rapport plus général de `/doctor`, facilite un nettoyage régulier sans avoir à relire l'ensemble du diagnostic de configuration à chaque fois.",
+  "tags": [
+    "claude-code",
+    "cli",
+    "anthropic",
+    "configuration"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Code — Changelog",
+      "url": "https://code.claude.com/docs/en/changelog",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Claude Code — Tools reference (output limits)",
+      "url": "https://code.claude.com/docs/en/tools-reference",
+      "consultee": "2026-09-05"
+    },
+    {
+      "titre": "Claude Code — Settings reference",
+      "url": "https://code.claude.com/docs/en/settings-reference",
+      "consultee": "2026-09-05"
+    }
+  ],
+  "statut": "publie"
+}
