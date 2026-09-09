@@ -1,0 +1,38 @@
+{
+  "slug": "openai-gpt-image-2-5-sunburst-flare",
+  "titre": "OpenAI lance GPT Image 2.5, avec deux modèles distincts",
+  "date": "2026-09-09T08:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 8 septembre 2026, OpenAI a mis en ligne dans son API deux nouveaux modèles de génération d'images, GPT Image 2.5 Sunburst et Flare, avec deux réglages de qualité inédits, xhigh et max.",
+  "corps": "Le 8 septembre 2026, OpenAI a inscrit dans le journal des modifications de son API la mise en production de deux nouveaux modèles de génération et d'édition d'images : gpt-image-2.5-sunburst et gpt-image-2.5-flare. Les deux sont accessibles directement par l'API Images, aux points d'entrée de création (`v1/images/generations`) et d'édition (`v1/images/edits`), ou comme modèle de l'outil `image_generation` de l'API Responses.\n\nLes deux modèles se substituent à un choix unique. Sunburst est décrit par sa fiche technique comme le modèle « le plus capable pour la génération et l'édition d'images », avec une force particulière dans les cas où la précision d'édition compte le plus, au prix d'un temps de génération plus long. Flare est présenté comme le modèle « le plus rapide pour une génération d'images de qualité au quotidien », pensé comme le choix par défaut pour la majorité des usages. La documentation ne publie ni chiffre de latence ni score de qualité comparatif entre les deux modèles ou face à la génération GPT Image 2 précédente.\n\nLe changement le plus vérifiable tient aux réglages de qualité disponibles. Les deux nouveaux modèles acceptent des valeurs `xhigh` et `max` pour le paramètre `quality`, en plus des valeurs `low`, `medium`, `high` et `auto` déjà connues. Le guide de génération d'images précise que ces deux valeurs « ne sont pas prises en charge par les modèles GPT Image antérieurs », ce qui en fait le premier écart fonctionnel documenté entre GPT Image 2 et GPT Image 2.5, avant même toute comparaison de rendu.\n\n## Deux modèles, un même point d'entrée\n\nLe choix entre Sunburst et Flare se fait par le nom du modèle, que ce soit dans l'API Images ou dans la configuration de l'outil `image_generation` de l'API Responses. Le guide technique donne l'exemple suivant pour sélectionner le modèle et son réglage de qualité au sein de l'outil :\n\n```json\n{\n  \"model\": \"gpt-6-astra\",\n  \"input\": \"Modifie cette photo de produit pour un fond blanc uni, en conservant les proportions.\",\n  \"tools\": [\n    { \"type\": \"image_generation\", \"model\": \"gpt-image-2.5-sunburst\", \"quality\": \"xhigh\" }\n  ]\n}\n```\n\nLe modèle principal de la requête (ici `gpt-6-astra`, lancé le 3 septembre) et le modèle d'image se déclarent séparément : le premier pilote la conversation, le second exécute la génération ou l'édition. Un appel direct à l'API Images, sans passer par l'outil, reste possible en indiquant `gpt-image-2.5-sunburst` ou `gpt-image-2.5-flare` comme valeur du paramètre `model` de la requête.\n\n## Tarification inchangée, calculateur à vérifier\n\nSelon la fiche de chaque modèle, la tarification suit la même grille que GPT Image 2 : 5 $ le million de jetons de texte en entrée (1,25 $ en cache), 8 $ le million de jetons d'image en entrée (2 $ en cache), et 30 $ le million de jetons d'image en sortie ; la sortie texte n'est pas facturée, le modèle ne produisant que des images. Le changelog confirme que les nouveaux réglages `xhigh` et `max` sont proposés « aux niveaux de tarification existants de GPT Image 2 », sans surcoût annoncé pour l'accès à ces qualités supérieures.\n\nUn avertissement figure toutefois sur les deux fiches techniques : le calculateur de coût conçu pour GPT Image 2 « n'estime pas la consommation de jetons de GPT Image 2.5 ». La documentation ne précise pas de calculateur de remplacement ni de méthode de conversion, ce qui laisse peu de moyen de chiffrer à l'avance le coût d'un lot d'images avant de l'exécuter.\n\n## Ce que ça change en pratique\n\nPour une intégration qui appelait jusqu'ici GPT Image 2 sans distinction d'usage, la bascule vers GPT Image 2.5 impose un premier choix : Flare pour un flux à fort volume où la vitesse prime, Sunburst pour un travail d'édition où la fidélité au rendu compte davantage que le délai. La documentation ne donne pas de seuil ou de cas d'usage limite entre les deux ; le choix reste à l'appréciation de qui développe, faute de comparatif chiffré publié par OpenAI à ce jour.\n\nL'ouverture des réglages `xhigh` et `max` élargit la plage de qualité disponible sans changer la structure tarifaire, ce qui simplifie la migration de code existant : remplacer le nom du modèle et, le cas échéant, ajuster le paramètre `quality` suffit à activer les nouveaux réglages. Le point de vigilance porte sur le suivi des coûts : tant qu'aucun calculateur dédié à GPT Image 2.5 n'est publié, une équipe qui budgète ses appels d'API devra mesurer la consommation réelle de jetons sur un échantillon de requêtes plutôt que se fier à un outil d'estimation existant, que la documentation elle-même signale comme inadapté à ces deux modèles.",
+  "tags": [
+    "images",
+    "api",
+    "openai",
+    "tarifs"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Changelog",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-09-09"
+    },
+    {
+      "titre": "OpenAI API — GPT Image 2.5 Sunburst model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.5-sunburst",
+      "consultee": "2026-09-09"
+    },
+    {
+      "titre": "OpenAI API — GPT Image 2.5 Flare model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.5-flare",
+      "consultee": "2026-09-09"
+    },
+    {
+      "titre": "OpenAI API — Image generation guide",
+      "url": "https://developers.openai.com/api/docs/guides/tools-image-generation",
+      "consultee": "2026-09-09"
+    }
+  ],
+  "statut": "publie"
+}
