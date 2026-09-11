@@ -1,0 +1,38 @@
+{
+  "slug": "openai-agents-api-beta-publique",
+  "titre": "OpenAI met son Agents API hébergée en bêta publique",
+  "date": "2026-09-11T08:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "OpenAI ouvre en bêta publique une Agents API hébergée, qui déplace côté serveur la session, l'orchestration et la compaction de contexte d'un agent. Le service est distinct du SDK Agents, exécuté lui côté client depuis août.",
+  "corps": "Le 10 septembre 2026, OpenAI a inscrit dans le journal des modifications de son API la sortie en bêta publique d'une **Agents API** hébergée. Jusqu'ici, la plateforme ne proposait pour construire un agent autonome que le SDK Agents (Agents SDK), une bibliothèque cliente qui s'exécute dans l'application de l'utilisateur et lui laisse la charge de la boucle d'exécution, du stockage de l'historique et de l'infrastructure de calcul.\n\nAvec l'Agents API, cette boucle passe côté serveur. D'après la documentation technique, OpenAI fait tourner une instance managée du même harnais logiciel que celui qui exécute Codex : le modèle, les outils et la boucle d'appel d'outils s'exécutent sur l'infrastructure d'OpenAI, qui prend en charge la session, l'orchestration, la compaction automatique du contexte et la reprise après interruption. L'application n'a plus qu'à envoyer des tâches et à recevoir des événements en retour.\n\nL'accès se fait par un en-tête de bêta, `OpenAI-Beta: agents=v1`, sur un nouveau point d'entrée, `POST /v1/agents/sessions`. La documentation consultée ne mentionne aucune liste d'attente : la fonctionnalité est ouverte, en bêta, à l'ensemble des développeurs disposant d'une clé API.\n\n## Ce que le service gère, ce que l'application garde\n\nLa documentation définit quatre notions. L'**agent** rassemble le modèle, les instructions, les outils et les serveurs MCP disponibles. L'**environnement** est le bac à sable optionnel où l'agent accède à des fichiers, charge des skills et exécute des commandes. La **session** est une instance durable de cet agent, qui travaille sur des tâches et répond aux entrées reçues au fil du temps. Le **harnais** (harness) désigne l'instance Codex hébergée par OpenAI qui fait tourner le modèle et la boucle d'outils, et qui maintient la session.\n\nTrois types d'environnement sont documentés. `none` convient à un agent qui s'appuie uniquement sur des outils externes, sans avoir besoin de calcul ni de fichiers. `openai_hosted` délègue à OpenAI le provisionnement d'un bac à sable managé. `self_hosted` fait tourner l'exécution sur une infrastructure fournie par le développeur, qui garde la main sur le calcul mais laisse OpenAI gérer la session et l'orchestration.\n\nLe service prend aussi en charge l'orchestration multi-agent : la documentation évoque la possibilité de découper une tâche en sous-tâches confiées à des sous-agents, avec un nombre maximal de sous-agents concurrents configurable. Les outils connectables cités incluent l'appel d'outils programmatique, les serveurs MCP et la recherche web. Deux façons de suivre la progression sont proposées : le streaming d'événements en direct, ou des webhooks pour recevoir les changements d'état de façon asynchrone.\n\n## Ce que ça change en pratique\n\nSur la tarification, la documentation est explicite : il n'existe pas de frais propre à l'Agents API. L'usage du modèle est facturé au tarif standard de l'API pour le modèle choisi, l'usage des outils OpenAI au tarif standard de ces outils, et un bac à sable hébergé par OpenAI au tarif standard des conteneurs. Un exemple de configuration montré dans la documentation utilise le modèle gpt-6-astra, lancé début septembre.\n\nAnthropic et Google DeepMind proposaient déjà, avant cette sortie, un service comparable : des agents gérés dans un bac à sable, avec sessions à état ; Anthropic y ajoute un budget de dépense plafonnable, Google DeepMind limite l'accès à deux agents documentés en disponibilité restreinte. OpenAI comble ainsi un écart avec ces deux acteurs, en ne s'appuyant plus seulement sur un SDK exécuté côté client.\n\nLa documentation prend soin de distinguer les sessions de l'Agents API des sessions du SDK Agents et des conversations de l'API Responses : ce sont, dans ses propres termes, des ressources différentes, qui ne se substituent pas automatiquement l'une à l'autre. Une application déjà construite sur le SDK Agents ou sur Responses ne bascule donc pas vers l'Agents API par un simple changement de point d'entrée ; elle doit migrer sa gestion de session vers le nouveau modèle. Pour une tâche longue, qui doit survivre à des heures ou des jours d'exécution avec reprise automatique, cela évite en revanche d'avoir à écrire et maintenir soi-même un serveur d'orchestration au-dessus de l'API Responses ou du SDK Agents.",
+  "tags": [
+    "agents",
+    "api",
+    "openai",
+    "beta"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Changelog (entrée du 10 septembre 2026)",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-09-11"
+    },
+    {
+      "titre": "OpenAI API — Agents API, overview",
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/overview",
+      "consultee": "2026-09-11"
+    },
+    {
+      "titre": "OpenAI API — Agents API, architecture",
+      "url": "https://developers.openai.com/api/docs/guides/agents-api/architecture",
+      "consultee": "2026-09-11"
+    },
+    {
+      "titre": "OpenAI API — Agents SDK (guide de comparaison)",
+      "url": "https://developers.openai.com/api/docs/guides/agents",
+      "consultee": "2026-09-11"
+    }
+  ],
+  "statut": "publie"
+}
