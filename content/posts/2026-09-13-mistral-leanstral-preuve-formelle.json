@@ -1,0 +1,45 @@
+{
+  "slug": "mistral-leanstral-preuve-formelle",
+  "titre": "Leanstral 1.5, le modèle Mistral qui prouve du code Lean 4",
+  "date": "2026-09-13T08:00:00+02:00",
+  "type": "explication",
+  "labo": "mistral",
+  "fonctionnalite": "preuve formelle avec leanstral",
+  "chapeau": "Leanstral 1.5 est un modèle ouvert de Mistral spécialisé dans la preuve formelle de code Lean 4, validée par le vérificateur plutôt que par de simples tests. Gratuit, il exige des budgets de jetons très supérieurs à une génération de code classique.",
+  "corps": "## Ce que c'est\n\nLeanstral 1.5 est un modèle publié par Mistral et spécialisé dans un seul domaine : la preuve formelle en Lean 4. Lean 4 est un assistant de preuve, un langage et un vérificateur qui accepte ou rejette mécaniquement une démonstration mathématique ou une spécification de programme, sans zone grise. Un modèle de langage généraliste peut produire du code qui *semble* correct ; Leanstral produit des preuves que le noyau de Lean 4 valide ou refuse, ce qui élimine l'ambiguïté du « ça a l'air bon ».\n\nLe modèle a une architecture de mélange d'experts : 119 milliards de paramètres au total, dont 6,5 milliards actifs par jeton, répartis sur 128 experts dont 4 sont activés à chaque passage, selon sa fiche sur Hugging Face. Il succède à une première version publiée en mars 2026 sous l'identifiant `labs-leanstral-2603`, désormais retirée. Cette version 1.5, identifiée `labs-leanstral-1-5` dans la documentation et le journal des changements de Mistral, apporte un mélange de données de fine-tuning supervisé amélioré et un raisonnement long contexte étendu.\n\nLe cas d'usage documenté n'est pas la démonstration de théorèmes abstraits pour elle-même : Mistral présente Leanstral comme un outil de vérification appliqué à du code réel, dans des dépôts Lean 4 existants, pour transformer une relecture humaine coûteuse en une vérification automatisée et vérifiable par machine.\n\n## Comment ça marche\n\nTrois façons d'accéder au modèle sont documentées.\n\n**Via l'agent Mistral Vibe**, en ligne de commande : après installation du CLI (`uv tool install mistral-vibe`, puis `vibe --setup`), la commande `/leanstral` configure l'agent, et `vibe --agent lean` le lance. Mistral recommande d'ajouter un serveur MCP dédié au langage Lean, `lean-lsp-mcp`, dans le fichier de configuration `~/.vibe/config.toml`, pour donner à l'agent accès aux outils du serveur de langage Lean (autocomplétion, état des objectifs de preuve, diagnostics) :\n\n```toml\n[[mcp_servers]]\nname = \"lean-lsp\"\ntransport = \"stdio\"\ncommand = \"uvx\"\nargs = [\"lean-lsp-mcp\"]\ntool_timeout_sec = 600\n```\n\n**Via l'API de complétion de chat**, comme n'importe quel autre modèle Mistral : il suffit de passer l'identifiant `labs-leanstral-1-5` dans le champ `model` d'une requête vers `/v1/chat/completions`. La fiche du modèle indique qu'il prend en charge la complétion de chat, l'appel de fonctions, les agents et conversations, et les sorties structurées, au même titre que les autres modèles de la gamme.\n\n```bash\ncurl https://api.mistral.ai/v1/chat/completions \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization: Bearer $MISTRAL_API_KEY\" \\\n  -d '{\n    \"model\": \"labs-leanstral-1-5\",\n    \"messages\": [\n      {\n        \"role\": \"user\",\n        \"content\": \"Prouve que la fonction de décodage zigzag ne déborde pas sur U64.MAX.\"\n      }\n    ]\n  }'\n```\n\n**En hébergement local**, les poids sont publiés sous licence Apache 2.0 sur Hugging Face (`mistralai/Leanstral-1.5-119B-A6B`), avec un déploiement via vLLM documenté sur la fiche du modèle, par exemple `vllm serve mistralai/Leanstral-1.5-119B-A6B --max-model-len 200000 --tensor-parallel-size 4`. Un point de vigilance : la fiche Hugging Face recommande une longueur de contexte locale de 200 000 jetons au maximum, alors que la documentation de l'API annonce une fenêtre de contexte de 256 000 jetons et une sortie maximale de 128 000 jetons pour le même modèle. Les deux chiffres proviennent de pages différentes et ne se recoupent pas exactement ; aucune des deux pages ne l'explique.\n\n## En pratique\n\nUne équipe qui maintient une bibliothèque bas niveau, par exemple un décodeur d'entiers variables comme le projet `datrs/varinteger` sur GitHub, peut faire vérifier formellement les propriétés critiques de son code (absence de débordement, cas limites sur les valeurs maximales d'un entier) plutôt que de s'appuyer uniquement sur des tests unitaires qui ne couvrent jamais tous les cas. C'est exactement le type d'usage que Mistral met en avant dans son annonce : en exécutant ce processus de vérification sur 57 dépôts Lean 4 réels, l'entreprise rapporte que 47 propriétés violées ont été détectées, dont 11 correspondaient à de véritables anomalies et 5 n'avaient jamais été signalées sur GitHub. L'exemple cité est un bug dans la fonction de signe du décodage zigzag de `datrs/varinteger` : avec une entrée égale à `Std.U64.MAX`, l'expression `value + 1` déborde, provoquant un plantage en mode debug et une corruption silencieuse en mode release.\n\nSur les bancs d'essai mathématiques, Mistral rapporte que Leanstral 1.5 sature entièrement miniF2F (100 %), résout 587 des 672 problèmes de PutnamBench, et atteint 87 et 34 problèmes respectivement sur FATE-H et FATE-X. Sur FLTEval, le score pass@1 passe de 21,9 à 28,9 et le pass@8 de 31,9 à 43,2, un résultat que Mistral présente comme supérieur au 39,6 de Claude Opus 4.6 sur cette même mesure, pour un coût annoncé sept fois moindre.\n\nLe prix affiché sur la fiche du modèle est « gratuit », mais la performance dépend directement du budget de jetons alloué à chaque preuve. Mistral illustre une montée en charge continue : 44 problèmes résolus avec un budget de 50 000 jetons, 244 à 200 000, 493 au million, et 587 à 4 millions de jetons. Un exemple de preuve portant sur une propriété d'arbre AVL a nécessité plus de 2,7 millions de jetons répartis sur 22 « compactions », un mécanisme de résumé du contexte qui permet de poursuivre un raisonnement au-delà de la fenêtre de contexte native. Gratuit ne signifie donc pas instantané : un budget de jetons de cet ordre implique un temps de calcul et une latence largement supérieurs à une génération de code ordinaire.\n\n## Ce que ça change, et où ça s'arrête\n\nCe que Leanstral change, c'est la nature de la garantie obtenue : au lieu d'un code qui a été relu ou testé, on obtient une preuve vérifiée mécaniquement par le noyau de Lean 4, ce qui a un sens concret dans des domaines où une erreur silencieuse coûte cher, comme les bibliothèques d'encodage bas niveau ou les mathématiques de recherche.\n\nLes limites documentées sont nombreuses. Le modèle ne couvre qu'un seul langage et un seul cas d'usage, la preuve formelle en Lean 4 : ce n'est pas un modèle de code généraliste, et rien dans sa documentation ne suggère qu'il remplace Mistral Large ou Codestral pour des tâches ordinaires. Son statut est « Public Preview », et le journal des changements de Mistral indique que `labs-leanstral-1-5` sera lui-même retiré le 30 septembre 2026, comme l'a été son prédécesseur de mars ; toute intégration doit donc suivre le journal des changements pour anticiper un changement d'identifiant. Le coût réel n'est pas nul non plus : la documentation ne précise ni quota ni limite de débit spécifique à ce modèle, mais les chiffres de mise à l'échelle publiés par Mistral montrent qu'une preuve non triviale peut consommer des millions de jetons et plusieurs cycles de compaction du contexte, ce qui a un coût en temps même si le prix affiché est de zéro. Enfin, la divergence entre la longueur de contexte annoncée par l'API (256 000 jetons) et celle recommandée pour un déploiement local via vLLM (200 000 jetons) n'est expliquée nulle part dans les pages consultées, ce qui invite à tester la limite réelle avant de la présumer.\n",
+  "tags": [
+    "leanstral",
+    "lean4",
+    "preuve-formelle",
+    "modeles",
+    "vibe"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral Docs — Leanstral 1.5 (fiche modèle)",
+      "url": "https://docs.mistral.ai/models/leanstral-1-5",
+      "consultee": "2026-09-13"
+    },
+    {
+      "titre": "Mistral Docs — Journal des changements (changelog)",
+      "url": "https://docs.mistral.ai/resources/changelogs",
+      "consultee": "2026-09-13"
+    },
+    {
+      "titre": "Mistral AI — Leanstral 1.5: Proof Abundance for All",
+      "url": "https://mistral.ai/news/leanstral-1-5/",
+      "consultee": "2026-09-13"
+    },
+    {
+      "titre": "Hugging Face — mistralai/Leanstral-1.5-119B-A6B",
+      "url": "https://huggingface.co/mistralai/Leanstral-1.5-119B-A6B",
+      "consultee": "2026-09-13"
+    },
+    {
+      "titre": "Mistral Docs — Chat Endpoints (API reference)",
+      "url": "https://docs.mistral.ai/api/endpoint/chat",
+      "consultee": "2026-09-13"
+    }
+  ],
+  "statut": "publie"
+}
