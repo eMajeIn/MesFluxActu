@@ -1,0 +1,28 @@
+{
+  "slug": "claude-code-monitor-delai-obligatoire",
+  "titre": "Claude Code : l'outil Monitor perd son option de veille illimitée",
+  "date": "2026-09-15T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "La version 2.1.271 de Claude Code, publiée le 14 septembre 2026, remplace l'option `persistent` de l'outil Monitor par une échéance obligatoire : cinq minutes par défaut, trente au maximum, dix en exécution à un seul prompt.",
+  "corps": "Anthropic a publié le 14 septembre 2026 la version 2.1.271 de Claude Code. Le changelog officiel liste plusieurs dizaines de changements, mais un seul touche au fonctionnement de l'outil Monitor, celui que Claude utilise pour surveiller en tâche de fond un journal, une exécution d'intégration continue, un répertoire ou un flux WebSocket sans interrompre la conversation en cours.\n\nJusqu'à cette version, une veille (watch) lancée par Monitor pouvait tourner sans limite de durée grâce à une option nommée `persistent`. Le changelog de la 2.1.271 indique que cette option disparaît : toute veille se voit désormais imposer une échéance, au terme de laquelle elle s'arrête d'elle-même et notifie Claude pour qu'il la relance s'il le juge nécessaire.\n\n## Le nouveau régime des échéances\n\nLa documentation technique de Claude Code, mise à jour avec cette version, précise les trois bornes qui s'appliquent maintenant à chaque veille Monitor : cinq minutes par défaut, trente minutes au maximum, et dix minutes au maximum dans une exécution non interactive lancée avec un seul prompt via l'option `-p`. La durée se règle avec le paramètre `timeout_ms`, dans la limite de ces plafonds.\n\nCes bornes s'appliquent aussi bien à une veille fondée sur une commande — Claude écrit un script, le lance en arrière-plan et reçoit chaque ligne produite au fil de l'exécution — qu'à une veille fondée sur une source WebSocket, où le même paramètre `timeout_ms` fixe l'échéance de la connexion. Dans ce second cas, la documentation précise qu'un message de plus d'un mébioctet met également fin à la veille, tout comme la fermeture du socket par le serveur distant.\n\nÀ l'échéance, le comportement est le même dans tous les cas : la veille s'arrête, et Claude reçoit un seul avis. Charge à lui de la relancer s'il estime que la surveillance reste utile. Rien n'empêche un redémarrage immédiat, mais il n'est plus automatique : c'est Claude qui doit en décider à chaque échéance.\n\n## Ce qui ne change pas\n\nL'outil Monitor garde par ailleurs son fonctionnement habituel. En mode automatique, ses commandes passent par le même classificateur de sécurité que les commandes Bash, puisque les règles d'autorisation propres à Monitor sont mises de côté dans ce mode et que chaque commande est revue au même titre qu'une commande Bash. Une veille peut toujours être arrêtée avant son échéance en demandant à Claude de l'annuler, en fermant la session, ou via l'outil `TaskStop` ; arrêter un sous-agent met aussi fin aux veilles qu'il avait lancées. L'outil reste par ailleurs indisponible sur Amazon Bedrock, sur la plateforme d'agents de Google Cloud, sur Microsoft Foundry, ainsi que dans les sessions où la télémétrie est désactivée.\n\n## Ce que ça change en pratique\n\nConcrètement, un développeur qui demandait à Claude Code de surveiller une build longue ou un flux de journaux pendant plusieurs heures pouvait jusqu'ici laisser la veille tourner sans y repenser, tant que la session restait ouverte. Ce n'est plus le cas : passé trente minutes au grand maximum — dix en exécution `-p` à un seul prompt — la veille s'arrête et attend que Claude la relance. Pour un job d'intégration continue qui dépasse cette durée, ou pour un flux d'événements qu'on veut suivre sur une journée entière, cela se traduit par des redémarrages répétés plutôt que par une veille continue.\n\nLa documentation ne motive pas explicitement ce changement, mais il va dans le même sens que d'autres bornes déjà en place sur cet outil, comme la limite de taille d'un message WebSocket évoquée plus haut : empêcher qu'une tâche de fond continue de consommer des ressources sans qu'un signal ne revienne périodiquement vérifier si elle sert encore à quelque chose.",
+  "tags": [
+    "claude-code",
+    "monitor",
+    "anthropic",
+    "outils"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Code — Changelog (2.1.271)",
+      "url": "https://code.claude.com/docs/en/changelog#2-1-271",
+      "consultee": "2026-09-15"
+    },
+    {
+      "titre": "Claude Code — Tools reference (Monitor)",
+      "url": "https://code.claude.com/docs/en/tools-reference",
+      "consultee": "2026-09-15"
+    }
+  ],
+  "statut": "publie"
+}
