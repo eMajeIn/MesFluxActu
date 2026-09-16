@@ -1,0 +1,48 @@
+{
+    "slug": "gemini-3-8-live-disponibilite-generale",
+    "titre": "Gemini 3.8 Live et Extended Thinking passent en disponibilité générale",
+    "date": "2026-09-16T09:00:00+02:00",
+    "type": "actu",
+    "labo": "gemini",
+    "chapeau": "Google DeepMind généralise, le 15 septembre 2026, deux modèles audio-to-audio pour l'API Live : Gemini 3.8 Live et Gemini 3.8 Live Extended Thinking, avec une fenêtre de contexte quadruplée par rapport au modèle qu'ils remplacent.",
+    "corps": "Google DeepMind a mis en disponibilité générale, le 15 septembre 2026, deux nouveaux modèles pour l'API Live de Gemini : `gemini-3.8-live` et `gemini-3.8-live-extended-thinking`. Tous deux traitent l'audio en entrée et en sortie, pour des applications de dialogue vocal en temps réel. Ils remplacent `gemini-3.1-flash-live-preview` comme option recommandée par défaut, ce dernier restant disponible mais présenté comme un modèle antérieur dans la documentation.\n\n`gemini-3.8-live` est décrit par Google comme l'option par défaut pour la plupart des expériences d'agent vocal à faible latence, sans délai de raisonnement. `gemini-3.8-live-extended-thinking` cible les échanges qui demandent un raisonnement plus poussé en arrière-plan pendant que la conversation continue. Les deux modèles sont accessibles aux développeurs via l'API Gemini et Google AI Studio ; côté entreprise, ils restent en aperçu privé dans Gemini Enterprise. Pour le grand public, `gemini-3.8-live` équipe Search Live, et `gemini-3.8-live-extended-thinking` alimente l'application Gemini Live ainsi que, pour les abonnés Google AI Pro et Ultra, certains usages dans Google Workspace.\n\n## Le contexte quadruple, le tarif ne bouge pas\n\nLa documentation technique consultée le jour de l'annonce indique une fenêtre de contexte de 131 072 jetons en entrée et 65 536 jetons en sortie pour les deux nouveaux modèles. Le guide de l'API Live situe cette limite à 128 000 jetons pour les modèles à sortie audio native, contre 32 000 jetons pour les autres modèles de l'API Live - dont `gemini-3.1-flash-live-preview`, jusqu'ici recommandé par défaut. La page de tarification affiche pour les deux nouveaux modèles les mêmes montants que ceux déjà en vigueur pour `gemini-3.1-flash-live-preview` : 0,75 dollar par million de jetons en entrée de texte, 3,00 dollars (ou 0,005 dollar la minute) en entrée audio, 1,00 dollar (ou 0,002 dollar la minute) en entrée image ou vidéo, puis 4,50 dollars en sortie texte et 12,00 dollars (ou 0,018 dollar la minute) en sortie audio.\n\nLes limites de durée de session, elles, ne changent pas : une session audio seule reste plafonnée à 15 minutes, une session combinant audio et vidéo à 2 minutes. La documentation continue par ailleurs de désigner l'API Live dans son ensemble comme « in preview », y compris pour ces deux modèles désormais qualifiés de généralement disponibles (GA) dans le changelog.\n\n## Raisonnement natif d'un côté, asynchrone imposé de l'autre\n\n`gemini-3.8-live` prend en charge nativement ce que la documentation nomme le raisonnement entrelacé (interleaved reasoning), sans paramètre `thinkingLevel` à renseigner - la documentation précise que ce paramètre doit être omis pour ce modèle. `gemini-3.8-live-extended-thinking` fonctionne à l'inverse avec un `thinkingLevel` réglable sur trois valeurs, faible, moyenne ou élevée (la valeur minimale n'est pas prise en charge), pour ajuster l'effort de raisonnement en arrière-plan pendant l'échange vocal.\n\nL'appel de fonction change aussi de comportement par défaut. Sur `gemini-3.8-live`, le mode asynchrone (`behavior: NON_BLOCKING`) est la valeur par défaut, mais un mode bloquant reste disponible pour compatibilité. Sur `gemini-3.8-live-extended-thinking`, seul le mode asynchrone est pris en charge : le modèle ne propose plus de mode bloquant, ce qui impose d'adapter le code client s'il suppose encore qu'une fonction appelée met la conversation en pause le temps de sa réponse.\n\nDans son billet d'annonce, Google DeepMind revendique pour `gemini-3.8-live-extended-thinking` la première place de l'indice de qualité speech-to-speech d'Artificial Analysis, avec un score de 82,6, ainsi que 97,7 % sur Big Bench Audio et 68,6 % sur le test τ-Voice de Sierra dédié aux tâches agentiques. `gemini-3.8-live` obtient de son côté la deuxième place de la Speech Agent Arena, sans que Google ne publie le protocole détaillé de ces classements.\n\n## Ce que ça change en pratique\n\nPour une équipe qui exploite déjà `gemini-3.1-flash-live-preview` sur un agent vocal, la migration vers `gemini-3.8-live` ne modifie ni les tarifs au jeton ni les limites de durée de session, mais quadruple la fenêtre de contexte disponible avant qu'une compression ne devienne nécessaire - utile pour des conversations plus longues sans perte du fil au cours de l'échange. Le raisonnement entrelacé, natif et sans paramètre à régler, remplace ce qui demandait jusqu'ici un enchaînement manuel de modèles pour intercaler une étape de réflexion dans un dialogue vocal.\n\nLe compromis se situe du côté de l'intégration technique pour qui choisit `gemini-3.8-live-extended-thinking` : l'abandon du mode bloquant pour les appels de fonction oblige à gérer soi-même l'attente d'un résultat asynchrone pendant que la conversation continue, plutôt que de compter sur une pause automatique du dialogue. Et malgré leur statut de disponibilité générale, les deux modèles restent rattachés à une API Live que la documentation elle-même continue de désigner comme en aperçu - une mention qui, pour un déploiement en production, mérite d'être suivie dans le temps plutôt que tenue pour définitive.",
+    "tags": [
+        "live api",
+        "audio",
+        "modèles",
+        "raisonnement"
+    ],
+    "sources": [
+        {
+            "titre": "Google — Introducing Gemini 3.8 Live and Gemini 3.8 Live Extended Thinking",
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/",
+            "consultee": "2026-09-16"
+        },
+        {
+            "titre": "Gemini API — Release notes / changelog",
+            "url": "https://ai.google.dev/gemini-api/docs/changelog",
+            "consultee": "2026-09-16"
+        },
+        {
+            "titre": "Gemini API — Gemini 3.8 Live model page",
+            "url": "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live",
+            "consultee": "2026-09-16"
+        },
+        {
+            "titre": "Gemini API — Gemini 3.8 Live Extended Thinking model page",
+            "url": "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live-extended-thinking",
+            "consultee": "2026-09-16"
+        },
+        {
+            "titre": "Gemini API — Live API guide",
+            "url": "https://ai.google.dev/gemini-api/docs/live-guide",
+            "consultee": "2026-09-16"
+        },
+        {
+            "titre": "Gemini API — Pricing",
+            "url": "https://ai.google.dev/gemini-api/docs/pricing",
+            "consultee": "2026-09-16"
+        }
+    ],
+    "statut": "publie"
+}
