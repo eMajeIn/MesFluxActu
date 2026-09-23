@@ -1,0 +1,34 @@
+{
+  "slug": "mistral-plafond-de-depenses",
+  "titre": "Mistral : fixer un plafond de dépenses mensuel par programme",
+  "date": "2026-09-23T11:00:00+02:00",
+  "type": "explication",
+  "labo": "mistral",
+  "fonctionnalite": "plafond de dépenses",
+  "chapeau": "L'Admin API de Mistral permet de fixer, par un simple appel, un plafond mensuel de dépenses pour une organisation entière. Au-delà, l'accès à l'API est suspendu jusqu'au mois suivant ou jusqu'à intervention d'un administrateur.",
+  "corps": "## Ce que c'est\n\nL'Admin API de Mistral permet de fixer un plafond de dépenses mensuel au niveau d'une Organisation. Une fois ce plafond atteint, l'accès à l'API est suspendu jusqu'au début du mois suivant, ou jusqu'à ce qu'un administrateur relève la limite manuellement. C'est un garde-fou financier, à ne pas confondre avec les limites de débit : celles-ci bornent un flux de requêtes ou de jetons par seconde, alors que le plafond de dépenses borne une somme facturée sur un mois, dans la devise de facturation de l'organisation.\n\nLe réglage se pilote par programme via un point de terminaison dédié de l'Admin API, distinct de la gestion des utilisateurs, des clés ou des groupes déjà couverte par ailleurs sur ce point d'entrée.\n\n## Comment ça marche\n\nLe point de terminaison est `https://api.mistral.ai/v1/admin/spend-limit`. En lecture, un appel GET renvoie le plafond actuel ; en écriture, un appel POST avec un corps JSON le modifie. L'authentification se fait par une clé d'administration dédiée, créée dans le Backoffice, transmise dans l'en-tête `x-api-key` — et non dans l'en-tête `Authorization` habituel des appels d'inférence.\n\nLe corps de la requête d'écriture accepte deux champs :\n\n- `amount` : un nombre entier représentant le plafond mensuel, exprimé dans la devise de facturation de l'organisation. La valeur `500` signifie 500 unités de cette devise, pas 500 centimes ;\n- `no_monthly_limit` : un booléen qui, mis à `true`, supprime tout plafond.\n\nLe plafond peut aussi être fixé au niveau d'un espace de travail (*workspace*) plutôt qu'au niveau de l'organisation entière, mais ce réglage-là n'existe que dans le panneau d'administration : aucun point de terminaison documenté ne permet de le manipuler par programme. Un plafond de workspace ne peut de toute façon jamais dépasser le plafond fixé pour l'organisation qui le contient, et par défaut un espace de travail n'a aucun plafond propre — seule l'organisation qui l'héberge en a un, tant qu'elle n'a pas explicitement demandé sa suppression via `no_monthly_limit`.\n\nCette asymétrie entre organisation et espace de travail structure toute la fonctionnalité : elle donne un levier programmable à l'échelle globale, là où le découpage plus fin entre équipes reste un geste manuel réservé à un administrateur dans l'interface. Une organisation qui gère plusieurs espaces de travail correspondant à des équipes ou des clients internes différents ne peut donc pas répartir automatiquement un budget global entre eux par appel API : elle peut seulement borner la somme totale, puis répartir la vigilance sur chaque espace à la main.\n\n## En pratique\n\nUne équipe qui fait tourner des jobs de traitement par lots ou de fine-tuning déclenchés automatiquement veut se prémunir contre une facture incontrôlée en cas de script défaillant ou de boucle d'appels erronée. Plutôt que de surveiller la facturation à la main, elle fixe un plafond mensuel par programme, par exemple dans le cadre d'un script de provisionnement qui configure automatiquement chaque nouvelle organisation cliente d'une plateforme qui revend l'accès à l'API Mistral à ses propres utilisateurs : à la création du compte, le script appelle `POST /v1/admin/spend-limit` avec le plafond correspondant à l'offre souscrite, sans qu'un humain n'ait à ouvrir le Backoffice pour chaque nouveau client.\n\n```bash\ncurl -X POST https://api.mistral.ai/v1/admin/spend-limit \\\n  -H \"Content-Type: application/json\" \\\n  -H \"x-api-key: $ADMIN_API_KEY\" \\\n  -d '{\"amount\": 500, \"no_monthly_limit\": false}'\n```\n\nPour lire le plafond actuellement configuré :\n\n```bash\ncurl https://api.mistral.ai/v1/admin/spend-limit \\\n  -H \"x-api-key: $ADMIN_API_KEY\"\n```\n\n## Ce que ça change, et où ça s'arrête\n\nLe principal risque documenté n'est pas financier mais opérationnel : dépasser le plafond suspend l'accès API de l'organisation entière jusqu'au mois suivant, ou jusqu'à intervention manuelle d'un administrateur. Un plafond mal dimensionné en production peut donc couper un service en pleine activité plutôt que de simplement freiner une dépense excessive — c'est un compromis à évaluer avant de fixer une valeur basse par précaution.\n\nLa documentation signale aussi qu'un défaut de paiement d'une facture récente peut affecter l'accès indépendamment du plafond configuré : le plafond de dépenses et la situation de facturation sont deux mécanismes distincts qui peuvent l'un et l'autre couper l'accès. Une organisation peut donc se retrouver bloquée sans avoir atteint son plafond, et inversement rester en dessous de son plafond sans que cela garantisse la continuité de l'accès si une facture n'a pas été honorée.\n\nEnfin, la granularité par programme s'arrête au niveau de l'organisation : un plafond par espace de travail se règle uniquement à la main dans le Backoffice, ce qui limite l'automatisation possible pour une organisation qui voudrait répartir un même budget global entre plusieurs équipes ou projets internes via des espaces de travail séparés. Aucun coût en jetons n'est associé à cet appel d'administration : il ne déclenche aucune inférence, seulement une lecture ou une écriture de configuration. La contrepartie de la simplicité du point de terminaison — deux champs, un seul niveau de portée — est donc son manque de finesse : il traite la dépense de toute l'organisation comme un seul chiffre, sans distinction entre un usage d'inférence classique, un job de fine-tuning ou un traitement par lots, et sans alerte intermédiaire documentée avant que le plafond ne soit atteint et l'accès coupé.\n",
+  "tags": [
+    "administration",
+    "facturation",
+    "api",
+    "organisation"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral — Usage metrics et spend-limit (Admin API)",
+      "url": "https://docs.mistral.ai/admin/admin-api/usage-metrics",
+      "consultee": "2026-09-23"
+    },
+    {
+      "titre": "Mistral — Usage limits",
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+      "consultee": "2026-09-23"
+    },
+    {
+      "titre": "Mistral — Workspaces usage limits",
+      "url": "https://docs.mistral.ai/admin/workspaces/usage-limits",
+      "consultee": "2026-09-23"
+    }
+  ],
+  "statut": "publie"
+}
