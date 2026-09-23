@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-claude-opus-5-5",
+  "titre": "Anthropic lance Claude Opus 5.5, moins cher et recommandé par défaut",
+  "date": "2026-09-23T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a mis en ligne Claude Opus 5.5 le 22 septembre 2026, avec un tarif d'entrée en baisse de 20 % et un coût d'usage type réduit de 40 % face à Opus 5. Le modèle devient la recommandation par défaut d'Anthropic pour la plupart des usages.",
+  "corps": "Anthropic a mis en ligne Claude Opus 5.5 le 22 septembre 2026, un modèle qui remplace Claude Opus 5 comme recommandation par défaut de l'entreprise « pour la plupart des charges de travail », selon la page de comparaison des modèles publiée le même jour. Le tarif d'entrée passe de 5 $ à 4 $ le million de jetons et celui de sortie de 25 $ à 20 $, soit une baisse de 20 % sur les deux axes. Anthropic va plus loin dans son billet d'annonce : sur des charges de travail types, à réglages par défaut, l'entreprise annonce un coût réduit de 40 % par rapport à Opus 5, un chiffre qui intègre aussi une consommation de jetons plus économe sur les tâches agentiques, et pas seulement la baisse tarifaire.\n\nSur le plan technique, Opus 5.5 reprend les caractéristiques d'Opus 5 : une fenêtre de contexte d'un million de jetons, une sortie maximale de 128 000 jetons et une réflexion adaptative activée en permanence, sans possibilité de la désactiver. La documentation situe la date de fiabilité des connaissances du modèle en juin 2026 et fixe son identifiant d'API à claude-opus-5-5, disponible sur la Claude API, Claude Platform on AWS, Amazon Bedrock, Google Cloud et Microsoft Foundry. Anthropic s'engage à ne pas le retirer avant le 22 septembre 2027.\n\nSur les tests internes cités dans l'annonce, Opus 5.5 passe de 52,3 % à 66,4 % sur Terminal-Bench 4.0, de 48,0 % à 54,4 % sur FrontierCode v1.1, et de 1708 à 1846 points Elo sur GDPval-AA v2.1, par rapport à Opus 5. Anthropic indique aussi une génération de sortie 30 % plus rapide, et affirme que le modèle se comporte au niveau de Claude Fable 5.1 sur la plupart des tâches tout en coûtant 40 % moins cher à l'usage qu'Opus 5.\n\n## Une remise supplémentaire sur les jetons mis en cache\n\nAu-delà de la baisse du tarif de base, la grille de prix d'Opus 5.5 modifie un paramètre resté stable depuis plusieurs générations de modèles Claude : le multiplicateur appliqué aux lectures de cache. Sur la quasi-totalité des modèles Claude actuels, un jeton relu depuis le cache coûte 10 % du tarif d'entrée standard. Sur Opus 5.5, ce taux tombe à 5 %, soit 0,20 $ le million de jetons au lieu des 0,50 $ qu'aurait donné le taux habituel appliqué à son propre tarif d'entrée. Les écritures en cache suivent la même baisse relative que le tarif de base : 5 $ pour une écriture de cinq minutes et 8 $ pour une heure, contre 6,25 $ et 10 $ sur Opus 5. Le traitement par lots (Batch API) descend à 2 $ en entrée et 10 $ en sortie le million de jetons, contre 2,50 $ et 12,50 $. Le mode rapide, en aperçu, reste la voie la plus onéreuse à 8 $ en entrée et 40 $ en sortie, contre 10 $ et 50 $ sur Opus 5 — un tarif premium proposé uniquement sur la Claude API de première partie, pas sur les plateformes cloud partenaires.\n\n## Deux garde-fous qui redirigent une partie des usages\n\nL'annonce détaille aussi deux restrictions liées aux capacités du modèle. Parce qu'Opus 5.5 affiche, selon Anthropic, des capacités en cybersécurité proches de celles de Claude Fable 5.1, l'entreprise lui applique des garde-fous comparables : la plupart des tâches de cybersécurité envoyées à Opus 5.5 sont automatiquement redirigées vers Claude Opus 4.8, sans que l'utilisateur ait à en faire la demande. Pour éviter cette redirection sur des travaux de recherche légitimes en biologie, il faut s'inscrire au Life Sciences Verification Program, le programme de vérification annoncé la semaine précédente pour l'accès aux capacités les plus poussées des modèles Anthropic dans ce domaine. Sur le terrain de la sécurité comportementale, Anthropic indique qu'Opus 5.5 obtient le meilleur score de tous les modèles testés à ce jour lors de son audit comportemental automatisé, le test d'alignement le plus complet que l'entreprise fasse passer en interne.\n\n## Ce que ça change en pratique\n\nPour une équipe qui utilisait déjà Opus 5 sur des charges de travail générales, le changement de modèle réduit mécaniquement la facture sur les jetons d'entrée et de sortie, et plus nettement encore sur les jetons relus depuis le cache — un poste qui pèse lourd dans les usages agentiques où le même contexte système est renvoyé à chaque tour. Pour une équipe de sécurité qui envoyait des tâches de test d'intrusion ou d'analyse de vulnérabilités à un modèle Opus, en revanche, le changement de version peut se traduire par une redirection silencieuse vers Opus 4.8 plutôt que vers Opus 5.5, avec des résultats potentiellement différents sur ce type de tâche. Une équipe travaillant en sciences de la vie et gênée par les mêmes garde-fous doit, elle, passer par une démarche d'inscription avant de pouvoir exploiter le modèle sans restriction. Anthropic ne qualifie pas cette baisse de promotionnelle, à la différence du tarif de lancement de Claude Sonnet 5 : la grille tarifaire consultée le jour de l'annonce inscrit directement le nouveau tarif d'Opus 5.5 comme tarif standard, sans échéance annoncée.",
+  "tags": [
+    "anthropic",
+    "opus-5-5",
+    "tarifs",
+    "modeles"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic Newsroom — Introducing Claude Opus 5.5",
+      "url": "https://www.anthropic.com/news/claude-opus-5-5",
+      "consultee": "2026-09-23"
+    },
+    {
+      "titre": "Claude Platform — Models overview",
+      "url": "https://platform.claude.com/docs/en/models/overview",
+      "consultee": "2026-09-23"
+    },
+    {
+      "titre": "Claude Platform — Pricing",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "consultee": "2026-09-23"
+    }
+  ],
+  "statut": "publie"
+}
