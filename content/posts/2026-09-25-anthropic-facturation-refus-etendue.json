@@ -1,0 +1,28 @@
+{
+  "slug": "anthropic-facturation-refus-etendue",
+  "titre": "Anthropic facture certains refus de Claude survenus avant toute sortie",
+  "date": "2026-09-25T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 24 septembre 2026, Anthropic a commencé à facturer certains refus de Claude survenant avant toute sortie, dans les catégories bio, frontier_llm et reasoning_extraction. Jusqu'ici, seuls les refus en cours de génération étaient facturés.",
+  "corps": "Anthropic a modifié, le 24 septembre 2026, la manière dont elle facture les refus émis par ses modèles Claude. Sur Claude Fable 5.1, Claude Fable 5, Claude Opus 5.5 et Claude Opus 5, un refus se traduit par une réponse HTTP normale, portant `stop_reason: \"refusal\"` et un champ `stop_details.category` qui nomme le domaine visé. La note de publication de l'API Claude, mise à jour ce jour-là, indique qu'un refus survenant avant toute sortie est désormais facturé lorsque cette catégorie vaut `bio`, `frontier_llm` ou `reasoning_extraction`.\n\nLes refus survenant en cours de génération (« mid-stream »), c'est-à-dire après qu'une partie de la réponse a déjà été produite, étaient déjà facturés auparavant, quelle que soit leur catégorie : l'API compte alors les jetons d'entrée et les jetons de sortie déjà envoyés, au tarif normal du modèle. Ce qui change au 24 septembre, ce sont les refus qui arrivent d'emblée, sans aucune sortie produite : aucun d'entre eux n'était facturé, dans quelque catégorie que ce soit, avant cette date. Anthropic justifie l'évolution par la volonté de limiter les tentatives de contournement de ses garde-fous à grande échelle, et précise réserver cette facturation aux catégories où elle mesure, à la date de l'annonce, un faible taux de faux positifs.\n\nLa documentation technique sur les refus et le repli, également mise à jour, détaille cinq catégories de refus : `cyber` (sécurité informatique), `bio` (biologie), `frontier_llm` (développement de modèles concurrents, un usage restreint par les conditions commerciales d'Anthropic), `reasoning_extraction` (une demande de faire apparaître le raisonnement interne du modèle dans le texte de la réponse) et `general_harms` (ce qui ne rentre dans aucune des quatre catégories précédentes). Seules les trois premières citées passent désormais en facturé pour un refus sans sortie ; `cyber` et `general_harms` restent gratuits dans ce cas, de même qu'un refus dont la catégorie vaut `null`.\n\n## Ce qui reste inchangé\n\nLe crédit de repli (*fallback credit*), qui évite de repayer une écriture de cache de prompt quand une requête refusée est rejouée sur un second modèle, n'est pas affecté par ce changement : la note de publication le précise explicitement. Le repli côté serveur — qui retente automatiquement, dans le même appel HTTP, une requête refusée sur un autre modèle recommandé par Anthropic pour la catégorie rencontrée — continue lui aussi de fonctionner à l'identique ; pour une application qui s'appuie sur ce mécanisme intégré, seul le coût final change, sans modification du fonctionnement observé côté client.\n\nLa nouvelle règle s'applique sur toutes les plateformes qui distribuent Claude, précise la documentation sur les refus et le repli : l'API Claude elle-même, Amazon Bedrock, Claude Platform on AWS, Google Cloud et Microsoft Foundry. Elle ne dépend donc pas du canal utilisé pour interroger le modèle.\n\n## Ce que ça change en pratique\n\nLa différence se voit surtout chez les équipes qui gèrent elles-mêmes leur logique de repli, par appel HTTP direct plutôt que par le mécanisme intégré d'Anthropic. Une requête légitime de recherche en biologie ou en apprentissage automatique, qui déclenche par erreur un refus classé `bio` ou `frontier_llm` avant toute sortie, est désormais facturée comme un appel normal, au tarif d'entrée du modèle interrogé — le contenu de la réponse restant vide dans ce cas, selon la documentation. Pour Claude Opus 5.5, lancé deux jours plus tôt selon la même note de publication, ce tarif d'entrée est de 4 dollars par million de jetons ; pour Claude Opus 5, il est de 5 dollars. Un refus classé `reasoning_extraction` entre dans le même cas de figure, par exemple pour une requête qui demande explicitement de dérouler le raisonnement interne du modèle en texte plutôt que de passer par le raisonnement adaptatif structuré.\n\nAnthropic prévient que la liste des catégories facturées n'est pas figée : elle dit la faire évoluer à mesure qu'elle continue de mesurer et d'affiner les taux de faux positifs de ses garde-fous. Une équipe qui surveille ses coûts d'API a donc intérêt à revérifier périodiquement le tableau des catégories facturées dans la documentation sur les refus, plutôt que de considérer comme acquise la répartition observée aujourd'hui entre catégories facturées et catégories gratuites.",
+  "tags": [
+    "anthropic",
+    "facturation",
+    "api",
+    "refus"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Developer Platform — Release notes: API",
+      "url": "https://platform.claude.com/docs/en/release-notes/api",
+      "consultee": "2026-09-25"
+    },
+    {
+      "titre": "Claude Developer Platform — Refusals and fallback",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback",
+      "consultee": "2026-09-25"
+    }
+  ],
+  "statut": "publie"
+}
