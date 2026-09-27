@@ -1,0 +1,38 @@
+{
+  "slug": "openai-defaut-encodage-image-gpt-6-sol-luna",
+  "titre": "OpenAI corrige un défaut d'encodage d'image sur GPT-6 Sol et Luna",
+  "date": "2026-09-27T08:00:00+02:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 25 septembre 2026, OpenAI a corrigé un défaut d'encodage d'image qui dégradait la compréhension visuelle de GPT-6 Sol et GPT-6 Luna, avec un effet sur l'outil d'usage d'ordinateur. Le changelog ne précise ni la durée ni l'ampleur du défaut.",
+  "corps": "Le 25 septembre 2026, OpenAI a inscrit dans le journal des modifications de son API la correction d'un défaut d'encodage d'image qui dégradait la compréhension visuelle de deux modèles de la famille GPT-6 : GPT-6 Sol, orienté vers la programmation et les flux de travail agentiques, mis en production le 20 avril 2026, et GPT-6 Luna, présenté par sa fiche technique comme le modèle le plus efficace de la gamme pour les tâches à fort volume et en production depuis le 18 mai 2026. L'entrée du changelog, consultée le 27 septembre 2026, indique qu'un défaut dans l'encodage des images dégradait la compréhension visuelle de ces deux modèles, et que le correctif améliore les résultats sur les tâches visuelles dans l'API et dans Codex, y compris pour l'usage d'ordinateur (computer use).\n\nOpenAI recommande aux équipes qui font transiter des images par ces deux modèles de rejouer leurs évaluations et de reprendre les traitements touchés par le défaut. Le changelog ne précise ni depuis quand la dégradation existait, ni son ampleur mesurée : aucune date de début n'est donnée, et aucun chiffre ne quantifie l'écart entre la compréhension visuelle attendue et celle réellement observée avant correction. GPT-6 Sol étant en production depuis avril et GPT-6 Luna depuis mai selon leurs fiches respectives, consultées le même jour, une application construite sur l'un de ces deux modèles a pu fonctionner plusieurs mois avec une lecture d'image dégradée sans qu'aucun signal ne le rende visible dans l'API elle-même.\n\n## Ce que l'usage d'ordinateur avait à perdre\n\nLa documentation de l'outil d'usage d'ordinateur, également consultée le 27 septembre 2026, décrit un fonctionnement en boucle : le modèle reçoit une capture d'écran encodée pour évaluer l'état de l'interface, décide d'une action, puis reçoit une nouvelle capture pour vérifier que l'action a produit l'effet attendu. Le paramètre `detail` y est mentionné avec la valeur `\"original\"`, recommandée pour préserver la résolution des captures et permettre au modèle de lire du texte ou d'identifier des éléments d'interface avec précision. Un défaut situé en amont, dans l'encodage même des images transmises au modèle, touche directement cette boucle d'observation et de vérification : une capture mal interprétée peut conduire le modèle à choisir la mauvaise action, ou à conclure à tort qu'une tâche est terminée, sans qu'aucune erreur explicite ne remonte à l'appelant.\n\n## Un correctif qui ne cite pas GPT-6 Astra\n\nL'entrée du changelog ne mentionne que GPT-6 Sol et GPT-6 Luna ; elle ne dit rien de GPT-6 Astra, le modèle le plus capable de la gamme, mis en production le 3 septembre 2026 et déjà suivi par ce journal à son lancement. La documentation ne précise pas si Astra partageait le même défaut d'encodage et en a été corrigé par un autre biais, s'il repose sur un chemin de traitement d'image distinct qui l'exemptait du problème, ou si le sujet n'a simplement pas été documenté pour ce modèle. Une équipe qui exploite Astra pour des tâches visuelles ne peut donc pas déduire de cette seule entrée si elle a été concernée par une dégradation comparable.\n\n## Ce que ça change en pratique\n\nPour une équipe qui a construit un pipeline de vision ou un agent d'usage d'ordinateur sur GPT-6 Sol ou GPT-6 Luna, la recommandation d'OpenAI revient à revérifier des résultats qui ont pu sembler corrects sans l'être totalement : un taux d'erreur plus élevé qu'attendu sur des tâches de lecture de capture d'écran, par exemple, aurait pu être attribué à tort à la complexité de l'interface testée plutôt qu'à un défaut du modèle. Rejouer les évaluations mentionnées par le changelog est, en l'état de la documentation, le seul moyen de savoir si un pipeline donné a été affecté et dans quelle mesure. Le changelog ne propose aucun mécanisme de vérification a posteriori, comme un identifiant de version de modèle antérieur au correctif, qui permettrait de distinguer une requête traitée avant et après le 25 septembre 2026 : la seule option, pour une équipe qui veut savoir si ses résultats passés sont fiables, est de reprendre ses propres tests sur les mêmes cas.",
+  "tags": [
+    "openai",
+    "modeles",
+    "api",
+    "usage-ordinateur"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Changelog",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-09-27"
+    },
+    {
+      "titre": "OpenAI API — GPT-6 Sol model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-sol",
+      "consultee": "2026-09-27"
+    },
+    {
+      "titre": "OpenAI API — GPT-6 Luna model",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "consultee": "2026-09-27"
+    },
+    {
+      "titre": "OpenAI API — Computer use tool",
+      "url": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "consultee": "2026-09-27"
+    }
+  ],
+  "statut": "publie"
+}
