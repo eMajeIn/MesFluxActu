@@ -1,0 +1,39 @@
+{
+  "slug": "anthropic-claude-sonnet-5-5",
+  "titre": "Claude Sonnet 5.5 : même prix que Sonnet 5, mais cinq changements cassants",
+  "date": "2026-09-29T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a publié Claude Sonnet 5.5 le 28 septembre 2026 au prix de Sonnet 5. La migration impose de revoir la désactivation de la réflexion, les appels d'outils forcés et l'historique des conversations.",
+  "corps": "Anthropic a publié Claude Sonnet 5.5 le 28 septembre 2026. Le modèle est disponible pour tous les clients de l'API Claude sous l'identifiant `claude-sonnet-5-5`, ainsi que sur Amazon Bedrock (`anthropic.claude-sonnet-5-5`), Claude Platform on AWS, Google Cloud et Microsoft Foundry. La documentation le décrit comme le meilleur compromis entre vitesse et intelligence de la gamme, entre Opus 5.5 et Haiku 4.5.\n\nLe prix par million de jetons ne bouge pas par rapport à Sonnet 5 : 2 $ en entrée, 10 $ en sortie, 0,20 $ pour une lecture de cache, 2,50 $ pour une écriture de cache de cinq minutes. La page de tarifs précise que ces prix, présentés à l'origine comme introductifs jusqu'au 31 août, sont devenus le tarif standard : la hausse prévue à 3 $ / 15 $ le 1er septembre n'a pas lieu. Le tokenizer est identique à celui de Sonnet 5, donc un même texte produit le même nombre de jetons.\n\nCe qui change tient moins aux capacités qu'au contrat d'API. Cinq changements cassants touchent le code qui tourne déjà sur Sonnet 5, et un sixième modifie la forme des réponses sans provoquer d'erreur.\n\n## Ce que dit Anthropic des performances\n\nLe billet d'annonce affirme que Sonnet 5.5 génère sa sortie plus de 30 % plus vite que Sonnet 5 et coûte jusqu'à 30 % de moins par tâche sur la plupart des travaux, grâce à un moindre nombre de jetons consommés. Ce sont des affirmations du fournisseur, sans protocole détaillé dans les pages consultées ; la documentation technique, elle, se limite à classer la latence comme « rapide » et ne chiffre pas l'écart. Le modèle offre une fenêtre de contexte de 1 million de jetons, 128 000 jetons de sortie (300 000 via l'API de lots avec l'en-tête bêta `output-300k-2026-03-24`), et une date de connaissances fiables en juin 2026. Anthropic s'engage à ne pas le retirer avant le 28 septembre 2027.\n\n## Les changements qui cassent\n\n**Désactiver la réflexion.** `thinking: {\"type\": \"disabled\"}` renvoie désormais une erreur 400. Le réglage le plus bas s'appelle `between_tools` : il coupe la réflexion initiale mais conserve les courtes notes d'avancement entre les appels d'outils. Il n'est accepté qu'aux niveaux d'effort `low`, `medium` et `high` ; à `xhigh` ou `max`, il renvoie une erreur 400, et il n'accepte aucun autre champ (`display`, `budget_tokens`, `block_binding`).\n\n**Appel d'outil forcé.** `tool_choice` avec `{\"type\": \"any\"}` ou `{\"type\": \"tool\", \"name\": \"...\"}` renvoie une erreur 400. Seuls `auto` et `none` sont acceptés. La documentation recommande de garder `auto`, d'activer `strict: true` sur les outils pour obtenir des entrées conformes au schéma, ou de passer par les sorties structurées.\n\n**Blocs de réflexion liés au modèle.** Chaque bloc de réflexion mémorise le modèle qui l'a produit. Sonnet 5.5 lit ceux de Sonnet 5, d'Opus 4.8 et de Haiku 4.5, mais pas ceux d'Opus 5, d'Opus 5.5 ni des modèles Fable et Mythos ; aucun autre modèle ne lit les siens. Un bloc illisible est écarté sans erreur ni facturation. Par ailleurs, pour les comptes créés à partir du 31 août 2026, rejouer un bloc après modification du prompt système, des outils ou d'un message antérieur renvoie une erreur 400 : l'historique doit rester en ajout seul.\n\n**Utilisation d'ordinateur et outil conseiller.** Sur l'API Claude et Google Cloud, l'outil `computer_20251124` est refusé au profit de `computer_toolset_20260801` ; Bedrock continue de l'accepter. Avec l'outil conseiller (bêta), un exécutant Sonnet 5.5 rejette les conseillers Opus 4.8, Opus 4.7 et Sonnet 5.\n\n**Texte entre les appels d'outils.** Les notes de plus d'une phrase ou deux reviennent dans des blocs `thinking`. Avec l'affichage par défaut (`display: \"omitted\"`), leur texte est vide : une interface qui diffuse ces notes reste muette entre deux appels d'outils, sans erreur. `between_tools` ou un réglage de `thinking.display` corrige le comportement.\n\nDeux nouveautés bêta figurent aussi dans la documentation : la compaction à la demande (en-tête `compact-2026-09-04`) et la définition d'outils dans un message (en-tête `inline-tools-2026-09-15`).\n\n## Ce que ça change en pratique\n\nPour une équipe déjà sur Sonnet 5, changer l'identifiant du modèle ne suffit pas. Trois vérifications s'imposent avant de basculer : remplacer `disabled` par `between_tools`, supprimer les `tool_choice` forcés, et contrôler que l'historique de conversation n'est jamais réécrit. Les niveaux d'effort sont en outre recalibrés ; la documentation demande de refaire un balayage plutôt que de reprendre l'ancien réglage, avec `medium` comme point de départ pour le code agentique bien spécifié.\n\nCôté coût, le prix unitaire est inchangé : toute économie éventuelle viendrait d'un nombre de jetons moindre par tâche, ce que chaque équipe doit mesurer sur ses propres charges. Le seuil de mise en cache tombe de 1 024 à 512 jetons, ce qui rend des prompts plus courts cachables. Enfin, les garde-fous biologiques restent alignés sur ceux de Sonnet 5, et le modèle peut refuser des requêtes dans cinq catégories (`cyber`, `bio`, `frontier_llm`, `reasoning_extraction`, `general_harms`) : le code appelant doit traiter `stop_reason: \"refusal\"`.\n",
+  "tags": [
+    "anthropic",
+    "claude",
+    "sonnet",
+    "api",
+    "migration"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — Claude Sonnet 5.5",
+      "url": "https://www.anthropic.com/claude-sonnet-5-5",
+      "consultee": "2026-09-29"
+    },
+    {
+      "titre": "Claude Developer Platform — What's new in Claude Sonnet 5.5",
+      "url": "https://platform.claude.com/docs/en/models/sonnet-5-5/whats-new-sonnet-5-5",
+      "consultee": "2026-09-29"
+    },
+    {
+      "titre": "Claude Developer Platform — Claude Sonnet 5.5",
+      "url": "https://platform.claude.com/docs/en/models/sonnet-5-5/overview",
+      "consultee": "2026-09-29"
+    },
+    {
+      "titre": "Claude Developer Platform — Pricing",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "consultee": "2026-09-29"
+    }
+  ],
+  "statut": "publie"
+}
