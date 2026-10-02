@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-retraite-claude-sonnet-4-5",
+  "titre": "Anthropic annonce la retraite de Claude Sonnet 4.5 le 30 novembre 2026",
+  "date": "2026-10-02T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 30 septembre 2026, Anthropic a déprécié claude-sonnet-4-5-20250929, qui cessera de répondre sur la Claude API le 30 novembre. Le remplaçant recommandé, Sonnet 5.5, impose plusieurs changements de code.",
+  "corps": "Le 30 septembre 2026, Anthropic a notifié les développeurs qui utilisent Claude Sonnet 4.5 de la retraite prochaine du modèle sur la Claude API. L'identifiant `claude-sonnet-4-5-20250929` cessera de répondre le 30 novembre 2026. Il passe dans l'état « Deprecated » (déprécié) du tableau d'état des modèles, et le remplaçant recommandé est `claude-sonnet-5-5`.\n\nLa page des dépréciations rappelle ce que ces termes recouvrent : un modèle déprécié fonctionne encore, mais n'est plus recommandé, et une fois la date de retraite passée, les requêtes qui le ciblent échouent. Les dates de cette page valent pour les plateformes exploitées par Anthropic (Claude API, Claude Platform on AWS, Microsoft Foundry). Amazon Bedrock et Google Cloud fixent leur propre calendrier, qui peut différer ; la documentation consultée ne donne pas, pour Sonnet 4.5, les dates de ces deux plateformes.\n\n## Le calendrier\n\nEntre l'annonce du 30 septembre et la retraite du 30 novembre, il s'écoule deux mois. La documentation indique qu'Anthropic s'engage à prévenir les clients ayant des déploiements actifs au moins 60 jours avant la retraite d'un modèle publié publiquement : le délai est ici respecté, de justesse.\n\nD'autres modèles Claude figurent au même tableau. Claude Opus 4.5 (`claude-opus-4-5-20251101`) est actif, avec une retraite « pas avant le 24 novembre 2026 », et Claude Haiku 4.5 avec une retraite « pas avant le 15 octobre 2026 ». Ces deux dates sont des plafonds minimaux, non des annonces de retraite : aucune dépréciation n'est inscrite pour eux à ce jour. Claude Sonnet 4.6 reste actif, avec une retraite pas avant le 17 février 2027.\n\nPour repérer les usages restants, la page propose un audit : exporter depuis la page Usage de la console Claude un CSV qui ventile la consommation par clé d'API et par modèle.\n\n## Ce que le saut vers Sonnet 5.5 impose\n\nLe remplaçant désigné n'est pas un échange d'identifiant. Le guide de migration vers Sonnet 5.5 consacre une section à ceux qui partent de Sonnet 4.5 ou d'une version antérieure : il faut appliquer toutes les sections précédentes, puis celle-ci. Les changements listés pour ce point de départ sont les suivants.\n\n- **Réflexion active par défaut.** Une requête sans champ `thinking` tournait sans réflexion sur Sonnet 4.5 ; sur Sonnet 5.5 elle utilise la réflexion adaptative. Pour s'en passer, le guide indique `thinking: {\"type\": \"between_tools\"}`. Les réponses peuvent désormais commencer par des blocs `thinking`, de sorte que le code qui lit `content[0].text` casse, et le texte de réflexion est omis par défaut (`display` vaut `\"omitted\"`, contre `\"summarized\"` sur Sonnet 4.5).\n- **Budgets de réflexion refusés.** `thinking: {\"type\": \"enabled\", \"budget_tokens\": N}` renvoie une erreur 400 sur Sonnet 5.5. Le guide demande de retirer le budget et de fixer un niveau d'effort via `output_config.effort`, en précisant qu'aucune correspondance fixe n'existe entre un budget et un niveau : il recommande de lancer ses évaluations à deux ou trois niveaux. Sonnet 4.5 n'a pas de paramètre d'effort.\n- **Paramètres d'échantillonnage.** Une valeur non par défaut de `temperature`, `top_p` ou `top_k` renvoie une erreur 400.\n- **Préremplissage (prefill).** Terminer la conversation par un tour d'assistant renvoie une erreur 400 sur Sonnet 5.5 ; Sonnet 4.5 l'acceptait. Le guide propose des sorties structurées, des instructions dans le prompt système ou un déplacement vers le message de l'utilisateur, selon l'usage du prefill.\n- **Outil d'usage de l'ordinateur.** `computer_20250124` n'est pas accepté ; le guide renvoie vers `computer_toolset_20260801`.\n- **En-têtes bêta.** `interleaved-thinking-2025-05-14` est à retirer ; `fine-grained-tool-streaming-2025-05-14` se remplace par `eager_input_streaming: true` sur chaque outil concerné. Le paramètre `output_format` est déprécié au profit de `output_config.format`.\n\n## Ce que ça change en pratique\n\nLe prix par million de jetons baisse : 2 dollars en entrée et 10 en sortie pour Sonnet 5.5, contre 3 et 15 pour Sonnet 4.5, selon la page de tarifs. Mais le guide avertit que le même texte produit environ 30 % de jetons de plus qu'avec Sonnet 4.5, selon le contenu, parce que le tokenizer a changé. L'écart de facture dépend donc de la charge de travail et se mesure avec le comptage de jetons plutôt qu'à partir des tarifs. Les images changent aussi de barème : jusqu'à 2 576 pixels sur le grand côté et 4 784 jetons visuels, contre 1 568 pixels et 1 568 jetons sur Sonnet 4.5 ; une image de 2 000 × 1 500 coûte environ 2,5 fois plus de jetons.\n\nPour une équipe qui a codé en dur l'identifiant de Sonnet 4.5, la tâche tient en trois étapes : exporter l'audit d'usage pour trouver les clés concernées, passer en revue les appels pour les six points ci-dessus, puis réévaluer qualité et coûts avant le 30 novembre. Les équipes passant par Bedrock ou Google Cloud doivent consulter les tableaux de ces plateformes. Le guide mentionne enfin une commande `/claude-api migrate` dans Claude Code, qui applique le changement d'identifiant et les modifications de paramètres puis produit une liste de points à vérifier à la main.\n",
+  "tags": [
+    "anthropic",
+    "sonnet",
+    "depreciation",
+    "migration"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Developer Platform — Model deprecations",
+      "url": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+      "consultee": "2026-10-02"
+    },
+    {
+      "titre": "Claude Developer Platform — Migrating to Claude Sonnet 5.5",
+      "url": "https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide",
+      "consultee": "2026-10-02"
+    },
+    {
+      "titre": "Claude Developer Platform — Pricing",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "consultee": "2026-10-02"
+    }
+  ],
+  "statut": "publie"
+}
