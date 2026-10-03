@@ -1,0 +1,32 @@
+{
+  "slug": "gemini-4-argon-presentation",
+  "titre": "Google présente Gemini 4 Argon, d'abord réservé aux défenseurs cyber",
+  "date": "2026-10-03T09:00:00+02:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Le 30 septembre 2026, Google présente Gemini 4 Argon, avec une sortie portée à 1 million de jetons et un tarif introductif de 2 et 10 dollars. L'accès reste limité au Fairwind Program.",
+  "corps": "Le 30 septembre 2026, Google a présenté Gemini 4 Argon, présenté comme le modèle de la prochaine génération de la famille Gemini. À la date du billet, il n'est pas ouvert à tous : l'accès est d'abord donné à un ensemble de défenseurs informatiques de confiance, via le Fairwind Program, déjà utilisé pour la variante Cyber de Gemini 3.8 Flash.\n\nGoogle indique vouloir le proposer aux développeurs, aux entreprises et au grand public « dès que possible », en commençant par les clients payants de l'API et les abonnés Google AI Ultra. Le billet ne donne aucune date, et la page de présentation de la famille Gemini sur le site de DeepMind ne fournit ni identifiant de modèle pour l'API, ni statut de disponibilité.\n\n## Ce que Google annonce\n\nLe billet décrit Argon comme un modèle destiné à trois domaines : l'ingénierie logicielle en conditions réelles, le travail de connaissance en entreprise (droit, finance, fiscalité) et la défense en cybersécurité, où Google affirme qu'il peut trouver, valider et corriger de façon autonome des vulnérabilités critiques. Il traite le texte, le code et des contenus multimodaux, dont les graphiques et la vidéo.\n\nUne limite technique change par rapport à la génération précédente : la limite de jetons en **sortie** passe à 1 million, contre 64 000 auparavant. Il s'agit bien de la sortie, pas de la fenêtre de contexte, dont le billet ne donne pas la taille. Pour des tâches longues en plusieurs étapes, un modèle peut donc produire une réponse nettement plus longue en un seul appel, ce qui concerne surtout les agents de code.\n\n## Tarifs et chiffres publiés\n\nLe billet annonce un tarif introductif de 2 dollars par million de jetons en entrée et 10 dollars par million en sortie, avec les jetons d'entrée mis en cache facturés 95 % moins cher. À l'issue de cette période, le tarif passe à 4 dollars en entrée et 20 dollars en sortie, soit le double. La durée de la période introductive n'est pas précisée. Aucun client ne peut en profiter tant que l'accès général n'est pas ouvert.\n\nLes résultats cités proviennent de Google lui-même :\n\n- DeepSWE v1.1 (génie logiciel) : 77,9 % ;\n- AutomationBench : 51,3 %, première place selon Google ;\n- CWE-bench v1 (cybersécurité) : 68 %, à égalité pour la première place ;\n- LVBench (compréhension de vidéos longues) : 91,7 %.\n\nGoogle ajoute que le modèle mène sur le Vals Index (finance, code, droit, fiscalité) et sur le benchmark Gray Swan de résistance aux injections de prompt, sans donner de chiffre dans le texte du billet. Ces scores figurent dans un tableau comparatif que le billet présente, mais ils n'ont pas été corroborés par un protocole publié indépendant ; ils sont à lire comme des mesures déclarées par l'éditeur.\n\n## Garde-fous\n\nLe billet décrit quatre axes de sécurité : la prévention des usages malveillants (armes chimiques, biologiques, radiologiques et nucléaires, attaques informatiques), la résistance aux injections de prompt, la surveillance de l'alignement par analyse de la chaîne de raisonnement, et des environnements d'exécution isolés renforcés. Google précise participer au processus volontaire du gouvernement américain d'accès au modèle avant sa publication, tout en élargissant progressivement l'accès.\n\n## Ce que ça change en pratique\n\nPour un développeur, rien n'est utilisable aujourd'hui sauf si son organisation fait partie du Fairwind Program : le billet ne mentionne ni identifiant de modèle ni fiche de modèle. Le point à surveiller est le changelog de l'API Gemini, qui n'indique pas encore Argon à la date de consultation, la dernière entrée relevée datant du 22 septembre 2026.\n\nDeux éléments permettent déjà de planifier. D'abord le tarif : la grille introductive n'est pas la grille durable, et un budget calé sur 2 et 10 dollars sous-estimerait de moitié le coût une fois la période terminée. Ensuite la sortie à 1 million de jetons : elle modifie la manière de découper les tâches longues, mais sa tenue en pratique (latence, coût d'une génération complète) n'est pas documentée à ce stade.\n",
+  "tags": [
+    "modèles",
+    "tarifs",
+    "cybersécurité"
+  ],
+  "sources": [
+    {
+      "titre": "Google — Gemini 4 Argon: our next era of frontier intelligence",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/",
+      "consultee": "2026-10-03"
+    },
+    {
+      "titre": "Google DeepMind — Modèles Gemini",
+      "url": "https://deepmind.google/models/gemini/",
+      "consultee": "2026-10-03"
+    },
+    {
+      "titre": "Gemini API — Release notes / changelog",
+      "url": "https://ai.google.dev/gemini-api/docs/changelog",
+      "consultee": "2026-10-03"
+    }
+  ],
+  "statut": "publie"
+}
