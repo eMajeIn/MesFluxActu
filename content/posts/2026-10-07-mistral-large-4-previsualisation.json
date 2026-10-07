@@ -1,0 +1,29 @@
+{
+  "slug": "mistral-large-4-previsualisation",
+  "titre": "Mistral Large 4 : préversion publique, poids promis pour fin octobre",
+  "date": "2026-10-07T08:00:00+02:00",
+  "type": "actu",
+  "labo": "mistral",
+  "chapeau": "Mistral a lancé le 6 octobre 2026 la préversion de Mistral Large 4, modèle multimodal d'environ 1 000 milliards de paramètres. Les poids ne sont pas publiés, et les chiffres de l'annonce et de la documentation divergent.",
+  "corps": "Mistral AI a lancé le 6 octobre 2026 une préversion publique de Mistral Large 4, désigné en interne par l'abréviation ML4 et, dans l'annonce, par le surnom « le Chonk ». Le modèle est décrit comme multimodal natif (texte et image en entrée), de type *mixture-of-experts* — une architecture où seule une partie des paramètres est activée pour chaque jeton — et comme le plus grand modèle de l'entreprise à ce jour.\n\nLe point à retenir tient au statut : c'est une préversion servie par l'API de Mistral Studio. Les poids, eux, ne sont pas encore publiés. L'annonce indique qu'ils seront publiés d'ici la fin du mois d'octobre, sans préciser où ni sous quelle licence. Tant que ce n'est pas fait, le modèle ne peut pas être auto-hébergé, et c'est pourtant l'argument central de l'annonce.\n\n## Ce que Mistral annonce\n\nL'annonce décrit un modèle de 1 000 milliards de paramètres dont 49 milliards actifs. La page de documentation du modèle, ouverte le même jour, donne d'autres chiffres : 52 milliards de paramètres actifs, 1,05 billion au total, plus un encodeur de vision de 1,6 milliard. La documentation ne dit pas si l'encodeur est compté dans les paramètres actifs, ce qui pourrait expliquer l'écart, mais rien ne le confirme. Elle indique un identifiant `mistral-large-4` et une fenêtre de contexte de 1 million de jetons ; l'annonce, elle, ne mentionne aucune taille de contexte.\n\nSur le prix, l'annonce affiche 1,36 dollar par million de jetons en entrée et 4,18 dollars en sortie, et ces tarifs sont ceux de la préversion. La page de documentation présente deux valeurs par ligne : 1,36 et 0,68 dollar en entrée, 0,14 et 0,07 en entrée mise en cache, 4,18 et 2,09 en sortie. Le texte de la page ne permet pas de savoir à quelle condition s'applique chaque colonne ; la documentation ne le précise pas dans ce que nous avons pu lire. Le tarif de référence à retenir est donc celui de l'annonce, jusqu'à clarification.\n\nLe modèle a été entraîné de zéro sur 3 800 GPU NVIDIA Grace Blackwell, dans des centres de données de Mistral en Europe, et la préversion est servie depuis la même infrastructure. Mistral indique qu'une part importante des données d'entraînement est multilingue, avec plus de 160 langues, dont toutes les langues officielles de l'Union européenne.\n\n## Des résultats publiés par l'éditeur\n\nLes chiffres de l'annonce sont ceux de Mistral, avec des protocoles détaillés seulement en partie. Parmi eux : 61,7 % sur DeepSWE v1.1, 28,3 % sur Terminal-Bench 4, 59,9 % sur AutomationBench (657 flux de travail métier) et 42 % contre 41 % pour GPT-6 Astra sur Dense 200, un test d'ancrage visuel. Mistral cite aussi une évaluation humaine en aveugle menée avec Surge AI sur la qualité du code : ML4 Preview obtient 3,74 sur 5, deuxième sur cinq modèles, derrière Claude Opus 5 (4,22).\n\nLa cybersécurité occupe la place la plus visible. ML4 obtient 82 % sur un test de l'Artificial Analysis Cyber Index (reproduire une vulnérabilité puis la corriger) et 93 % sur Cybench, un ensemble de 40 exercices issus de compétitions de sécurité. Mistral précise que Claude Opus 5.5 et GPT-6 Astra obtiennent près de zéro sur ce même test parce qu'ils refusent la tâche. Le résultat mesure donc autant la politique de refus que la capacité technique : une comparaison où un modèle refuse n'indique pas ce qu'il saurait faire sans filtre. L'annonce note d'ailleurs que, jusqu'à la publication des poids, des partenaires vérifiés et des autorités étatiques testent le modèle avec une modération réduite et des capacités cyber étendues. La version publique en préversion n'est pas celle-là.\n\n## Ce que ça change en pratique\n\nPour un développeur, la préversion permet dès maintenant d'appeler `mistral-large-4` et de tester le modèle sur ses propres données. La documentation liste le support des sorties structurées, de l'appel de fonctions, des questions-réponses sur documents, du traitement par lots, des agents et conversations, des outils intégrés et du préfixe. Le contexte d'un million de jetons n'est mentionné que par la documentation.\n\nTrois éléments restent à vérifier avant de s'engager : la licence des poids, la date et le lieu de leur publication, et la grille tarifaire définitive. Mistral indique qu'il publiera plus tard des détails sur l'architecture, des benchmarks supplémentaires et sa méthode de post-entraînement. Les scores cités sont des résultats de l'éditeur ou de tiers qu'il cite ; ils n'ont pas été reproduits ici.",
+  "tags": [
+    "mistral",
+    "mistral-large-4",
+    "modele",
+    "open-weight",
+    "cybersecurite"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral — Introducing Mistral Large 4",
+      "url": "https://mistral.ai/news/mistral-large-4/",
+      "consultee": "2026-10-07"
+    },
+    {
+      "titre": "Documentation Mistral — Mistral Large 4",
+      "url": "https://docs.mistral.ai/models/mistral-large-4",
+      "consultee": "2026-10-07"
+    }
+  ],
+  "statut": "publie"
+}
