@@ -1,0 +1,44 @@
+{
+  "slug": "anthropic-claude-haiku-5-5",
+  "titre": "Claude Haiku 5.5 : 0,10 dollar l'entrée, mais un tarif à paliers et des ruptures d'API",
+  "date": "2026-10-08T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Anthropic a publié Claude Haiku 5.5 le 7 octobre 2026, à partir de 0,10 dollar le million de jetons en entrée. Le tarif double au-delà de 100 000 jetons de prompt, et la migration depuis Haiku 4.5 casse plusieurs paramètres.",
+  "corps": "Anthropic a publié le 7 octobre 2026 Claude Haiku 5.5, identifiant d'API `claude-haiku-5-5`, présenté comme le plus petit modèle de la gamme et le moins cher. Il est disponible sur l'API Claude, Amazon Bedrock, Google Cloud, Microsoft Foundry et Claude Platform on AWS. La documentation fixe sa disponibilité garantie au moins jusqu'au 7 octobre 2027.\n\nLe prix d'appel est de 0,10 dollar par million de jetons en entrée et 0,50 dollar en sortie, contre 1 et 5 dollars pour Claude Haiku 4.5. Mais ce tarif a deux conditions que l'annonce ne met pas au premier plan, et une migration depuis Haiku 4.5 demande des modifications de code : le modèle n'est pas un simple remplacement d'identifiant.\n\n## Ce qui est annoncé\n\nLa documentation décrit un modèle destiné aux tâches à fort volume et sensibles à la latence : classification, extraction, routage, sous-agents. Il offre une fenêtre de contexte de 1 million de jetons et jusqu'à 128 000 jetons en sortie. Il prend du texte et des images en entrée et produit du texte. Il gère la réflexion adaptative (*adaptive thinking*, où le modèle décide lui-même combien réfléchir) pilotée par le paramètre `effort`, dont la valeur par défaut est `medium`. Anthropic le décrit comme le premier modèle de la famille Haiku à disposer d'un réglage d'effort.\n\nSur les benchmarks, Anthropic publie ses propres chiffres, dont le protocole complet renvoie à la fiche système du modèle. Haiku 5.5 y obtient 72,4 % sur OSWorld 2.1 (utilisation d'un ordinateur, sous-ensemble hors ligne) contre 15,7 % pour Haiku 4.5, et 39,2 % sur Terminal-Bench 4.0 contre 0,0 %. Sonnet 5.5 reste devant sur ces deux tests, avec 83,9 % et 70,6 %. Ces résultats sont ceux de l'éditeur et n'ont pas été reproduits ici. Des clients cités par Anthropic, dont Asana, Box et HubSpot, rapportent des gains de latence ou de score, sans que leurs protocoles soient détaillés.\n\n## Le prix réel dépend de deux paramètres\n\nPremier paramètre : la longueur du prompt. Le tarif de 0,10 et 0,50 dollar ne vaut que pour les prompts jusqu'à 100 000 jetons. Au-delà, l'entrée passe à 0,50 dollar et la sortie à 2,50 dollars par million de jetons. La page de tarification précise que Haiku 5.5 est l'exception parmi les modèles récents : les autres incluent la fenêtre de 1 million de jetons au tarif standard. Les lectures de cache coûtent 0,01 dollar, ou 0,05 dollar au-delà du seuil, et l'API de traitement par lots applique une remise de 50 %.\n\nSecond paramètre : le tokeniseur. Haiku 5.5 utilise celui introduit avec Claude 4.7, qui produit environ 30 % de jetons en plus pour le même texte que sur Haiku 4.5, selon la documentation. Un calcul de la rédaction, à partir de ces deux chiffres : pour un prompt court, 0,10 dollar sur 1,3 fois plus de jetons revient à environ 0,13 dollar pour un volume de texte qui coûtait 1 dollar sur Haiku 4.5, soit une baisse de l'ordre de 87 %. Au-delà de 100 000 jetons, 0,50 dollar × 1,3 donne environ 0,65 dollar, soit une baisse proche de 35 %. L'annonce parle d'une baisse moyenne de 75 %. L'écart exact dépend de la nature du texte, puisque le surcoût de 30 % est un ordre de grandeur et non une constante.\n\n## Ce qui casse en migrant depuis Haiku 4.5\n\nLe guide de migration liste plusieurs changements qui provoquent des erreurs HTTP 400 :\n\n- `thinking: {\"type\": \"enabled\", \"budget_tokens\": N}` n'est plus accepté. Il faut utiliser `{\"type\": \"adaptive\"}` avec `output_config.effort` ;\n- `temperature`, `top_p` et `top_k` doivent être retirés : seules les valeurs `1` pour `temperature` et `0.99` pour `top_p` passent, et `top_k` est refusé quelle que soit sa valeur ;\n- un message assistant final servant de préremplissage (*prefill*) est rejeté, même sans réflexion ;\n- l'outil `computer_20250124` est remplacé par `computer_toolset_20260801` sur l'API Claude et Google Cloud.\n\nAutres points : la réflexion adaptative est active par défaut, donc une réponse peut commencer par un bloc `thinking`, et le code qui lit le premier bloc comme la réponse doit être corrigé. Ces blocs sont renvoyés avec un champ `thinking` vide, sauf si la requête demande `\"display\": \"summarized\"`. Les jetons de réflexion comptent dans `max_tokens`. Enfin, le niveau Priority Tier n'est pas pris en charge sur Haiku 5.5, et le modèle peut renvoyer `stop_reason: \"refusal\"` sans solution de repli côté serveur.\n\n## Ce que ça change en pratique\n\nPour un volume important de requêtes courtes (classification, extraction, routage), le coût unitaire baisse nettement, même après correction du tokeniseur. Pour des usages qui remplissent le long contexte, l'avantage de prix est plus modeste et la comparaison avec Sonnet 5.5, à 2 et 10 dollars sans palier, se fait au cas par cas. La documentation ne précise pas les limites de débit du modèle, ni, dans les pages consultées, le gain de latence en valeur absolue : elle indique seulement que Haiku 5.5 est le plus rapide de la gamme à vitesse standard.\n\nLe même jour, la documentation signale aussi une baisse du prix de lecture du cache de Sonnet 5.5, de 0,20 à 0,10 dollar par million de jetons.",
+  "tags": [
+    "anthropic",
+    "claude-haiku-5-5",
+    "modele",
+    "tarifs",
+    "migration"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — Introducing Claude Haiku 5.5",
+      "url": "https://www.anthropic.com/claude-haiku-5-5",
+      "consultee": "2026-10-08"
+    },
+    {
+      "titre": "Claude Developer Platform — Claude Haiku 5.5",
+      "url": "https://platform.claude.com/docs/en/models/haiku-5-5/overview",
+      "consultee": "2026-10-08"
+    },
+    {
+      "titre": "Claude Developer Platform — Haiku 5.5 migration guide",
+      "url": "https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide",
+      "consultee": "2026-10-08"
+    },
+    {
+      "titre": "Claude Developer Platform — Pricing",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "consultee": "2026-10-08"
+    },
+    {
+      "titre": "Claude Developer Platform — Release notes",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-10-08"
+    }
+  ],
+  "statut": "publie"
+}
