@@ -1,0 +1,38 @@
+{
+  "slug": "claude-code-review-niveaux-de-revue",
+  "titre": "Code Review : trois niveaux de revue et une couverture par organisation",
+  "date": "2026-10-20T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Claude Code 2.1.304 ajoute à Code Review des niveaux Quick, Standard et Deep, réglables par organisation ou par dépôt, et une option pour couvrir tous les dépôts d'une organisation GitHub.",
+  "corps": "Anthropic a publié le 19 octobre 2026 la version 2.1.304 de Claude Code. Dans la liste des ajouts du changelog officiel, deux lignes concernent Code Review, le service qui relit les pull requests GitHub d'une organisation sur l'infrastructure d'Anthropic : des niveaux de revue, et une option pour couvrir tous les dépôts d'une organisation GitHub.\n\nCode Review n'est pas la commande locale `/code-review` : c'est le service réservé aux offres Team et Enterprise, activé par un Owner de l'organisation Claude dans les paramètres d'administration. Plusieurs agents lisent le diff et le code environnant, une étape de vérification écarte les faux positifs, puis les résultats sont publiés en commentaires en ligne et dans un check run nommé **Claude Code Review**. La documentation précise qu'une revue n'approuve ni ne bloque jamais la pull request.\n\nJusqu'ici, le seul levier d'une organisation sur l'effort de revue était la fréquence de déclenchement. Avec les niveaux, elle règle aussi la profondeur de chaque passage.\n\n## Trois niveaux, un défaut\n\nLa documentation décrit trois niveaux :\n\n- **Quick** : une passe plus légère, la plus rapide et la moins coûteuse ;\n- **Standard** : un équilibre entre profondeur, vitesse et coût, c'est le niveau par défaut ;\n- **Deep** : la passe la plus approfondie, la plus longue et la plus chère.\n\nUn Owner choisit un niveau pour toute l'organisation dans **Admin settings > Claude Code**, section **Code review** : on sélectionne le niveau sous **Review level**, puis on confirme avec **Change level**. Chaque dépôt peut ensuite avoir le sien : on clique sur **Edit** sur la ligne du dépôt et on choisit un **Review level**. La première option, **Default**, suit le niveau de l'organisation, et le choix s'enregistre dès qu'on le sélectionne. Un nouveau niveau s'applique aux revues qui démarrent après le changement.\n\nLa documentation donne elle-même l'exemple d'usage : Quick pour une base de code courante, Deep pour un dépôt critique. Elle ne dit pas ce que chaque niveau change techniquement (nombre d'agents, modèles employés, durée mesurée) et ne chiffre pas l'écart de coût entre eux. Elle précise seulement que le choix des modèles est fait par Code Review et que les réglages d'administration n'en proposent pas : le niveau est le seul moyen de rendre les revues plus ou moins approfondies.\n\n## Couvrir toute une organisation GitHub\n\nLe second ajout du changelog permet de couvrir tous les dépôts d'une organisation GitHub, y compris ceux ajoutés plus tard, sans les sélectionner un par un. Dans le tableau **Repositories**, on règle **Review runs** sur la ligne de l'organisation. Les options sont les trois modes habituels (**Once after PR creation**, **After every push**, **Manual (@claude review)**) plus **Off**.\n\nLes conditions sont strictes :\n\n- le compte GitHub connecté à Claude doit être propriétaire de l'organisation GitHub ;\n- l'organisation doit être sur github.com : GitHub Enterprise Server et les comptes personnels ne sont pas éligibles ;\n- une limite de dépense mensuelle doit être définie, pour l'organisation Claude ou pour Code Review.\n\nDeux effets méritent attention. Le réglage écrase ceux des dépôts déjà configurés individuellement, hormis les dépôts désactivés sur leur propre ligne, qui restent à Off. Et la ligne d'organisation n'a pas de niveau de revue propre : le niveau vient du défaut de l'organisation ou du réglage de chaque dépôt. La documentation avertit que cette couverture globale « peut faire monter la dépense de façon significative ».\n\n## Ce que ça change en pratique\n\nLa facturation de Code Review se fait à l'usage de jetons, via les crédits d'utilisation, séparément de l'usage inclus dans l'offre. La documentation ne donne pas de prix par revue : le coût dépend du niveau, de la taille de la modification, de la complexité du code voisin et du nombre de problèmes candidats à vérifier. Le nombre de revues dépend du réglage **Review runs** : un dépôt ajouté depuis la page d'administration démarre à **After every push**, qui multiplie le coût par le nombre de pushes.\n\nUn responsable d'équipe dispose donc de deux curseurs indépendants, la profondeur et la fréquence. Pour estimer l'effet, la documentation recommande un pilote : fixer une limite mensuelle, activer quelques dépôts représentatifs en **Once after PR creation** ou en manuel, puis lire le coût moyen par revue dans la colonne **Average cost** du tableau des dépôts, et le multiplier par le nombre de pull requests mensuelles. Ce coût moyen varie avec le niveau choisi, ce qui permet de comparer Quick et Standard sur ses propres données plutôt que sur une estimation générique.\n\nAutre limite documentée : quand la limite de dépense du service, la limite de l'organisation ou le solde de crédits est épuisé, ou qu'il reste moins que le coût attendu d'une revue, les revues sont sautées et un commentaire sur la pull request en donne la cause. Le service n'est pas disponible pour les organisations avec Zero Data Retention, la configuration HIPAA ou des clés de chiffrement gérées par le client (CMEK).\n\nLa version 2.1.304 contient aussi d'autres changements, notamment `/auto-mode-setup` et la commande `/claude-api managed-agents-secure`, qui ne sont pas détaillés ici.\n",
+  "tags": [
+    "claude-code",
+    "code-review",
+    "anthropic",
+    "facturation"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Code — Changelog (2.1.304)",
+      "url": "https://code.claude.com/docs/en/changelog#2-1-304",
+      "consultee": "2026-10-20"
+    },
+    {
+      "titre": "Claude Code — Code Review",
+      "url": "https://code.claude.com/docs/en/code-review",
+      "consultee": "2026-10-20"
+    },
+    {
+      "titre": "Claude Code — Set up Code Review",
+      "url": "https://code.claude.com/docs/en/code-review-setup",
+      "consultee": "2026-10-20"
+    },
+    {
+      "titre": "Claude Code — Code Review costs and usage",
+      "url": "https://code.claude.com/docs/en/code-review-costs",
+      "consultee": "2026-10-20"
+    }
+  ],
+  "statut": "publie"
+}
