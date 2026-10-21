@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-profils-utilisateur-clients-finaux",
+  "titre": "Anthropic : des profils pour isoler les clients finaux en cas de sanction",
+  "date": "2026-10-21T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Les user profiles de l'API Claude permettent à une plateforme d'attribuer chaque requête à un client final, pour qu'une restriction ne vise plus toute l'organisation. Les webhooks associés n'émettent pas encore d'événements.",
+  "corps": "Les notes de version de la Claude Platform, à la date du 20 octobre 2026, annoncent le lancement des *user profiles* (profils d'utilisateur) : un mécanisme qui permet à une plateforme d'indiquer à Anthropic, pour chaque requête d'API, quel client final elle sert. Le but est qu'une mesure de sécurité, restriction ou bannissement, puisse viser un seul client final au lieu de toute l'organisation.\n\nLe problème décrit par la documentation est celui des revendeurs et des passerelles. Les requêtes envoyées pour le compte de clients arrivent sous l'organisation de la plateforme, et les classificateurs automatiques de sécurité d'Anthropic y opèrent sur l'ensemble du trafic. Sans profil sur la requête, un seul client peut déclencher une mesure qui s'applique à l'organisation entière. Les profils ne sont pas facturables et n'affectent pas les tarifs.\n\n## Enregistrer un client, puis l'identifier à chaque requête\n\nLe fonctionnement tient en deux gestes. On enregistre une fois chaque client final avec `POST /v1/user_profiles`, qui renvoie un identifiant préfixé `uprof_`. Cet identifiant est ensuite transmis dans l'en-tête `anthropic-user-profile-id` de chaque requête faite pour ce client. Les SDK et le CLI exposent un argument qui pose l'en-tête (`user_profile_id` en Python, `--user-profile-id` en CLI). L'en-tête fonctionne aussi pour le comptage de jetons, les Message Batches (il s'applique alors à toutes les requêtes du lot) et la compatibilité avec le SDK OpenAI.\n\n```bash\ncurl https://api.anthropic.com/v1/user_profiles \\\n  -H \"x-api-key: $ANTHROPIC_API_KEY\" \\\n  -H \"anthropic-version: 2023-06-01\" \\\n  -H \"content-type: application/json\" \\\n  -d '{\n    \"name\": \"Acme Analytics, Inc.\",\n    \"access_type\": \"passthrough\",\n    \"external_user_details\": {\n      \"reference_id\": \"cust-8f2a1c\",\n      \"country\": \"US\"\n    }\n  }'\n```\n\nLe champ `access_type` distingue deux cas. Avec `application` (valeur par défaut), le profil représente un utilisateur inscrit sur le produit, un profil par personne. Avec `passthrough`, il représente une entreprise à qui l'on revend l'accès à l'API, un profil par entreprise et non par employé. Pour identifier une personne précise au sein d'une entreprise, la documentation recommande d'ajouter en plus `metadata.user_id` dans la requête Messages.\n\nTous les champs d'un profil sont facultatifs. Parmi ceux d'`external_user_details` figurent `reference_id`, `country`, `entity_type`, `account_status`, `name_hash` et `email_hash`. Pour les noms et adresses que l'on ne peut pas communiquer, la documentation prévoit d'envoyer un condensé calculé par ses soins. Anthropic précise ne pas vérifier ces informations, et un profil ne contient aucun contenu de conversation.\n\n## Webhooks d'organisation : une bêta sans événements\n\nLe même jour, l'Admin API reçoit en bêta des *webhooks* d'organisation, activés par l'en-tête `anthropic-beta: webhooks-2026-10-07`. Les points de terminaison se gèrent sous `/v1/organizations/webhooks`, et deux types d'événements existent : `user_profile.enforcement_action_opened` et `user_profile.enforcement_action_resolved`. Les événements ne portent que des identifiants (`data.id` pour le profil, `data.enforcement_action_id` pour la mesure) ; il faut ensuite lire le profil avec `GET /v1/user_profiles/{id}` pour connaître le type de mesure, `restriction` ou `ban`, et son éventuelle expiration. Les livraisons suivent la spécification Standard Webhooks, avec une réponse `2xx` attendue sous 5 secondes.\n\nUne réserve figure en tête de la page de documentation : la livraison des événements n'est pas active. Anthropic n'envoie pas encore les deux événements, et un point de terminaison enregistré ne reçoit donc rien. La page indique que l'on peut enregistrer des points de terminaison et construire son gestionnaire d'après le format décrit. L'accès se demande auprès de l'équipe commerciale d'Anthropic, et les organisations avec HIPAA readiness activé en sont exclues.\n\n## Ce que ça change en pratique\n\nPour une plateforme qui revend Claude, le changement est de granularité : l'exposition à une mesure de sécurité cesse d'être commune à tous les clients dès lors que chaque requête porte un profil. La documentation conseille aussi de séparer en deux organisations le trafic des clients finaux et l'usage interne, car un profil appartient à une organisation et non à un espace de travail.\n\nIl y a des coûts d'intégration : créer un profil à l'inscription de chaque client, stocker son identifiant, penser à le mettre sur chaque appel. Une requête sans identifiant reste traitée comme un usage propre de l'organisation. Sur l'API Claude, un identifiant malformé ou étranger à l'organisation est rejeté par une erreur `400`, alors que Claude dans Amazon Bedrock et Google Cloud ne vérifient que le format et acceptent tout identifiant bien formé.\n\nEnfin, tant que les événements ne sont pas livrés, la détection d'une mesure contre un client passe par l'interrogation de la liste des profils filtrée sur `enforcement_status`. La documentation ne précise pas de date pour l'activation de la livraison.",
+  "tags": [
+    "api",
+    "securite",
+    "user-profiles",
+    "webhooks"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Platform — Notes de version",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-10-21"
+    },
+    {
+      "titre": "Claude Platform — User profiles",
+      "url": "https://platform.claude.com/docs/en/manage-claude/user-profiles",
+      "consultee": "2026-10-21"
+    },
+    {
+      "titre": "Claude Platform — Organization webhooks",
+      "url": "https://platform.claude.com/docs/en/manage-claude/organization-webhooks",
+      "consultee": "2026-10-21"
+    }
+  ],
+  "statut": "publie"
+}
