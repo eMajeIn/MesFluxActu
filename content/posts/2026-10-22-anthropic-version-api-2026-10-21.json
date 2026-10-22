@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-version-api-2026-10-21",
+  "titre": "Anthropic : la version d'API 2026-10-21 retire temperature, top_p et top_k",
+  "date": "2026-10-22T08:00:00+02:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "La version d'API 2026-10-21 de Claude renvoie une erreur 400 dès qu'une requête contient temperature, top_p ou top_k. Les SDK qui l'envoient par défaut changent aussi d'en-tête d'authentification et de licence.",
+  "corps": "Les notes de version de la Claude Platform signalent, à la date du 21 octobre 2026, la publication de la version d'API `2026-10-21`. Les SDK et la CLI `ant` livrés avec elle l'envoient par défaut. Jusque-là, ils transmettaient `anthropic-version: 2023-06-01`.\n\nLa page de versions rappelle le principe : pour une version donnée, Anthropic conserve les paramètres d'entrée et de sortie existants. Changer de version est donc le seul moment où une requête valide peut devenir invalide. Celle-ci en contient plusieurs, et un SDK mis à jour les applique sans qu'on l'ait demandé.\n\n## Ce qui change côté requêtes\n\nTrois changements touchent l'API Messages, d'après le guide de migration.\n\n- **`temperature`, `top_p` et `top_k` sont supprimés.** Une requête qui envoie l'un des trois renvoie une erreur 400, y compris à la valeur par défaut du paramètre. Cela vaut aussi pour les requêtes de l'API Message Batches. Sans ces paramètres, l'échantillonnage utilise les valeurs par défaut, dont une `temperature` de 1,0.\n- **Un bloc `document` placé directement dans un message `assistant` renvoie une erreur 400.** Les documents doivent passer par un message `user`. Un document imbriqué dans un autre bloc, comme un résultat d'outil de récupération web renvoyé par Claude, reste accepté.\n- **Un bloc `text` avec un tableau `citations` non vide dans un message `user` renvoie une erreur 400**, y compris à l'intérieur d'un bloc `search_result`. Les citations présentes dans les messages `assistant` (les réponses précédentes de Claude renvoyées dans l'historique) restent acceptées, tout comme le réglage `\\\"citations\\\": {\\\"enabled\\\": true}` sur les documents et les résultats de recherche.\n\nCôté administration, plusieurs champs sont renommés dans l'Admin API et l'API Analytics de Claude Enterprise. Par exemple, les groupes RBAC ne renvoient plus `roles` mais `role_ids`, et les clés d'API ne renvoient plus `workspace_id` mais `scope.workspace_id`. Le guide en donne la liste complète.\n\n## Ce que les SDK et la CLI changent en plus\n\nLe guide précise que les versions majeures qui envoient `2026-10-21` sont les suivantes : `anthropic` 2.0.0 pour Python, `@anthropic-ai/sdk` 1.0.0 pour TypeScript, `Anthropic` 13.0.0 pour C#, la version 2.0.0 pour Go (le chemin du module devient `github.com/anthropics/anthropic-sdk-go/v2`), la gem `anthropic` 2.0.0 pour Ruby et la CLI `ant` 2.0.0. Pour la CLI, l'ancien chemin `go install` continue d'installer la dernière v1, sans erreur ni avertissement.\n\nCes versions apportent des ruptures qui ne dépendent pas de l'API elle-même :\n\n- les SDK et la CLI n'exposent plus les trois paramètres d'échantillonnage ;\n- la clé d'API est envoyée dans l'en-tête `Authorization: Bearer` au lieu de `X-Api-Key`. L'API accepte les deux, mais un proxy ou une passerelle qui lit `X-Api-Key` doit être adapté, ou la clé doit être envoyée à la main dans cet en-tête ;\n- l'API Text Completions est retirée des SDK TypeScript, Go, Java et Ruby, et de la CLI ;\n- dans les SDK TypeScript et Ruby, la compaction côté client du tool runner est supprimée au profit de la compaction côté serveur ;\n- un client ne porte plus qu'un seul identifiant, puisque clé d'API et jeton d'authentification partagent désormais un en-tête.\n\nLes notes de version indiquent aussi que ces SDK et la CLI passent de la licence MIT à la licence Apache 2.0. Le guide précise que les versions antérieures restent sous MIT et qu'aucun changement de code n'est nécessaire ; seules les fiches de suivi de licences des dépendances sont à mettre à jour.\n\n## Ce que ça change en pratique\n\nPour un appel direct, par exemple en `curl`, la migration consiste à envoyer l'en-tête `anthropic-version: 2026-10-21` et à retirer les trois paramètres :\n\n```bash\ncurl https://api.anthropic.com/v1/messages \\\n  -H \"x-api-key: $ANTHROPIC_API_KEY\" \\\n  -H \"anthropic-version: 2026-10-21\" \\\n  -H \"content-type: application/json\" \\\n  -d '{\n    \"model\": \"claude-opus-5-5\",\n    \"max_tokens\": 1024,\n    \"messages\": [{\"role\": \"user\", \"content\": \"Hello, Claude\"}]\n  }'\n```\n\nLe point le plus délicat concerne les modèles qui acceptent encore des valeurs d'échantillonnage non standard, comme Claude Sonnet 4.6, cité par le guide. Une requête qui abaissait la `temperature` pour obtenir des sorties plus stables perd cet effet, et aucun autre réglage ne le remplace. Le guide propose deux issues : cesser d'envoyer le paramètre, ou laisser cette requête sur `2023-06-01`. Les modèles qui n'acceptent déjà que les valeurs par défaut, dont Claude 4.7 et les suivants, échantillonnent comme avant.\n\nLa mise à jour d'un SDK sans lecture du guide expose donc à des erreurs 400 là où le code passait. Le contenu de `2023-06-01` n'est pas déclaré retiré dans les pages consultées : la documentation ne mentionne pas de date d'arrêt de cette version.\n",
+  "tags": [
+    "api",
+    "sdk",
+    "migration",
+    "versions"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Platform — Versions de l'API",
+      "url": "https://platform.claude.com/docs/en/api/versioning",
+      "consultee": "2026-10-22"
+    },
+    {
+      "titre": "Claude Platform — Migrating to API version 2026-10-21",
+      "url": "https://platform.claude.com/docs/en/api/migration-2026-10-21",
+      "consultee": "2026-10-22"
+    },
+    {
+      "titre": "Claude Platform — Notes de version",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-10-22"
+    }
+  ],
+  "statut": "publie"
+}
