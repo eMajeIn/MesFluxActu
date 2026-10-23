@@ -1,0 +1,27 @@
+{
+    "slug": "anthropic-don-agent-skills-aaif",
+    "titre": "Anthropic confie le standard Agent Skills à l'Agentic AI Foundation",
+    "date": "2026-10-23T08:00:00+02:00",
+    "type": "actu",
+    "labo": "anthropic",
+    "chapeau": "Le 22 octobre 2026, Anthropic a donné la spécification Agent Skills, son nom, son dépôt GitHub et son domaine à l'AAIF. La licence et le calendrier de la feuille de route ne sont pas précisés.",
+    "corps": "Anthropic a annoncé le 22 octobre 2026 qu'elle donne le standard Agent Skills à l'Agentic AI Foundation (AAIF), une fondation hébergée par la Linux Foundation. Le transfert couvre la spécification, le nom et le logo, l'organisation GitHub qui héberge le projet et le domaine agentskills.io. Jusque-là, le standard vivait sous l'organisation GitHub et le domaine d'Anthropic, où il avait été publié en décembre 2025.\n\nSelon le billet d'annonce, l'AAIF a été cofondée par Anthropic, Block et OpenAI l'année précédente, et abrite déjà le Model Context Protocol (MCP), autre projet qu'Anthropic lui a confié. Le standard reste ouvert, et l'on peut l'utiliser ou y contribuer sans adhérer à la fondation.\n\n## Ce qui est transféré, et à qui\n\nUne *skill* est un dossier contenant un fichier `SKILL.md`, accompagné si besoin de scripts et de documents de référence. Le fichier commence par un en-tête YAML dont la documentation de la Claude Platform donne les champs obligatoires : `name` et `description`. Seuls ces deux éléments occupent le contexte du modèle au démarrage ; le corps du fichier n'est lu que lorsque la skill est déclenchée.\n\nCôté gouvernance, le billet indique que des ingénieurs d'Anthropic, de Google, d'OpenAI et d'autres organisations maintiendront le standard à titre individuel, et non comme représentants de leur employeur. David Soria Parra et Mahesh Murag en sont les mainteneurs principaux. Anthropic dit vouloir un standard ouvert, piloté par la communauté et neutre vis-à-vis des fournisseurs.\n\nLe billet avance aussi des chiffres d'adoption : plus de 70 plateformes d'agents l'ont intégré, dont ChatGPT, Cursor, GitHub Copilot et VS Code, avec environ un million de skills publiées et près de 280 millions d'installations. Ces chiffres proviennent d'Anthropic elle-même ; la page ne cite pas de mesure indépendante.\n\n## Ce que le billet ne dit pas\n\nPlusieurs points restent sans réponse dans le texte consulté :\n\n- **La licence.** Aucune licence n'est nommée pour la spécification, le code ou le nom et le logo.\n- **Le calendrier.** Le billet présente comme une proposition une feuille de route faite de versions numérotées, d'un processus formel de propositions de changement et de consignes de sécurité pour les auteurs et les utilisateurs de skills. Aucune date n'est donnée, et les consignes de sécurité ne sont pas publiées.\n- **La prise de décision.** Le billet promet de la transparence, mais ne décrit ni la désignation des mainteneurs ni le règlement des désaccords.\n- **La compatibilité.** Rien n'indique si les skills existantes ou leurs chargeurs devront être modifiés.\n\nLe site agentskills.io n'a pas pu être consulté pendant cette exécution (erreur de résolution DNS depuis l'environnement, sans en-tête `x-deny-reason`) ; le contenu de la spécification n'a donc pas été relu à la source.\n\n## Ce que ça change en pratique\n\nPour un développeur qui écrit des skills, le format ne change pas : un dossier, un `SKILL.md`, un `name` et une `description`. La documentation de la Claude Platform décrit toujours les mêmes surfaces et les mêmes contraintes. Les skills personnalisées ne se synchronisent pas entre claude.ai, l'API et Claude Code ; elles se gèrent séparément sur chaque surface. Dans l'API, elles s'exécutent dans un conteneur sans accès réseau.\n\nLe changement porte sur la propriété. L'évolution de la spécification passe d'un seul éditeur à une structure collective, avec un canal de retour passant par le Discord du projet et la discussion qui continue sur GitHub. Pour une équipe qui distribue des skills à des outils de plusieurs éditeurs, cela réduit la dépendance à un seul calendrier de décision, sans qu'on sache encore comment les arbitrages seront rendus.\n\nReste un point de vigilance que la documentation d'Anthropic formule déjà : une skill donne des instructions et du code à l'agent, et une skill malveillante peut lui faire appeler des outils de façon non conforme à son objet. La documentation conseille de n'employer que des skills de confiance et d'auditer tous les fichiers d'une skill externe. Les consignes de sécurité annoncées par la fondation ne sont pas encore disponibles.",
+    "tags": [
+        "skills",
+        "standard-ouvert",
+        "gouvernance"
+    ],
+    "sources": [
+        {
+            "titre": "Anthropic — Donating Agent Skills to the Agentic AI Foundation",
+            "url": "https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation",
+            "consultee": "2026-10-23"
+        },
+        {
+            "titre": "Documentation Claude Platform — Agent Skills",
+            "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview",
+            "consultee": "2026-10-23"
+        }
+    ],
+    "statut": "publie"
+}
