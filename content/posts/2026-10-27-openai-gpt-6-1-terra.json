@@ -1,0 +1,33 @@
+{
+  "slug": "openai-gpt-6-1-terra",
+  "titre": "OpenAI : GPT-6.1 Terra, un modèle à 1 $ l'entrée pour l'image et l'agent",
+  "date": "2026-10-27T07:00:00+01:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "OpenAI ajoute gpt-6.1-terra à l'API : 1,05 million de jetons de contexte, entrée texte et image, 1 $ le million de jetons en entrée et 5 $ en sortie, soit la moitié du tarif de GPT-6.1 Sol.",
+  "corps": "OpenAI a ajouté `gpt-6.1-terra` à son API le 26 octobre 2026, d'après le journal des modifications de la plateforme. Le modèle est disponible dans les API Responses et Chat Completions. La fiche du modèle le décrit comme rapide et économique, orienté vers le raisonnement visuel, l'usage précis d'un ordinateur (*computer use*, c'est-à-dire un agent qui agit sur des écrans d'application) et la rédaction.\n\nLa fiche ne donne pas de date de sortie ; la date retenue ici est celle de l'entrée du journal des modifications.\n\nTerra se place sous GPT-6.1 Sol dans la gamme : il coûte moitié moins cher, avec les mêmes tailles de contexte. Le détail des écarts compte plus que le positionnement affiché.\n\n## Ce que dit la fiche technique\n\n- **Contexte :** 1 050 000 jetons, dont 922 000 en entrée au maximum et 128 000 en sortie. Ces valeurs sont identiques à celles de GPT-6.1 Sol.\n- **Modalités :** texte et image en entrée, texte en sortie. Audio et vidéo ne sont pas pris en charge.\n- **Date limite des connaissances :** 1er juin 2026, contre le 30 avril 2026 pour GPT-6.1 Sol.\n- **Raisonnement :** les niveaux d'effort sont `none`, `low`, `medium` (par défaut), `high`, `xhigh` et `max`. La fiche de GPT-6.1 Sol ne liste pas `none`.\n- **Fonctions :** streaming, sorties structurées, appel de fonctions, recherche de fichiers, entrée image, recherche web et mise en cache des prompts. Le fine-tuning et les sorties prédites ne sont pas pris en charge.\n- **Outils (API Responses uniquement) :** `web_search`, `file_search`, `image_generation`, `code_interpreter`, `hosted_shell`, `apply_patch`, `skills`, `computer_use`, `mcp` et `tool_search`.\n\n## Tarifs et limites de débit\n\nLes prix sont indiqués par million de jetons.\n\n| | GPT-6.1 Terra | GPT-6.1 Sol |\n|---|---|---|\n| Entrée | 1 $ | 2 $ |\n| Entrée en cache | 0,05 $ | 0,10 $ |\n| Sortie | 5 $ | 10 $ |\n\nPour Terra, l'écriture en cache coûte 1,25 $ avec une rétention de 30 minutes, ou 2,50 $ avec 12 heures. Au-delà de 272 000 jetons d'entrée, la requête entière est facturée au double sur l'entrée et le cache, et à 1,5 fois sur la sortie. Les modes Batch et Flex sont 50 % moins chers que le tarif standard, le mode rapide (*fast*) coûte le double, et le traitement régional ajoute 10 %.\n\nLes limites par minute sont les mêmes que pour Sol : 5 000 requêtes et 1 million de jetons pour le palier Build, 10 000 et 4 millions pour Launch, 15 000 et 40 millions pour Grow.\n\n## Ce que ça change en pratique\n\nPour une application qui envoie des images (photos de produits, plans techniques, captures d'écran) et qui n'a pas besoin du niveau de Sol, la différence de prix est un facteur deux sur chaque ligne du tarif. La fiche ne publie aucun benchmark comparant les deux modèles : l'écart de qualité reste à mesurer sur ses propres données.\n\nPlusieurs exclusions sont à vérifier avant une migration. Terra n'est pas disponible via l'API Realtime ni l'API Assistants, et il n'accepte pas le fine-tuning. Les outils listés ne fonctionnent que dans l'API Responses, pas dans Chat Completions. La date limite des connaissances plus récente que celle de Sol peut aussi compter pour des sujets de mai 2026, sans que la documentation en dise davantage sur la qualité de ces connaissances.\n\nEnfin, le changement de modèle n'est pas neutre pour les coûts de contexte long : la majoration au-delà de 272 000 jetons s'applique à la requête entière, pas seulement à la part qui dépasse le seuil.",
+  "tags": [
+    "openai",
+    "gpt-6.1",
+    "modèle",
+    "tarifs"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI API — Fiche du modèle GPT-6.1 Terra",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6.1-terra",
+      "consultee": "2026-10-27"
+    },
+    {
+      "titre": "OpenAI API — Journal des modifications",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-10-27"
+    },
+    {
+      "titre": "OpenAI API — Fiche du modèle GPT-6.1 Sol",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "consultee": "2026-10-27"
+    }
+  ],
+  "statut": "publie"
+}
