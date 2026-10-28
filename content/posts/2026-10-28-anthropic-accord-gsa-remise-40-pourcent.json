@@ -1,0 +1,28 @@
+{
+    "slug": "anthropic-accord-gsa-remise-40-pourcent",
+    "titre": "Anthropic : 40 % de remise sur Claude pour les acheteurs publics via la GSA",
+    "date": "2026-10-28T08:00:00+01:00",
+    "type": "actu",
+    "labo": "anthropic",
+    "chapeau": "Le 27 octobre 2026, Anthropic a annoncé un accord avec la GSA : 40 % de remise sur Claude Enterprise, Claude for Government et l'API, sans minimum de dépense, pour les acheteurs publics américains.",
+    "corps": "Anthropic a annoncé le 27 octobre 2026 un nouvel accord avec la General Services Administration (GSA), l'agence fédérale américaine chargée des achats publics. Les organismes publics qui achètent Claude par ce canal bénéficient de 40 % de remise sur Claude Enterprise, Claude for Government et l'API Claude.\n\nSelon le billet, c'est la première fois que la remise couvre l'ensemble des surfaces de produit. Elle s'applique aux achats faits directement auprès d'Anthropic dès maintenant ; pour les achats passés via des fournisseurs cloud, le billet parle des « mois à venir » sans donner de date. Les agences n'ont aucun engagement de dépense minimale et ne paient que la consommation réelle. Anthropic estime que les remises feront économiser un milliard de dollars à l'État ; le billet ne détaille pas le calcul.\n\n## Qui est concerné, et comment acheter\n\nLe dispositif vise les agences fédérales américaines, ainsi que les collectivités des États, locales, tribales et territoriales. Elles peuvent acheter Claude au tarif remisé via le Multiple Award Schedule de la GSA, le catalogue d'achat de l'agence. Pour les autres organisations, Anthropic renvoie vers son équipe secteur public.\n\nLe billet ajoute un programme d'accompagnement destiné à aider les agences à déployer Claude, annoncé pour « les prochaines semaines » sans autre précision. La durée de l'accord et ses éventuelles conditions, au-delà de l'absence de minimum, ne figurent pas sur la page.\n\n## Ce que l'offre recouvre côté technique\n\nLe billet rappelle l'état des autorisations de sécurité, qui conditionnent ce qu'une agence peut réellement acheter :\n\n- **Claude for Government**, disponible pour tous depuis le 30 septembre, offre selon Anthropic une parité de fonctions quasi complète avec les offres commerciales, à un niveau d'autorisation FedRAMP High. L'annonce du 30 septembre précise que le produit est ouvert aux agences fédérales et d'État, qu'il était en bêta publique depuis juillet, et que la ligne de commande Claude Code ainsi que Claude pour Microsoft 365 y sont en accès anticipé, sur demande auprès de l'équipe secteur public.\n- **Claude sur Amazon Bedrock** est autorisé FedRAMP High ; certains modèles sont autorisés pour des charges DoD IL4 et IL5 dans AWS GovCloud.\n- **Claude sur Vertex AI** (Google Cloud) est autorisé FedRAMP High.\n- **Claude Enterprise** est en cours d'instruction pour FedRAMP Moderate, via le programme FedRAMP 20x. Il n'est donc pas encore autorisé à ce niveau, selon le billet.\n\nSur l'adoption, Anthropic indique qu'environ 500 organisations fédérales, d'État et locales utilisent Claude, que les utilisateurs actifs hebdomadaires de Claude for Government ont été multipliés par huit environ depuis février, et que l'usage dans les agences civiles fédérales a été multiplié par vingt en un an. Ces chiffres sont ceux d'Anthropic ; la page ne précise pas leur méthode de calcul.\n\n## Ce que ça change en pratique\n\nPour un acheteur public américain, le changement est tarifaire et contractuel : une remise uniforme de 40 % sur trois produits, sans engagement minimal, via un catalogue d'achat déjà utilisé. Le modèle d'achat de Claude for Government décrit le 30 septembre allait déjà dans ce sens : pas de frais par siège, achat d'usage par paliers fixes avec un plafond ferme.\n\nDeux limites ressortent des pages. D'abord, la remise via les fournisseurs cloud n'est pas encore active, ce qui compte pour les agences dont les marchés passent par Bedrock ou Vertex AI. Ensuite, le niveau d'autorisation dépend du produit : un service sous FedRAMP High et un autre encore en cours pour FedRAMP Moderate ne se substituent pas l'un à l'autre pour les mêmes données.\n\nHors des États-Unis, rien dans les pages consultées ne prévoit d'équivalent. Les organisations européennes ne sont pas visées par cet accord, et la documentation consultée ne dit rien sur d'éventuelles conditions comparables ailleurs.\n",
+    "tags": [
+        "secteur-public",
+        "tarifs",
+        "gsa",
+        "fedramp"
+    ],
+    "sources": [
+        {
+            "titre": "Anthropic — Expanding our partnership with GSA to bring Claude to all levels of government",
+            "url": "https://www.anthropic.com/news/expanding-partnership-gsa",
+            "consultee": "2026-10-28"
+        },
+        {
+            "titre": "Claude — Claude for Government is now generally available",
+            "url": "https://claude.com/blog/claude-for-government-is-now-generally-available",
+            "consultee": "2026-10-28"
+        }
+    ],
+    "statut": "publie"
+}
