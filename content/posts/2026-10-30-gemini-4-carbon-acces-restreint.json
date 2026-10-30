@@ -1,0 +1,28 @@
+{
+    "slug": "gemini-4-carbon-acces-restreint",
+    "titre": "Gemini 4 Carbon : Google ouvre son modèle phare aux défenseurs cyber",
+    "date": "2026-10-30T08:00:00+01:00",
+    "type": "actu",
+    "labo": "gemini",
+    "chapeau": "Le 28 octobre 2026, Google a présenté Gemini 4 Carbon, son modèle le plus puissant, d'abord réservé à des défenseurs en cybersécurité et à des partenaires. Tarifs et benchmarks annoncés ; pas d'API ouverte.",
+    "corps": "Google a présenté le 28 octobre 2026 Gemini 4 Carbon, qu'elle décrit comme son modèle le plus puissant à ce jour. Il succède, deux semaines après, à Gemini 4 Argon, publié le 13 octobre 2026. Contrairement à Argon, Carbon n'est pas disponible pour tous : l'accès est restreint.\n\nSelon l'annonce, le modèle est distribué cette semaine à un sous-ensemble de défenseurs en cybersécurité, puis étendu à des partenaires de confiance via le programme Fairwind. Google indique vouloir l'ouvrir aux développeurs, aux entreprises et au grand public « dès que possible », sans date. L'article ne fournit ni identifiant de modèle pour l'API, ni taille de fenêtre de contexte, ni liste des modalités acceptées.\n\n## Ce que Google revendique\n\nLes résultats sont ceux que publie Google, avec des évaluations de cybersécurité menées sans garde-fous :\n\n- Artificial Analysis Intelligence Index v5.0 : 59, au premier rang ;\n- WebDev Arena : 1768 Elo, quatrième rang, soit 89 points de plus que le modèle précédent ;\n- SEC-bench Pro (détection de vulnérabilités) : 88,2 % ;\n- ExploitGym (exploitation) : 54,8 % ;\n- CWE-bench (correction), d'après le classement de Collinear : 71,0 % ;\n- Gray Swan IPI (injection de prompt indirecte) : 0,0 % d'attaques réussies, contre 0,7 % pour Argon.\n\nGoogle ajoute que la tricherie réussie sur Terminal-Bench 4.0 tombe à 0,0 %, avec 0,4 % de tentatives, et que la génération de code sécurisé progresse de plus du double par rapport à Argon. Le billet ne décrit pas le protocole complet des autres mesures, et les chiffres n'ont pas été reproduits de façon indépendante dans cet article.\n\n## Tarifs annoncés\n\nLe prix d'introduction est identique à celui d'Argon : 2 $ par million de jetons en entrée et 10 $ par million en sortie, avec 95 % de remise sur les jetons d'entrée en cache. Après la période d'introduction, le tarif passe à 4 $ en entrée et 20 $ en sortie. La page consultée ne précise pas la date de fin de cette période pour Carbon ; pour Argon, la page d'annonce indique le 30 novembre 2026.\n\n## Ce que ça change en pratique\n\nPour un développeur, rien n'est utilisable aujourd'hui sans invitation : le modèle de référence reste Gemini 4 Argon, disponible dans l'API depuis AI Studio et la plateforme Gemini. L'intérêt de l'annonce tient au choix de diffusion : Google réserve d'abord Carbon à la défense informatique, ce qui est cohérent avec la place des benchmarks de sécurité dans le billet.\n\nLes équipes sécurité qui évaluent des modèles pour la recherche de vulnérabilités ou la correction de code ont là des chiffres à surveiller, à confronter à leurs propres jeux de test une fois l'accès ouvert. Pour tous les autres, il faudra attendre la documentation de l'API, qui précisera l'identifiant du modèle, le contexte et les modalités, trois points sur lesquels l'annonce ne dit rien.",
+    "tags": [
+        "gemini",
+        "modèle",
+        "cybersécurité",
+        "tarifs"
+    ],
+    "sources": [
+        {
+            "titre": "Google — Gemini 4 Carbon : our next frontier model",
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/",
+            "consultee": "2026-10-30"
+        },
+        {
+            "titre": "Google — Gemini 4 Argon : built to solve your hardest problems",
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
+            "consultee": "2026-10-30"
+        }
+    ],
+    "statut": "publie"
+}
