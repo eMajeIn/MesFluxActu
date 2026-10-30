@@ -1,0 +1,44 @@
+{
+  "slug": "mistral-clonage-de-voix",
+  "titre": "Mistral : cloner une voix pour la synthèse vocale Voxtral",
+  "date": "2026-10-30T08:00:00+01:00",
+  "type": "explication",
+  "labo": "mistral",
+  "fonctionnalite": "clonage de voix",
+  "chapeau": "Voxtral TTS peut parler avec la voix d'un enregistrement, pour une requête ou enregistrée dans le workspace. Format de l'extrait, voice_id, rétention, autres langues et zones d'ombre.",
+  "corps": "## Ce que c'est\n\nLe clonage de voix de Mistral produit de la parole avec la voix d'un enregistrement que vous fournissez, sans entraînement. La documentation parle de clonage *zero-shot* : un extrait court suffit. Deux usages existent : cloner la voix pour une seule requête, ou l'enregistrer dans votre espace de travail (*workspace*) pour la réutiliser par son identifiant.\n\nLe modèle utilisé dans les exemples de la documentation est `voxtral-mini-tts-3-0` (Voxtral TTS 3), via le point d'entrée `POST /v1/audio/speech`. Les voix enregistrées se créent avec `POST /v1/audio/voices`.\n\n## Comment ça marche\n\nLa documentation distingue trois sortes de voix :\n\n| Sorte | Origine | Durée d'usage |\n| --- | --- | --- |\n| Voix prédéfinie | Fournie par Mistral | Dans toute requête, par son identifiant |\n| Voix clonée | Enregistrement envoyé avec la requête | Cette requête seulement |\n| Voix enregistrée | Voix clonée stockée dans votre workspace | Dans toute requête, par son identifiant, jusqu'à suppression |\n\n**Extrait de référence.** L'enregistrement est un fichier MP3 ou WAV, encodé en base64 ; une URL n'est pas acceptée. Un fichier d'un autre format provoque une erreur `400`, et la page des limites indique une durée d'« quelques secondes à quelques minutes ». Un clone reprend plus que le timbre : l'émotion, le rythme, le bruit de fond et le microphone de l'extrait se retrouvent dans le résultat. La documentation conseille donc d'enregistrer l'extrait dans le style que l'on veut entendre.\n\n**Requête unique.** On passe l'enregistrement dans le champ `ref_audio` de la requête de synthèse ; la voix n'est pas conservée.\n\n**Voix enregistrée.** On crée la voix à partir de l'enregistrement, puis on passe son identifiant dans `voice_id`. Une voix enregistrée porte un champ `retention_notice` : 30 jours par défaut, de 1 à 365 jours, réglable à la création ou à la mise à jour par l'API ; les voix créées depuis l'interface d'AI Studio ont 30 jours par défaut.\n\n**Autres langues.** Une voix clonée n'est pas limitée à la langue de son enregistrement. La langue d'une synthèse est déterminée par la voix, non par un paramètre de requête : on écrit `input` dans la langue voulue et on choisit une voix qui correspond. Le modèle prend en charge 35 langues et plus de 50 dialectes, mais des voix prédéfinies n'existent que pour 22 d'entre elles. Pour les autres, la documentation indique de cloner une voix à partir d'un enregistrement dans la langue cible ; la voix est alors étiquetée avec cette langue automatiquement.\n\n## En pratique\n\nCloner pour une requête unique, avec `curl`. La réponse contient `audio_data`, de l'audio encodé en base64 :\n\n```bash\njq -n --arg ref_audio \"$(base64 < voice_sample.mp3 | tr -d '\\n')\" '{\n  model: \"voxtral-mini-tts-3-0\",\n  input: \"Your order shipped this morning and should arrive on Thursday.\",\n  ref_audio: $ref_audio,\n  response_format: \"wav\"\n}' | curl -s https://api.mistral.ai/v1/audio/speech \\\n  -H \"Authorization: Bearer $MISTRAL_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d @- | jq -r '.audio_data' | base64 --decode > cloned_one_off.wav\n```\n\nEnregistrer une voix, puis l'utiliser par son identifiant, avec le SDK Python :\n\n```python\nimport base64\nimport os\nfrom pathlib import Path\n\nfrom mistralai.client import Mistral\n\nclient = Mistral(api_key=os.environ[\"MISTRAL_API_KEY\"])\n\nsample = Path(\"voice_sample.mp3\")\nvoice = client.audio.voices.create(\n    name=\"Support agent\",\n    sample_audio=base64.b64encode(sample.read_bytes()).decode(),\n    sample_filename=sample.name,\n    languages=[\"en\"],\n)\nprint(f\"Created voice {voice.id}\")\n\nresponse = client.audio.speech.complete(\n    model=\"voxtral-mini-tts-3-0\",\n    input=\"Your order shipped this morning and should arrive on Thursday.\",\n    voice_id=voice.id,\n    response_format=\"wav\",\n)\n\noutput = Path(\"cloned_saved_voice.wav\")\noutput.write_bytes(base64.b64decode(response.audio_data))\nprint(f\"Saved {output.resolve()}\")\n```\n\nPour lister, renommer ou supprimer une voix enregistrée, la documentation renvoie aux méthodes `voices.search`, `voices.get`, `voices.update` et `voices.delete`. Si l'identifiant passé en `voice_id` ne correspond à aucune voix, la requête échoue avec une erreur `404`.\n\n**Cas d'usage.** Une société de livraison veut que ses notifications vocales de suivi de colis aient toujours la même voix, celle d'une employée du service client qui a accepté d'être enregistrée. Un technicien lui fait lire un court texte dans une pièce calme, avec le ton chaleureux souhaité, puis enregistre la voix sous le nom « Support agent ». Toutes les notifications générées ensuite passent par le même `voice_id`, sans renvoyer l'enregistrement à chaque appel.\n\n## Ce que ça change, et où ça s'arrête\n\nL'apport est une voix de marque reproductible à partir d'un enregistrement court, sans phase d'entraînement, réutilisable par un simple identifiant. La voix reste la même d'une requête à l'autre ; ce que l'on peut encore piloter par requête (balises d'émotion et de rythme, prononciation personnalisée, expressivité) fait l'objet d'autres pages de la documentation.\n\nPour un résultat plus fidèle, la documentation recommande le clonage professionnel (*professional voice cloning*, PVC) : 30 minutes à 3 heures d'audio propre, d'un seul locuteur, enregistré dans une pièce calme avec le même micro et la même distance tout du long, sans musique ni traitement lourd, et avec une gamme d'émotions pour éviter un rendu robotique. La page décrit le principe, mais pas la procédure d'enrôlement par l'API ; ne vous attendez donc pas à la trouver ici.\n\nZones d'ombre, à vérifier avant de produire :\n\n- les pages consultées ne donnent pas de tarif du clonage, ni de durée précise en secondes pour l'extrait ;\n- la section de la documentation consacrée au consentement et au clonage est vide dans la version consultée, alors qu'il s'agit de la voix d'une personne réelle : le consentement écrit de la personne reste une précaution à prendre de votre côté ;\n- un clone reprend le bruit et le micro de l'extrait ; un enregistrement médiocre donne une voix médiocre ;\n- la durée de rétention d'une voix enregistrée est bornée (1 à 365 jours) : une voix ne vit pas indéfiniment par défaut, et il faut prévoir son renouvellement ou la recréer.\n",
+  "tags": [
+    "voxtral",
+    "synthese-vocale",
+    "voix",
+    "audio"
+  ],
+  "sources": [
+    {
+      "titre": "Documentation Mistral — Voice cloning",
+      "url": "https://docs.mistral.ai/studio/audio/text-to-speech/voice-cloning",
+      "consultee": "2026-10-30"
+    },
+    {
+      "titre": "Documentation Mistral — Voices (concepts)",
+      "url": "https://docs.mistral.ai/studio/audio/concepts/voices",
+      "consultee": "2026-10-30"
+    },
+    {
+      "titre": "Documentation Mistral — Voices (bibliothèque)",
+      "url": "https://docs.mistral.ai/studio/audio/text-to-speech/voices",
+      "consultee": "2026-10-30"
+    },
+    {
+      "titre": "Documentation Mistral — Languages",
+      "url": "https://docs.mistral.ai/studio/audio/specs-and-limits/languages",
+      "consultee": "2026-10-30"
+    },
+    {
+      "titre": "Documentation Mistral — Limits",
+      "url": "https://docs.mistral.ai/studio/audio/specs-and-limits/limits",
+      "consultee": "2026-10-30"
+    }
+  ],
+  "statut": "publie"
+}
