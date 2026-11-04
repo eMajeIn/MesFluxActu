@@ -1,0 +1,38 @@
+{
+  "slug": "anthropic-taille-requete-128-mo",
+  "titre": "Anthropic : les requêtes Messages passent de 32 à 128 Mo sur l'API directe",
+  "date": "2026-11-04T08:00:00+01:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Depuis le 28 octobre 2026, l'API Claude de première partie accepte 128 Mo par requête Messages ou Token Counting, contre 32 Mo. Les plateformes partenaires gardent leurs propres plafonds, parfois à 20 Mo.",
+  "corps": "L'API Claude de première partie accepte désormais des requêtes de 128 Mo sur les endpoints Messages et Token Counting, contre 32 Mo auparavant. Les notes de version de la plateforme datent le changement du 28 octobre 2026 et le limitent à l'API hébergée par Anthropic elle-même.\n\nLa limite en question porte sur la taille totale de la requête HTTP, en octets, et non sur le nombre de jetons. Elle se heurte surtout aux pièces jointes encodées dans le corps de la requête : PDF, images, documents volumineux. Une requête qui la dépasse reçoit une erreur 413 de type `request_too_large`.\n\n## Les limites en vigueur, endpoint par endpoint\n\nLa page de présentation de l'API donne le tableau suivant pour l'API Claude de première partie :\n\n| Endpoint | Taille maximale d'une requête |\n|---|---|\n| Messages, Token Counting | 128 Mo |\n| Message Batches | 256 Mo |\n| Files API | 500 Mo |\n| Sessions, Agents, Environments (Managed Agents) | 32 Mo |\n\nLe plafond de 32 Mo reste donc en vigueur pour les endpoints de Managed Agents. Il ne s'applique plus à Messages ni à Token Counting, ce qui est cohérent avec le fait que ce dernier sert à estimer le coût d'une requête avant de l'envoyer : les deux acceptent la même taille.\n\nLa page des erreurs précise un détail d'exploitation : sur l'API de première partie, c'est Cloudflare qui renvoie l'erreur 413 avant que la requête n'atteigne les serveurs de l'API. Le dépassement se constate donc à l'entrée, sans traitement du contenu.\n\n## Ce qui n'a pas bougé : les autres plateformes\n\nLe relèvement ne vaut que pour l'API Claude directe. La documentation indique que les plateformes partenaires ont leurs propres plafonds :\n\n- Amazon Bedrock : 20 Mo ;\n- Claude Models on Google Cloud (géré par Google) : 30 Mo ;\n- Claude Platform on AWS, Claude Models on Google Cloud (géré par Anthropic) et Microsoft Foundry : 32 Mo pour les requêtes Messages et Token Counting.\n\nLa documentation renvoie vers la page de chaque plateforme pour les valeurs à jour. Un code qui fonctionne en direct avec un fichier de 60 Mo échouera donc sur ces plateformes, sans que le modèle appelé n'y soit pour quelque chose.\n\n## Ce que ça change en pratique\n\nLe cas le plus direct est celui du PDF. La page de documentation consacrée au support des PDF indique désormais 128 Mo comme taille maximale de requête sur l'API de première partie, en précisant que la valeur varie selon la plateforme. Notre article du 24 août 2026 sur le sujet mentionnait 32 Mo : ce chiffre n'est plus exact pour l'API directe. Un document qu'il fallait découper ou envoyer par la Files API peut désormais, selon sa taille, passer dans une requête Messages.\n\nDeux réserves figurent dans la même page. D'abord, la limite d'octets n'est pas la seule : les PDF denses peuvent remplir la fenêtre de contexte avant d'atteindre la limite de pages, et la documentation avertit que des requêtes contenant de gros PDF peuvent échouer même avec la Files API. Elle suggère de découper le document, et de réduire la résolution des images intégrées, chaque page étant traitée comme une image. Ensuite, une requête plus grosse n'est pas gratuite : la documentation consultée ne précise pas d'effet de cette limite sur la latence.\n\nPour un développeur, l'action concrète est de vérifier trois endroits. Les garde-fous côté client qui refusent un envoi au-delà de 32 Mo peuvent être relevés, à condition que la cible soit l'API directe. Le code qui découpe des documents uniquement pour respecter l'ancienne limite peut être simplifié. Et tout code qui doit aussi tourner sur Bedrock, Google Cloud ou Foundry doit conserver la contrainte la plus basse, soit 20 Mo pour Bedrock.\n",
+  "tags": [
+    "api",
+    "limites",
+    "pdf",
+    "messages"
+  ],
+  "sources": [
+    {
+      "titre": "Anthropic — API overview : request size limits",
+      "url": "https://platform.claude.com/docs/en/api/overview",
+      "consultee": "2026-11-04"
+    },
+    {
+      "titre": "Anthropic — Notes de version de la plateforme (28 octobre 2026)",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-11-04"
+    },
+    {
+      "titre": "Anthropic — Claude API errors : request size limits",
+      "url": "https://platform.claude.com/docs/en/api/errors",
+      "consultee": "2026-11-04"
+    },
+    {
+      "titre": "Anthropic — PDF support",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/pdf-support",
+      "consultee": "2026-11-04"
+    }
+  ],
+  "statut": "publie"
+}
