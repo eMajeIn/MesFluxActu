@@ -1,0 +1,38 @@
+{
+  "slug": "openai-gpt-image-2-6-sunburst-flare",
+  "titre": "OpenAI publie GPT Image 2.6, avec sorties SVG et GIF animé",
+  "date": "2026-11-05T08:00:00+01:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 4 novembre 2026, OpenAI a publié gpt-image-2.6-sunburst et gpt-image-2.6-flare : réglage de complexité, sortie SVG, GIF animé, édition par calque, au même tarif que la 2.5.",
+  "corps": "Le 4 novembre 2026, OpenAI a ajouté à son API deux modèles d'image, `gpt-image-2.6-sunburst` et `gpt-image-2.6-flare`, qui succèdent aux modèles 2.5 de la même famille. Le journal des modifications les présente comme dotés d'une complexité réglable, d'une sortie SVG et d'une sortie en GIF animé. Il y ajoute l'édition guidée par un calque d'annotation, ouverte aussi aux modèles 2.5 pris en charge.\n\nLa fiche de chaque modèle conserve la répartition des rôles déjà en place : Sunburst pour le travail visuel détaillé, Flare pour l'itération rapide. Les deux acceptent du texte et des images en entrée et produisent des images. Ils passent par l'API Images, aux points d'entrée `v1/images/generations` et `v1/images/edits`.\n\n## Un réglage de planification : `complexity`\n\nLe champ `complexity` contrôle, selon le guide, la part de réflexion que le modèle consacre à planifier l'image avant de la rendre. Trois valeurs sont acceptées : `low`, `medium` et `high`. Sans indication, les deux modèles utilisent `high`. Le réglage est distinct de `quality`, qui gouverne la qualité du rendu.\n\nLa documentation associe un niveau bas aux retouches ciblées, comme changer un fond ou une enseigne, et un niveau élevé aux textes denses, aux mises en page chargées et aux relations entre objets. Elle prévient qu'une complexité élevée peut augmenter la latence et introduire des changements non voulus, et recommande de comparer les résultats sur sa propre tâche. Ce réglage ne donne pas lieu à une facturation séparée. La documentation ne publie pas de chiffre de latence par niveau.\n\n## Trois nouveaux formats et une édition par calque\n\n**SVG.** Avec `output_format: \"svg\"` sur `POST /v1/images/generations`, l'API renvoie un document vectoriel, utile pour des icônes ou des illustrations dont on veut retoucher les tracés et les couleurs. Le guide décrit le procédé : l'API crée d'abord une image de référence, dont `quality` règle le rendu, puis en tire le SVG. Le résultat est statique, sans script, sans ressource externe et sans image matricielle incorporée. Il faut fixer `n` à 1. Le streaming, les images partielles, `output_compression` et `prompt_rewriter` ne sont pas pris en charge. Le point d'édition n'accepte pas le SVG en sortie, et un SVG n'est pas une entrée valide pour une édition.\n\n**GIF animé.** Avec `output_format: \"gif\"`, trois champs pilotent l'animation :\n\n| Champ | Valeurs | Défaut |\n|---|---|---|\n| `frame_count` | 2 à 64 images | 9 |\n| `frame_duration_ms` | 20 à 2000 ms par image, arrondi à 10 ms | 200 |\n| `size` | `auto`, ou `LARGEURxHAUTEUR` en multiples de 16 | `auto` |\n\nLe nombre d'images, leurs dimensions et le nombre d'animations doivent tenir dans les limites du modèle et dans un budget total de pixels par requête. En cas de dépassement, le guide conseille de réduire `frame_count`, les dimensions ou `n`. Le GIF n'est pas disponible à l'édition. Il n'accepte ni streaming, ni images partielles, ni `output_compression` personnalisé, ni `prompt_rewriter`. Les champs `frame_count` et `frame_duration_ms` ne servent qu'avec cette sortie. Le guide ne publie pas la valeur de ces limites de taille.\n\n**Édition guidée par calque.** Sur `POST /v1/images/edits`, un fichier `markup` transparent indique où la modification doit avoir lieu, et `prompt` décrit le changement. L'exemple officiel recolore un vase entouré en rouge sur une photo de cuisine :\n\n```python\nimport base64\nfrom pathlib import Path\n\nfrom openai import OpenAI\n\nclient = OpenAI()\noverlay = Path(\"markup-vase-overlay-gpt-image-2-6.png\")\nwith open(\"kitchen.webp\", \"rb\") as image, overlay.open(\"rb\") as markup:\n    result = client.images.edit(\n        model=\"gpt-image-2.6-flare\",\n        image=(\"kitchen.webp\", image, \"image/webp\"),\n        markup=(overlay.name, markup, \"image/png\"),\n        quality=\"medium\",\n        prompt=(\n            \"Recolor the striped vase inside the red circle to solid cobalt blue ceramic. \"\n            \"Keep its shape, the dried stems, and the rest of the kitchen unchanged. \"\n            \"Remove the red circle from the finished photo.\"\n        ),\n    )\n\nPath(\"vase.png\").write_bytes(base64.b64decode(result.data[0].b64_json))\n```\n\nPour des retouches par région dans l'API Responses, le guide renvoie vers un masque, non vers ce calque.\n\n## Ce que ça change en pratique\n\nLe tarif ne bouge pas par rapport à la génération précédente : les fiches de Sunburst et de Flare 2.6 indiquent 8 dollars par million de jetons d'image en entrée, 2 dollars en entrée mise en cache et 30 dollars en sortie. La fiche de Sunburst 2.5 affiche les mêmes montants. Les fiches 2.6 donnent aussi 5 dollars par million de jetons de texte en entrée. La fiche 2.5 précise que la sortie coûte 15 dollars en traitement par lots ; celle de la 2.6 ne reprend pas cette mention, et la documentation ne dit pas si le traitement par lots s'applique à elle.\n\nLe point à vérifier avant de migrer est celui des points d'entrée. Les fiches des deux modèles 2.6 marquent l'API Responses comme non prise en charge et seuls les deux points de l'API Images comme pris en charge. Une application qui appelle jusqu'ici l'outil `image_generation` de Responses avec un modèle 2.5 ne peut donc pas simplement changer le nom du modèle. Le guide indique aussi que ses exemples détaillés portent encore sur GPT Image 2.5.\n\nCôté usage, un SVG convient à une équipe qui produit des pictogrammes à retoucher dans un outil de dessin vectoriel. Le GIF concerne les animations courtes : au réglage par défaut, 9 images de 200 ms donnent une boucle de 1,8 seconde, exemple repris dans le guide. Les limites générales de la famille demeurent : les prompts complexes peuvent demander jusqu'à deux minutes, et le rendu du texte reste imparfait selon la documentation.",
+  "tags": [
+    "images",
+    "api",
+    "svg",
+    "gif"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI — Changelog de l'API",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-11-05"
+    },
+    {
+      "titre": "OpenAI — Guide de génération d'images",
+      "url": "https://developers.openai.com/api/docs/guides/image-generation",
+      "consultee": "2026-11-05"
+    },
+    {
+      "titre": "OpenAI — Fiche du modèle GPT-Image-2.6 Sunburst",
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.6-sunburst",
+      "consultee": "2026-11-05"
+    },
+    {
+      "titre": "OpenAI — Fiche du modèle GPT-Image-2.6 Flare",
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2.6-flare",
+      "consultee": "2026-11-05"
+    }
+  ],
+  "statut": "publie"
+}
