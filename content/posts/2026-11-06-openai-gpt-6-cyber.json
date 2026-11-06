@@ -1,0 +1,32 @@
+{
+    "slug": "openai-gpt-6-cyber",
+    "titre": "OpenAI publie GPT-6-Cyber, réservé aux accès Daybreak Red",
+    "date": "2026-11-06T08:00:00+01:00",
+    "type": "actu",
+    "labo": "openai",
+    "chapeau": "Le 5 novembre 2026, OpenAI a publié gpt-6-cyber, un modèle d'analyse de vulnérabilités à 1,05 million de jetons de contexte, accessible sur approbation Daybreak Red.",
+    "corps": "Le 5 novembre 2026, OpenAI a ajouté `gpt-6-cyber` à son API. Le journal des modifications le décrit comme un modèle destiné à enquêter sur une vulnérabilité, à la reproduire dans un environnement de test autorisé et à vérifier qu'un correctif la ferme. Il n'est pas ouvert à tout compte : l'organisation doit disposer d'un accès Daybreak Red et d'une approbation du modèle.\n\nLa fiche du modèle indique une fenêtre de contexte de 1 050 000 jetons, dont 922 000 au maximum en entrée, et jusqu'à 128 000 jetons en sortie. Il accepte du texte et des images, ne produit que du texte, et prend en charge le raisonnement. Il est joignable par deux points d'entrée, Chat Completions (`v1/chat/completions`) et Responses (`v1/responses`).\n\n## Accès : Daybreak Red, plus une approbation propre au modèle\n\nDaybreak est le nom des programmes d'accès cyber d'OpenAI, que le guide dédié décrit dans l'API Responses. Pour `gpt-6-cyber`, ce guide indique « Red + approbation supplémentaire du modèle » : avoir Daybreak Red ne suffit donc pas, l'approbation du modèle s'y ajoute. La fiche demande aussi de configurer l'organisation et le projet avant la première requête, et renvoie au contact commercial pour confirmer l'accès.\n\nLe champ concerné est `access_programs.cyber`, qui doit valoir `daybreak_red`. Le guide précise que les modèles de type Red, comme `gpt-5.6-cyber`, prennent `daybreak_red` par défaut quand le champ est omis, mais il ne liste pas `gpt-6-cyber` dans cette section ; son exemple envoie la valeur explicitement. Sans l'accès requis, la requête échoue avec une erreur 403 `access_program_not_enabled`, qui nomme le niveau Daybreak à demander.\n\n## Tarifs, limites de débit et périmètre fonctionnel\n\nLes prix publiés, par million de jetons au tarif standard en contexte court, sont de 20 dollars en entrée, 2 dollars en entrée mise en cache et 100 dollars en sortie. Les écritures dans le cache coûtent 25 dollars pour une durée de 30 minutes ou 50 dollars pour 12 heures. La fiche ne donne pas de comparaison avec `gpt-5.6-cyber` et ne dit pas si `gpt-6-cyber` en est le successeur ; il n'est donc pas possible de chiffrer l'écart de coût ou de capacité entre les deux à partir de ces pages.\n\nPour les organisations approuvées, les limites standard par palier sont les suivantes :\n\n| Palier | Requêtes/min | Jetons/min |\n|---|---|---|\n| Free | 3 | 10 000 |\n| Build | 5 000 | 1 000 000 |\n| Launch | 10 000 | 4 000 000 |\n| Grow | 15 000 | 40 000 000 |\n\nLa fiche mentionne aussi des limites d'images par minute (50 000 aux trois premiers paliers, 250 000 au palier Grow) et précise que des limites personnalisées peuvent s'appliquer.\n\nCôté fonctions, la fiche liste le streaming, les sorties structurées, l'appel de fonctions, la recherche web et la mise en cache des prompts. Dans l'API Responses, les outils pris en charge incluent l'appel de fonctions, la recherche web, la recherche de fichiers, l'interpréteur de code, le shell hébergé, `apply_patch`, les skills, l'usage d'ordinateur et MCP. Sont en revanche exclus Batch, le fine-tuning, les embeddings, les API Realtime et Assistants, la génération d'images et la modération.\n\n## Ce que ça change en pratique\n\nPour une équipe de sécurité déjà approuvée, la fiche apporte un contexte d'environ un million de jetons, utile pour charger de gros dépôts ou de longs journaux, et l'accès aux outils de l'API Responses dans un même flux de travail. Pour les autres, rien ne change : le modèle n'est pas utilisable sans approbation, et la procédure passe par l'équipe commerciale d'OpenAI.\n\nDeux points à intégrer avant de brancher un pipeline : l'absence de l'API Batch signifie que les analyses massives doivent passer par des requêtes synchrones soumises aux limites de débit ci-dessus, et le prix de sortie de 100 dollars par million de jetons pèse sur les sessions de raisonnement longues, dont la documentation ne chiffre pas la consommation type. La date limite de connaissance du modèle n'est pas indiquée.",
+    "tags": [
+        "modeles",
+        "cybersecurite",
+        "api"
+    ],
+    "sources": [
+        {
+            "titre": "OpenAI — Fiche du modèle GPT-6-Cyber",
+            "url": "https://developers.openai.com/api/docs/models/gpt-6-cyber",
+            "consultee": "2026-11-06"
+        },
+        {
+            "titre": "OpenAI — Journal des modifications de l'API",
+            "url": "https://developers.openai.com/api/docs/changelog",
+            "consultee": "2026-11-06"
+        },
+        {
+            "titre": "OpenAI — Daybreak dans l'API Responses",
+            "url": "https://developers.openai.com/api/docs/guides/daybreak",
+            "consultee": "2026-11-06"
+        }
+    ],
+    "statut": "publie"
+}
