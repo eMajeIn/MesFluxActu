@@ -1,0 +1,27 @@
+{
+    "slug": "gemini-omni-1-2-flash-clips-15-secondes",
+    "titre": "Gemini Omni 1.2 Flash : clips de 15 secondes, prix réduit de 30 %",
+    "date": "2026-11-08T08:00:00+01:00",
+    "type": "actu",
+    "labo": "gemini",
+    "chapeau": "Google publie Gemini Omni 1.2 Flash : clips vidéo jusqu'à 15 secondes au lieu de 10, édition en plusieurs tours et tarif annoncé 30 % sous celui d'Omni 1.1.",
+    "corps": "Google a publié le 5 novembre 2026 Gemini Omni 1.2 Flash, nouvelle version de son modèle de génération et d'édition de vidéo conversationnel. Son identifiant dans AI Studio est `gemini-omni-1.2-flash`. Le billet d'annonce le décrit comme disponible en disponibilité générale sur l'API Gemini et dans Gemini pour les entreprises (Google Cloud), avec une option de débit provisionné (*Provisioned Throughput*, une capacité réservée à l'avance).\n\nTrois changements chiffrés ressortent : la durée maximale des clips passe de 10 à 15 secondes, le prix est annoncé 30 % plus bas que celui d'Omni 1.1, et le modèle accepte l'édition en plusieurs tours, c'est-à-dire qu'un clip se retouche par échanges successifs sans être régénéré depuis zéro.\n\n## Ce qui change par rapport à Omni 1.1\n\nCôté durée, la génération et l'édition natives atteignent 15 secondes. La durée se règle par pas d'une seconde, de 3 à 15 secondes. Les clips de mouvement servant de référence restent limités à 3 secondes, ce qui borne la quantité de mouvement qu'on peut imposer en entrée.\n\nCôté qualité, Google cite une meilleure fidélité aux références fournies (personnage, produit, style, audio), une cohérence plus stable entre la première et la dernière image, des mouvements de caméra plus maîtrisés avec moins de coupes brusques, ainsi qu'une parole plus naturelle, une synchronisation labiale plus nette et la prise en charge de plusieurs locuteurs. Ces points sont des affirmations du fabricant : le billet ne les accompagne pas, dans la version consultée, d'une mesure indépendante.\n\n## Tarif et chaîne de production\n\nLe billet indique 0,07 $ par seconde de vidéo en 720p. Il ne donne pas, dans le passage consulté, de tarif pour les autres résolutions. Il recommande une approche en deux temps : produire des brouillons en 360p ou 720p, puis ne surclasser que les meilleurs résultats en 1080p ou en 4K. Cette consigne rejoint le fonctionnement décrit lors de la disponibilité générale d'Omni 1.1, où les résolutions les plus hautes sont obtenues par surclassement plutôt que générées nativement.\n\nLe modèle est aussi intégré à des produits Google : Google Vids propose des clips de 15 secondes sans coût supplémentaire avec un compte Google ou un abonnement Workspace ; l'application Gemini déploie les vidéos de 15 secondes pour les abonnés Google AI Ultra ; Flow, Google Ads et la console Google Cloud y donnent aussi accès. Les sorties portent un filigrane SynthID imperceptible.\n\n## Ce que ça change en pratique\n\nPour une équipe qui produit des vidéos courtes par API, le passage de 10 à 15 secondes réduit le nombre de plans à assembler pour un message publicitaire ou une démonstration produit, et l'édition multi-tours évite de relancer une génération complète pour corriger un détail. La baisse de 30 % compte surtout pour le flux brouillon puis surclassement recommandé ci-dessus.\n\nPlusieurs points restent à vérifier avant de migrer. La page de documentation technique de l'API Gemini n'a pas pu être ouverte pendant cette exécution : les paramètres exacts, les quotas et le tarif complet par résolution ne sont donc pas confirmés ici, et il n'est pas possible de convertir le tarif par seconde en équivalent du tarif par jeton d'Omni 1.1. Google reconnaît par ailleurs des limites : l'action sportive rapide, les changements de script rapides et la physique complexe sont encore en cours de développement. La documentation consultée ne précise pas le calendrier de retrait d'Omni 1.1.\n",
+    "tags": [
+        "video",
+        "gemini",
+        "omni"
+    ],
+    "sources": [
+        {
+            "titre": "Google Blog — Introducing Gemini Omni 1.2 Flash",
+            "url": "https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/",
+            "consultee": "2026-11-08"
+        },
+        {
+            "titre": "Google DeepMind — Blog (liste des publications)",
+            "url": "https://deepmind.google/discover/blog",
+            "consultee": "2026-11-08"
+        }
+    ],
+    "statut": "publie"
+}
