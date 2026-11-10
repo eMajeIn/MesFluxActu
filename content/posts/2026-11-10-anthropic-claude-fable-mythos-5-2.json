@@ -1,0 +1,32 @@
+{
+  "slug": "anthropic-claude-fable-mythos-5-2",
+  "titre": "Anthropic lance Claude Fable 5.2 et Mythos 5.2 à tarif réduit",
+  "date": "2026-11-10T08:00:00+01:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Le 9 novembre 2026, Anthropic publie Claude Fable 5.2 et Claude Mythos 5.2 : 8 $ en entrée et 40 $ en sortie par million de jetons, contre 10 $ et 50 $, avec quatre changements cassants.",
+  "corps": "Anthropic a ajouté le 9 novembre 2026 deux modèles à son API : Claude Fable 5.2, identifiant `claude-fable-5-2`, et Claude Mythos 5.2, identifiant `claude-mythos-5-2`. Le premier est ouvert à tous les clients de l'API Claude. Le second offre les mêmes capacités, mais seulement aux organisations vérifiées par les programmes de vérification d'Anthropic, comme le Cyber Verification Program.\n\nIls succèdent à Claude Fable 5.1 et Claude Mythos 5.1. Les deux modèles gardent une fenêtre de contexte de 1 million de jetons, jusqu'à 128 000 jetons en sortie et une réflexion adaptative toujours active, pilotée par le paramètre `effort`. Le changement le plus visible est tarifaire : le prix baisse, alors que la version précédente coûtait plus cher.\n\n## Un tarif en baisse de 20 %\n\nClaude Fable 5.2 et Claude Mythos 5.2 sont facturés 8 dollars par million de jetons en entrée et 40 dollars par million en sortie. Claude Fable 5.1 et Claude Mythos 5.1 coûtaient 10 et 50 dollars. La baisse est donc de 20 % sur les deux postes. Le traitement par lots est à 4 et 20 dollars, les lectures de cache à 0,20 dollar par million de jetons.\n\nLe mode rapide (*fast mode*, qui sert les mêmes modèles avec une configuration d'inférence accélérée) est disponible pour Fable 5.2 et Mythos 5.2 sur l'API Messages. Il se déclenche avec `speed: \"fast\"` et vise jusqu'à 2,5 fois plus de jetons de sortie par seconde, pour 16 dollars par million en entrée et 80 en sortie. La documentation précise que le gain porte sur le débit de sortie, pas sur le délai avant le premier jeton. Sur Microsoft Foundry, le mode rapide passe par un modèle distinct, `claude-fable-5-2-fast`.\n\nFable 5.2 est aussi proposé sur Amazon Bedrock, Claude Platform on AWS, Claude Models on Google Cloud (versions gérées par Anthropic et par Google) et Claude in Microsoft Foundry. Les deux modèles exigent une rétention des données de 30 jours et ne sont pas disponibles sous rétention zéro, sauf autorisation expresse d'Anthropic.\n\n## Quatre changements qui peuvent casser le code existant\n\nLa documentation en liste quatre par rapport à Fable 5.1.\n\n- **Contrôle du préfixe pour tous les comptes.** Si le code modifie le prompt système, les outils ou un message antérieur, puis renvoie un bloc de réflexion produit plus tard, la requête échoue avec une erreur 400. Avec Fable 5.1, cette erreur ne concernait par défaut que les comptes créés à partir du 31 août 2026. Un mode transitoire existe : l'en-tête bêta `thinking-binding-controls-2026-08-01` et `thinking.block_binding.prefix_mismatch_behavior` réglé sur `\"drop_block\"`, que la documentation présente comme un palliatif, car écarter des blocs peut augmenter les jetons de sortie.\n- **Blocs de réflexion lisibles par peu de modèles.** Seuls Fable 5.2 et Mythos 5.2 relisent les blocs de réflexion de Fable 5.2. Quand une conversation passe vers un autre modèle, y compris Claude Opus 5.5 ou Fable 5.1, l'API écarte ces blocs et la requête réussit. Les blocs ne fonctionnent en outre que dans le compte qui les a produits, ou un compte lié.\n- **Outil d'usage de l'ordinateur.** L'ancien `computer_20251124` renvoie une erreur 400 sur toutes les plateformes sauf Amazon Bedrock. Il faut déclarer le jeu d'outils `computer_toolset_20260801`.\n- **Outil conseiller (*advisor*, en bêta).** Un exécuteur Fable 5.2 n'accepte comme conseiller que Fable 5.2 ou Mythos 5.2.\n\nS'y ajoutent deux règles de l'API Messages : `thinking` avec `budget_tokens` ou à `disabled` renvoie une erreur 400, et le choix d'outil forcé (`tool_choice` à `any` ou à un outil nommé) n'est pas pris en charge.\n\n## Ce que ça change en pratique\n\nPour une équipe sur Fable 5.1, la migration commence par le changement d'identifiant, puis par un test de l'historique : tout code qui construit lui-même le tableau `messages` et le réécrit entre deux tours est concerné. Les produits qui construisent les requêtes eux-mêmes, comme Claude Code, claude.ai, Claude Managed Agents ou le Claude Agent SDK, ne demandent aucune action selon la documentation.\n\nAnthropic recommande, pour la plupart des charges, de partir du dernier modèle Claude Opus et de ne passer à Fable 5.2 que si les évaluations à effort élevé ne suffisent pas. L'effort par défaut est `high`. La documentation signale aussi des différences de comportement : une consigne demandant moins de réflexion n'empêche pas le modèle de réfléchir à partir de `medium`, et un tour peut se terminer avant la fin d'une tâche longue, plus souvent à effort bas ou moyen. Les chiffres de performance ne figurent pas dans les pages consultées : la documentation ne précise pas de comparaison chiffrée avec Fable 5.1.",
+  "tags": [
+    "modèles",
+    "tarifs",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Docs — What's new in Claude Fable 5.2",
+      "url": "https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2",
+      "consultee": "2026-11-10"
+    },
+    {
+      "titre": "Claude Docs — Claude Platform release notes",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-11-10"
+    },
+    {
+      "titre": "Claude Docs — Fast mode",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+      "consultee": "2026-11-10"
+    }
+  ],
+  "statut": "publie"
+}
