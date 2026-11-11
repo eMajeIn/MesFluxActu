@@ -1,0 +1,44 @@
+{
+  "slug": "openai-notifications-sanctions-securite",
+  "titre": "OpenAI : être prévenu des sanctions visant ses utilisateurs",
+  "date": "2026-11-11T08:00:00+01:00",
+  "type": "explication",
+  "labo": "openai",
+  "fonctionnalite": "notifications d'application des règles de sécurité",
+  "chapeau": "Les webhooks safety.warning_issued et safety.deactivation_issued, couplés à l'API des dossiers de sécurité, relient une sanction OpenAI au bon utilisateur d'une application.",
+  "corps": "Lorsqu'OpenAI émet un avertissement ou une désactivation, la mesure peut viser un **safety identifier** précis, c'est-à-dire l'identifiant qu'une application transmet pour chacun de ses utilisateurs finaux. La documentation de la plateforme décrit une intégration pour en être informé : des webhooks d'organisation signalent chaque avertissement ou désactivation, et une API en lecture, la Safety Case Read API, fournit le détail du dossier.\n\n## Ce que c'est\n\nDeux pièces s'assemblent.\n\n- **Deux événements webhook**, émis au niveau de l'organisation : `safety.warning_issued` quand un avertissement vise un safety identifier de l'organisation, `safety.deactivation_issued` quand il s'agit d'une désactivation.\n- **Un point d'entrée de lecture**, `GET /v1/safety/cases/{id}`, qui renvoie le dossier (*case*) correspondant : l'identifiant visé, le type de notification, la date de création du dossier et, quand elle est disponible, la raison invoquée.\n\nLe safety identifier est la chaîne qu'une application envoie avec ses requêtes, via le paramètre `safety_identifier`, pour désigner l'utilisateur à l'origine d'un appel sans révéler qui il est. C'est la table de correspondance tenue par l'application, entre cet identifiant et son propre compte utilisateur, qui permet de remonter à la personne concernée.\n\nDeux précisions de la documentation : ces notifications d'organisation sont distinctes des alertes de désalignement envoyées au niveau du projet, et consulter un dossier ne modifie ni n'annule la sanction.\n\n## Comment ça marche\n\n**Le webhook.** Le point de réception se déclare dans les réglages de webhooks de l'*organisation*, pas dans ceux du projet, et s'abonne aux deux événements. La charge utile est minimale : un `id` d'événement préfixé `evt_`, `object` à `event`, un `created_at` en secondes Unix, le `type`, et un objet `data` qui ne contient que `id`, l'identifiant du dossier.\n\nLes règles générales des webhooks OpenAI s'appliquent : le point de réception doit répondre vite par un code `2xx`, faute de quoi la livraison est retentée avec un délai croissant pendant 72 heures au plus ; une redirection `3xx` compte comme un échec. La signature se vérifie avec la méthode `unwrap()` des SDK officiels.\n\n**La lecture du dossier.** Elle exige une clé d'API de la même organisation, créée avec des permissions **Restricted** et la permission **Safety** réglée sur **Read** (`api.safety.read`). L'objet renvoyé, de type `safety.case`, comporte :\n\n| Champ | Contenu |\n|---|---|\n| `id` | identifiant du dossier, 128 caractères au plus |\n| `created_at` | date de création, en secondes Unix |\n| `entity_identifier` | le safety identifier visé |\n| `notice.type` | `warning` ou `deactivation` |\n| `reason` | raison invoquée, ou `null` |\n\n## En pratique\n\nCôté réception, l'exemple adapte le serveur Flask de la documentation des webhooks. Il vérifie la signature, filtre les deux événements de sécurité et met de côté l'identifiant du dossier ; le traitement lourd est laissé à un processus séparé, comme le recommande la documentation pour répondre sans délai.\n\n```python\nimport os\nfrom openai import OpenAI, InvalidWebhookSignatureError\nfrom flask import Flask, request, Response\n\napp = Flask(__name__)\nclient = OpenAI(webhook_secret=os.environ[\"OPENAI_WEBHOOK_SECRET\"])\n\ndossiers_a_traiter = []\n\n@app.route(\"/webhook\", methods=[\"POST\"])\ndef webhook():\n    try:\n        # unwrap lève une erreur si la signature est invalide\n        event = client.webhooks.unwrap(request.data, request.headers)\n\n        if event.type in (\"safety.warning_issued\", \"safety.deactivation_issued\"):\n            # data.id désigne le dossier, pas l'événement\n            dossiers_a_traiter.append(event.data.id)\n\n        return Response(status=200)\n    except InvalidWebhookSignatureError:\n        return Response(\"Signature invalide\", status=400)\n```\n\nLe processus de traitement interroge ensuite l'API, avec la clé restreinte :\n\n```bash\ncurl \"https://api.openai.com/v1/safety/cases/C-abc123\" \\\n  -H \"Authorization: Bearer ${OPENAI_API_KEY}\"\n```\n\nLa réponse attendue ressemble à ceci, d'après l'exemple officiel :\n\n```json\n{\n  \"id\": \"C-abc123\",\n  \"object\": \"safety.case\",\n  \"created_at\": 1787659200,\n  \"entity_identifier\": \"safety-id-123\",\n  \"reason\": \"cyber_abuse\",\n  \"notice\": {\"type\": \"warning\"}\n}\n```\n\nIl reste à retrouver, dans la table de correspondance de l'application, le compte associé à `entity_identifier`, puis à ouvrir un ticket dans l'outil de l'équipe de modération.\n\n**Cas d'usage.** Une plateforme de tutorat en ligne transmet un safety identifier par élève. Lorsqu'un avertissement tombe, le webhook déclenche la création d'un ticket dans l'outil de support, enrichi du motif `reason` et du compte élève retrouvé : l'équipe peut suspendre ce compte précis avant qu'une désactivation ne survienne, au lieu de découvrir le problème quand l'accès est coupé.\n\n**Dépannage.** La documentation liste les erreurs courantes : `401` pour une clé absente ou invalide, `403` si la permission `api.safety.read` manque, `404` si l'on a passé l'identifiant de l'événement au lieu de `data.id`, ou si le dossier appartient à une autre organisation. Sur un `429` ou une erreur `5xx` passagère, réessayer avec un nombre de tentatives borné, en conservant l'événement pour un traitement ultérieur.\n\n## Ce que ça change, et où ça s'arrête\n\nUne application qui sert de nombreux utilisateurs derrière une seule clé reçoit ainsi, sous forme d'événement exploitable par programme, l'avis qu'une mesure vise l'un d'eux. L'information entre dans son propre circuit de modération, au niveau de l'utilisateur concerné.\n\n**Coût.** La documentation ne mentionne aucun tarif pour ces webhooks ni pour la lecture des dossiers. Le coût est surtout d'intégration : un point de réception public et signé au niveau de l'organisation, une clé restreinte supplémentaire, et surtout une stratégie de safety identifiers stables, sans laquelle rien ne relie un dossier à un utilisateur.\n\n**Limites documentées et zones d'ombre.**\n\n- Le mécanisme ne fonctionne que si l'application envoie des safety identifiers. La documentation les recommande sans les rendre obligatoires, et déconseille d'y placer des informations personnelles.\n- Le dossier ne contient que des métadonnées : la documentation ne mentionne ni le contenu des requêtes en cause, ni de moyen de contester la décision via cette API.\n- Le champ `reason` peut valoir `null`. La documentation donne `cyber_abuse` en exemple mais ne publie pas la liste des valeurs possibles.\n- L'API est en lecture seule : elle ne permet ni de lever ni de modifier une sanction.\n- Le guide illustre son parcours avec un avertissement ; il indique que la même intégration vaut pour les désactivations, sans préciser de différence de traitement.",
+  "tags": [
+    "sécurité",
+    "webhooks",
+    "modération",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Documentation OpenAI — Safety enforcement notifications",
+      "url": "https://developers.openai.com/api/docs/guides/safety-enforcement",
+      "consultee": "2026-11-11"
+    },
+    {
+      "titre": "Référence API OpenAI — Get safety case",
+      "url": "https://developers.openai.com/api/reference/resources/safety/subresources/cases/methods/retrieve",
+      "consultee": "2026-11-11"
+    },
+    {
+      "titre": "Référence API OpenAI — Webhook events",
+      "url": "https://developers.openai.com/api/reference/resources/webhooks",
+      "consultee": "2026-11-11"
+    },
+    {
+      "titre": "Documentation OpenAI — Safety best practices",
+      "url": "https://developers.openai.com/api/docs/guides/safety-best-practices",
+      "consultee": "2026-11-11"
+    },
+    {
+      "titre": "Documentation OpenAI — Webhooks",
+      "url": "https://developers.openai.com/api/docs/guides/webhooks",
+      "consultee": "2026-11-11"
+    }
+  ],
+  "statut": "publie"
+}
