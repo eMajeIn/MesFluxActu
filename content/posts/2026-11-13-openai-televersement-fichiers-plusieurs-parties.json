@@ -1,0 +1,43 @@
+{
+  "slug": "openai-televersement-fichiers-plusieurs-parties",
+  "titre": "OpenAI : envoyer un fichier de 8 Go par morceaux avec l'API Uploads",
+  "date": "2026-11-13T08:00:00+01:00",
+  "type": "explication",
+  "labo": "openai",
+  "fonctionnalite": "téléversement de fichiers en plusieurs parties (uploads)",
+  "chapeau": "L'API Uploads d'OpenAI découpe l'envoi d'un fichier en parties de 64 Mo, jusqu'à 8 Go, puis l'assemble en fichier ordinaire. Mécanisme, exemple complet en curl et pièges de la fenêtre d'une heure.",
+  "corps": "L'endpoint classique de l'API OpenAI pour envoyer un fichier, `POST /files`, accepte des fichiers jusqu'à 512 Mo en une seule requête. Au-delà, il existe une autre voie, moins connue : l'API **Uploads**, qui découpe l'envoi en morceaux. On ouvre un téléversement, on y ajoute des parties, puis on le clôt ; la plateforme assemble alors un objet *File* ordinaire, utilisable partout où un fichier l'est.\n\nLe mécanisme rappelle les envois en plusieurs parties (*multipart upload*) des services de stockage objet. Il intéresse surtout ceux qui manipulent de gros jeux de données d'entraînement ou des lots volumineux.\n\n## Ce que c'est\n\nUn objet **Upload** est un réceptacle intermédiaire. Il connaît à l'avance la taille totale attendue, le nom du fichier, son type MIME et son usage (`purpose`). Il reçoit des **Parts**, des tranches d'octets d'au plus 64 Mo chacune, jusqu'à un total de 8 Go par téléversement.\n\nUn Upload vit au plus une heure après sa création. Il passe par quatre statuts : `pending` à la création, `completed` une fois clos, `cancelled` s'il est annulé, `expired` si l'heure s'est écoulée. À la clôture, l'objet renvoyé contient un champ `file` : c'est le fichier final, avec son propre identifiant, que l'on passe ensuite aux autres API.\n\n## Comment ça marche\n\nQuatre points d'entrée suffisent.\n\n**Créer** : `POST /v1/uploads`, avec un corps JSON. Les champs obligatoires sont `bytes` (la taille exacte en octets), `filename`, `mime_type` et `purpose`. Ce dernier n'accepte ici que quatre valeurs : `assistants`, `batch`, `fine-tune` et `vision`. Le type MIME doit correspondre à l'usage choisi. Un champ facultatif, `expires_after`, fixe la durée de vie du *fichier final* : il porte `anchor` (seule valeur admise : `created_at`) et `seconds`, compris entre 3 600 (une heure) et 2 592 000 (30 jours). Sans lui, un fichier `batch` expire après 30 jours et les autres sont conservés jusqu'à suppression manuelle.\n\n**Ajouter une partie** : `POST /v1/uploads/{upload_id}/parts`, en `multipart/form-data`, avec un seul champ, `data`, qui contient les octets. La réponse est un objet `upload.part` doté d'un `id`. Les parties peuvent être envoyées en parallèle : leur ordre n'est fixé qu'à la fin.\n\n**Clore** : `POST /v1/uploads/{upload_id}/complete`, avec `part_ids`, la liste ordonnée des identifiants de parties, et en option `md5`, une somme de contrôle du contenu attendu. Le nombre total d'octets reçus doit être égal à la valeur `bytes` déclarée à la création. Aucune partie ne peut plus être ajoutée ensuite.\n\n**Annuler** : `POST /v1/uploads/{upload_id}/cancel`, qui passe l'objet en `cancelled` et ferme lui aussi la porte à toute nouvelle partie.\n\n## En pratique\n\n### Un fichier de fine-tuning de 2 Go, en ligne de commande\n\nL'exemple suit la séquence de la référence officielle. Le découpage local se fait avec `split`, en restant sous le plafond de 64 Mo par partie ; `jq` extrait les identifiants des réponses.\n\nPremière étape : ouvrir le téléversement en annonçant la taille exacte du fichier.\n\n```bash\nFICHIER=training_examples.jsonl\nTAILLE=$(wc -c < \"$FICHIER\")\n\nUPLOAD_ID=$(curl -s https://api.openai.com/v1/uploads \\\n  -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d \"{\n    \\\"purpose\\\": \\\"fine-tune\\\",\n    \\\"filename\\\": \\\"$FICHIER\\\",\n    \\\"bytes\\\": $TAILLE,\n    \\\"mime_type\\\": \\\"text/jsonl\\\"\n  }\" | jq -r '.id')\n```\n\nDeuxième étape : découper en tranches de 60 Mo et envoyer chaque partie, en notant son identifiant.\n\n```bash\nsplit -b 60m \"$FICHIER\" partie_\nPART_IDS=()\nfor f in partie_*; do\n  ID=$(curl -s https://api.openai.com/v1/uploads/$UPLOAD_ID/parts \\\n    -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n    -F \"data=@$f\" | jq -r '.id')\n  PART_IDS+=(\"\\\"$ID\\\"\")\ndone\n```\n\nTroisième étape : clore en donnant l'ordre des parties et la somme MD5 du fichier complet.\n\n```bash\nLISTE=$(IFS=,; echo \"${PART_IDS[*]}\")\nMD5=$(md5sum \"$FICHIER\" | cut -d' ' -f1)\ncurl -s https://api.openai.com/v1/uploads/$UPLOAD_ID/complete \\\n  -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d \"{\\\"part_ids\\\": [$LISTE], \\\"md5\\\": \\\"$MD5\\\"}\" | jq '.status, .file.id'\n```\n\nLa dernière commande doit afficher `completed` puis un identifiant de la forme `file-...`. C'est ce dernier, et non l'identifiant `upload_...`, que l'on transmet ensuite à un travail de fine-tuning. La boucle est séquentielle par souci de lisibilité ; la documentation autorise l'envoi des parties en parallèle, à condition de conserver l'ordre au moment de la clôture.\n\n### Cas d'usage\n\nUne équipe de data science prépare un fine-tuning supervisé à partir de plusieurs années de tickets de support anonymisés, soit un fichier JSONL de quelques gigaoctets. Avec `POST /files`, le fichier dépasse la limite de 512 Mo. Avec Uploads, chaque tranche part dans une requête distincte et la clôture ne retient que les parties listées dans `part_ids` ; la somme MD5 transmise à ce moment permet de faire vérifier que l'assemblage correspond bien au fichier d'origine.\n\n## Ce que ça change, et où ça s'arrête\n\n**Apport.** La limite pratique passe de 512 Mo à 8 Go par fichier, et l'envoi se fragmente en requêtes de 64 Mo au plus, que l'on peut paralléliser. La documentation ne décrit pas en revanche la marche à suivre quand l'envoi d'une partie échoue en cours de route ; la reprise reste à concevoir et à tester côté client.\n\n**Coût.** Les pages de référence consultées n'associent aucun tarif aux points d'entrée Uploads ; la documentation ne précise pas s'ils sont facturés à part. Le coût réel est en complexité côté client : au moins trois requêtes plus une par partie, une comptabilité exacte des octets, et la gestion des identifiants de parties dans le bon ordre.\n\n**La fenêtre d'une heure.** Elle court dès la création de l'Upload. Un envoi de plusieurs gigaoctets sur une liaison lente doit tenir dans ce délai, faute de quoi l'objet passe en `expired` et tout est à refaire. Il ne faut pas confondre cette échéance avec `expires_after`, qui règle la durée de vie du fichier produit, pas celle du téléversement.\n\n**Usages restreints.** Seules quatre valeurs de `purpose` sont admises à la création, alors que les fichiers de la plateforme connaissent d'autres usages, comme `user_data`. Un fichier destiné à un usage absent de cette liste doit passer par `POST /files`.\n\n**Zones d'ombre.** La référence de `POST /files` fixe d'autres contraintes : 2,5 To de stockage par projet, des fichiers Batch limités à 200 Mo, et 1 000 requêtes par minute et par utilisateur sur cet endpoint. La documentation consultée ne dit pas si ces plafonds s'appliquent aussi aux fichiers assemblés par Uploads, ni si un fichier `batch` de plus de 200 Mo créé par cette voie serait accepté par l'API Batch. Mieux vaut le vérifier sur un petit volume avant d'industrialiser.",
+  "tags": [
+    "fichiers",
+    "fine-tuning",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Référence API OpenAI — Create upload",
+      "url": "https://developers.openai.com/api/reference/resources/uploads/methods/create.md",
+      "consultee": "2026-11-13"
+    },
+    {
+      "titre": "Référence API OpenAI — Add upload part",
+      "url": "https://developers.openai.com/api/reference/resources/uploads/subresources/parts/methods/create.md",
+      "consultee": "2026-11-13"
+    },
+    {
+      "titre": "Référence API OpenAI — Complete upload",
+      "url": "https://developers.openai.com/api/reference/resources/uploads/methods/complete.md",
+      "consultee": "2026-11-13"
+    },
+    {
+      "titre": "Référence API OpenAI — Cancel upload",
+      "url": "https://developers.openai.com/api/reference/resources/uploads/methods/cancel.md",
+      "consultee": "2026-11-13"
+    },
+    {
+      "titre": "Référence API OpenAI — Upload file",
+      "url": "https://developers.openai.com/api/reference/resources/files/methods/create.md",
+      "consultee": "2026-11-13"
+    }
+  ],
+  "statut": "publie"
+}
