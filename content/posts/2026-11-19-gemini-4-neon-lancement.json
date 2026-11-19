@@ -1,0 +1,33 @@
+{
+  "slug": "gemini-4-neon-lancement",
+  "titre": "Gemini 4 Neon : le modèle intermédiaire de Google, à 3 $ l'entrée",
+  "date": "2026-11-19T08:00:00+01:00",
+  "type": "actu",
+  "labo": "gemini",
+  "chapeau": "Le 18 novembre 2026, Google publie Gemini 4 Neon, dérivé de Gemini 4 Carbon : 1 million de jetons de contexte, 3 $ et 15 $ par million de jetons, réservé au niveau payant de l'API.",
+  "corps": "Google a publié le 18 novembre 2026 Gemini 4 Neon, un modèle qui se place entre Gemini 4 Hydrogen, sorti six jours plus tôt pour l'exécution rapide, et Gemini 4 Carbon, son modèle le plus puissant. Le billet d'annonce, signé par Koray Kavukcuoglu, le destine au développement logiciel complexe, au travail analytique et aux chaînes de production en entreprise.\n\nLe tarif annoncé est de 3 dollars par million de jetons en entrée et 15 dollars par million en sortie. Les jetons d'entrée servis depuis le cache coûtent 0,15 dollar par million, soit une remise de 95 %. La fenêtre de contexte atteint un million de jetons. Dans l'outil de test de Google AI Studio, le lien fourni par l'annonce désigne le modèle par l'identifiant `gemini-4-neon`.\n\nLe déploiement commence le jour même, mais pas pour tout le monde. Côté développeurs, Neon est proposé sur le **niveau payant** de l'API Gemini, dans AI Studio et Android Studio. Il arrive aussi dans Gemini for business, dans Google Antigravity pour les abonnés payants Google AI Pro et Ultra, et dans l'application Gemini pour ces mêmes abonnés. C'est une différence avec Hydrogen, que Google annonçait le 12 novembre pour tous les niveaux d'AI Studio et de l'API.\n\n## Ce que précise la fiche du modèle\n\nLa fiche publiée avec l'annonce ajoute plusieurs éléments :\n\n- **Filiation.** Neon est *adapté de* Gemini 4 Carbon, comme Hydrogen. Pour l'architecture, les données d'entraînement et le matériel, la fiche renvoie à celle de Carbon.\n- **Entrées.** Texte, images, audio et vidéo, dans une fenêtre unifiée d'un million de jetons au plus, entrée et sortie confondues.\n- **Sorties.** 64 000 jetons par défaut en sortie synchrone. Le million n'est atteignable que par le *background long decode*, un décodage long exécuté en arrière-plan.\n- **Coupure des connaissances.** Mars 2026, avec des domaines où les connaissances peuvent être moins à jour.\n- **Sécurité.** Le rapport complet *Safety & Security* n'est pas encore publié ; la fiche l'annonce comme « à venir ». L'évaluation de changement matériel de capacité menée par rapport à Gemini 4 Argon conclut à une hausse de capacité générale, mais sous le seuil qui imposerait une nouvelle batterie d'évaluations critiques : Google reprend donc les conclusions établies pour Argon.\n\nFace à Hydrogen, les évaluations automatiques de sécurité du contenu varient peu. Le taux de refus injustifiés baisse de 3 points, et la sécurité sur les requêtes texte et image progresse de 1,9 point.\n\nLe billet décrit quatre niveaux de réflexion, avec *high* par défaut et *xhigh* comme palier le plus élevé. Une variante dédiée à la défense informatique, *Neon for cyber*, est ouverte progressivement aux membres éligibles du programme Fairwind, sur les jours qui suivent l'annonce.\n\n## Des scores auto-déclarés, et un harnais qui pèse lourd\n\nGoogle classe Neon troisième de l'indice d'Artificial Analysis avec 61 points au niveau *xhigh*, et premier de l'indice de codage agentique du même organisme avec 58,6. Le billet avance aussi 65,2 % sur Terminal-Bench 4.1 et 46,2 % sur FrontierCode 2.0 au niveau *high*.\n\nLe chiffre le plus parlant concerne SWE-sweep, un test où le modèle doit trouver et corriger des bogues sans casser le code existant. Neon y obtient 12,8 % avec le harnais générique mini-SWE, et 39,0 % dans Google Antigravity. Le document de méthodologie explique l'écart : le harnais Antigravity-CLI, en version 1.5.9, inclut par défaut un outil qui lance des sous-agents en parallèle sur la base de code, ce qui avantage la recherche de bogues. Ces deux scores sont calculés par Google.\n\nLe même document précise que les résultats des modèles concurrents, Claude Opus 5.5 et GPT-6.2 Sol, proviennent pour l'essentiel de leurs propres publications. Comparer Neon à un autre modèle sur ces chiffres revient donc souvent à comparer deux protocoles différents.\n\n## Ce que ça change en pratique\n\nLe point de départ est le prix. Avec 3 et 15 dollars, Neon coûte deux fois plus cher par jeton qu'Hydrogen (1,50 et 7,50 dollars). Face à Carbon, la comparaison dépend de la date. Carbon est facturé 2 dollars en entrée et 10 dollars en sortie jusqu'au 30 novembre 2026, au tarif d'introduction. Jusqu'à cette date, le modèle intermédiaire coûte donc plus cher par jeton que le modèle phare. Ensuite, Carbon passe à 4 et 20 dollars, et l'ordre attendu se rétablit.\n\nGoogle défend Neon sur un autre terrain : le coût par tâche. Au niveau *high*, l'annonce lui attribue un coût par tâche inférieur de 32 % à celui de Carbon. C'est une mesure qui dépend du nombre de jetons consommés pour finir un travail, et que chaque équipe devra vérifier sur ses propres charges. Le billet ne publie pas le détail du calcul.\n\nPour une équipe qui utilise Carbon via l'API, Neon est un candidat à tester sur les tâches de code et d'analyse répétitives, surtout après le 30 novembre. Pour une équipe qui tourne sur le niveau gratuit, rien ne change : Neon n'y est pas proposé, et Hydrogen reste le modèle Gemini 4 accessible sans facturation. Enfin, les applications qui produisent de très longues sorties doivent tenir compte du plafond synchrone de 64 000 jetons ; au-delà, la fiche renvoie au mode en arrière-plan, sur lequel elle ne donne pas d'autre détail.",
+  "tags": [
+    "gemini",
+    "modèles",
+    "tarifs",
+    "agents"
+  ],
+  "sources": [
+    {
+      "titre": "Google — Introducing Gemini 4 Neon",
+      "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon/",
+      "consultee": "2026-11-19"
+    },
+    {
+      "titre": "Google DeepMind — Gemini 4 Neon Model Card",
+      "url": "https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-4-Neon-Model-Card.pdf",
+      "consultee": "2026-11-19"
+    },
+    {
+      "titre": "Google DeepMind — Gemini 4 Neon Model evaluation (méthodologie)",
+      "url": "https://deepmind.google/models/evals-methodology/gemini-4-neon",
+      "consultee": "2026-11-19"
+    }
+  ],
+  "statut": "publie"
+}
