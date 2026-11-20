@@ -1,0 +1,43 @@
+{
+  "slug": "openai-gpt-live-1-1-mise-en-veille",
+  "titre": "OpenAI publie GPT-Live-1.1 et met en veille les sessions vocales inactives",
+  "date": "2026-11-20T08:00:00+01:00",
+  "type": "actu",
+  "labo": "openai",
+  "chapeau": "Le 19 novembre 2026, OpenAI a publié GPT-Live-1.1, modèle vocal au même tarif que GPT-Live-1, et une mise en veille des sessions WebRTC facturée 0,02 $ la minute au lieu de 0,05 $.",
+  "corps": "OpenAI a ajouté le 19 novembre 2026 un nouveau modèle vocal à son API, GPT-Live-1.1, successeur de GPT-Live-1 pour les conversations parlées en direct. Le changelog le présente comme une amélioration ciblée sur les échanges multilingues : prononciation, constance de l'accent et qualité de la transcription.\n\nLe même jour, une seconde nouveauté touche les deux générations du modèle : les sessions ouvertes en WebRTC peuvent désormais suspendre l'inférence quand plus personne ne parle, puis la reprendre dès qu'une voix se fait entendre. Pendant cette pause, la minute est facturée à un tarif réduit.\n\nLe nouveau modèle ne change pas la facture à la minute ; la mise en veille réduit le coût du silence.\n\n## GPT-Live-1.1 : même tarif, même point d'entrée\n\nLa fiche du modèle donne l'identifiant `gpt-live-1.1`, avec un seul instantané (*snapshot*, une version figée du modèle) portant le même nom. Il accepte et produit de l'audio et du texte, prend en charge le streaming et l'appel de fonctions, et n'est accessible que par le point d'entrée Live, `v1/live/sessions`. Responses, Chat Completions, l'API Realtime ou Batch ne le servent pas. Le changelog précise qu'il suffit de le désigner dans une configuration de session Live existante.\n\nPar rapport à GPT-Live-1, la fiche décrit trois progrès : une transcription de la parole plus exacte, un accent et une voix plus réguliers d'une langue à l'autre, et la capacité d'écouter pendant qu'il parle. Sur ce dernier point, la documentation ne dit pas si GPT-Live-1 en était dépourvu. Aucun résultat chiffré ni protocole d'évaluation n'accompagne ces affirmations.\n\nLa tarification ne bouge pas : 0,05 dollar la minute de session active et 0,02 dollar la minute en veille, comme pour GPT-Live-1, dont la fiche ajoute que la durée n'est pas arrondie à la minute supérieure. Les appels au modèle de *backend* (le modèle de texte auquel GPT-Live confie le raisonnement et les outils) et les outils eux-mêmes sont facturés à part, à leurs tarifs habituels.\n\nCôté quotas, les deux modèles disposent de plafonds de sessions simultanées distincts, et chaque plafond vaut pour l'ensemble des régions d'inférence. La fiche de GPT-Live-1.1 ne donne pas de chiffres et renvoie à la page des limites de l'organisation ; celle de GPT-Live-1 indique 50 sessions au palier Build, 300 au palier Launch et 500 au palier Grow, sans accès au palier gratuit.\n\n## La mise en veille des sessions WebRTC\n\nLe guide des conversations Live décrit le réglage. À la création d'une session WebRTC, on fixe `session.wake_policy.type` à `speech` : l'inférence attend alors qu'une personne parle avant de démarrer. Le paramètre `session.idle_timeout_s`, un entier compris entre 5 et 60, fixe le nombre de secondes sans transcription en entrée ni en sortie au bout duquel la session repasse en veille. S'il est omis, l'inférence reste active du premier réveil jusqu'à la fin de la session.\n\nLa sensibilité du réveil se règle avec `session.wake_policy.vad_threshold`, une valeur entre 0 et 1, à 0,5 par défaut ; plus elle est élevée, plus il faut une parole nette pour relancer le modèle. Ce seuil s'applique au premier réveil comme après chaque pause.\n\nDeux événements signalent les changements d'état : `session.paused` quand le délai d'inactivité a suspendu l'inférence, `session.resumed` quand le modèle est de nouveau prêt, y compris au tout premier réveil. On peut les écouter sur la connexion *sideband* (le canal parallèle par lequel un serveur pilote la session) ou sur le canal de données, si sa configuration laisse passer ces événements.\n\nPendant la veille, la connexion et l'identifiant de session restent les mêmes, et l'historique de la conversation est restauré à la reprise. Le guide demande de laisser la piste du micro active. Il prévient aussi que la première réponse à un énoncé bref peut arriver plus lentement après un réveil.\n\n## Ce que ça change en pratique\n\nLe gain le plus net tient à la veille. Une minute en pause coûte 60 % de moins qu'une minute active. Un assistant vocal qui reste ouvert longtemps avec peu de parole — un appel mis en attente, une borne d'accueil, un copilote laissé en arrière-plan pendant une tâche — payait jusqu'ici le plein tarif pour ces silences. Il peut désormais les facturer au tarif réduit, au prix d'une latence possiblement plus élevée sur la première phrase qui suit.\n\nLa limite tient au transport : le changelog ne vise que les sessions WebRTC. La documentation ne dit rien des sessions en téléphonie SIP ou en WebSocket.\n\nPour GPT-Live-1.1, le passage se fait en changeant l'identifiant du modèle, sans surcoût. Un détail de migration figure dans le guide de rédaction des prompts : avec `gpt-live-1`, les règles de délégation au backend devaient employer un jeton spécial, sous la forme `Generate <|SpawnThinking|>` et `Do not generate <|SpawnThinking|>`. Avec `gpt-live-1.1`, le guide recommande de décrire ces situations en langage courant. Une équipe qui migre a donc intérêt à réécrire cette partie de ses consignes plutôt qu'à la conserver telle quelle, puis à vérifier les délégations sur des requêtes représentatives.\n\nEnfin, les quotas de sessions simultanées étant séparés, une organisation peut faire tourner les deux modèles en parallèle pendant la transition sans que l'un consomme la capacité de l'autre. Faute de chiffres publiés pour GPT-Live-1.1, il reste à vérifier dans la console que son plafond suffit au trafic visé.",
+  "tags": [
+    "modèles",
+    "voix",
+    "tarifs",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "OpenAI — Changelog de l'API",
+      "url": "https://developers.openai.com/api/docs/changelog",
+      "consultee": "2026-11-20"
+    },
+    {
+      "titre": "OpenAI — GPT-Live-1.1 (fiche du modèle)",
+      "url": "https://developers.openai.com/api/docs/models/gpt-live-1.1",
+      "consultee": "2026-11-20"
+    },
+    {
+      "titre": "OpenAI — GPT-Live-1 (fiche du modèle)",
+      "url": "https://developers.openai.com/api/docs/models/gpt-live-1",
+      "consultee": "2026-11-20"
+    },
+    {
+      "titre": "OpenAI — Conversations Live : configurer la mise en veille",
+      "url": "https://developers.openai.com/api/docs/guides/live-conversations#configure-standby",
+      "consultee": "2026-11-20"
+    },
+    {
+      "titre": "OpenAI — Guide de rédaction des prompts pour GPT-Live",
+      "url": "https://developers.openai.com/api/docs/guides/live-prompting#recommended-prompt-structure",
+      "consultee": "2026-11-20"
+    }
+  ],
+  "statut": "publie"
+}
