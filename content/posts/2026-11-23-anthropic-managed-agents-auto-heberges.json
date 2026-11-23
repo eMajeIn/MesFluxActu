@@ -1,0 +1,49 @@
+{
+  "slug": "anthropic-managed-agents-auto-heberges",
+  "titre": "Anthropic : héberger soi-même le service Claude Managed Agents",
+  "date": "2026-11-23T08:00:00+01:00",
+  "type": "explication",
+  "labo": "anthropic",
+  "fonctionnalite": "managed agents auto-hébergé",
+  "chapeau": "Claude Managed Agents peut désormais tourner entièrement chez le client : serveur, base et bacs à sable, avec le fournisseur de modèle de son choix. Architecture, mise en route, coûts et écarts avec le service hébergé.",
+  "corps": "Depuis le 12 novembre 2026, Anthropic propose une variante auto-hébergée de Claude Managed Agents, son service d'agents autonomes. Jusqu'ici, une entreprise pouvait déjà exécuter les outils de ses agents chez elle grâce aux bacs à sable auto-hébergés, mais le service lui-même, avec ses agents, ses sessions et leur historique, restait chez Anthropic. La nouvelle option déplace aussi ce service sur l'infrastructure du client. L'accès passe par l'équipe commerciale d'Anthropic : ce n'est pas une fonctionnalité en libre-service.\n\n## Ce que c'est\n\nManaged Agents se découpe en deux blocs. D'un côté, les **bacs à sable** (*sandboxes*), conteneurs ou machines virtuelles où l'agent lance des commandes et modifie des fichiers. De l'autre, le **service** : l'API, la boucle d'agent qui enchaîne appels au modèle et appels d'outils, et le stockage des agents et des sessions. La documentation résume les trois configurations possibles :\n\n| Option | Bacs à sable | Service | Modèle |\n|---|---|---|---|\n| Par défaut (cloud) | Anthropic | Anthropic | Anthropic |\n| Bacs à sable auto-hébergés | client | Anthropic | Anthropic |\n| Managed Agents auto-hébergé | client | client | Anthropic ou un fournisseur choisi |\n\nLe serveur auto-hébergé expose la même API que le service hébergé. Le SDK officiel et la CLI `ant` fonctionnent donc sans modification de code, à deux réglages près : l'adresse du serveur et la clé employée. La documentation liste toutefois une série d'écarts, détaillés plus bas.\n\n## Comment ça marche\n\nUn déploiement réunit quatre éléments :\n\n- le **serveur** `cma-server`, qui sert l'API, fait tourner la boucle d'agent et stocke les données ; il n'exécute jamais lui-même les outils shell ou fichiers ;\n- une **base PostgreSQL 16** ou plus récente ; sans elle, tout reste en mémoire et disparaît au redémarrage ;\n- des **workers**, programmes qui interrogent le serveur pour récupérer du travail et exécutent les outils dans les bacs à sable (une commande `ant beta:worker` ou un worker écrit avec le SDK) ;\n- l'outil d'administration `cma-server-admin`, qui crée les environnements et leurs clés.\n\nUne console web hébergée sur le serveur permet aussi de créer des agents et de suivre des sessions, avec connexion par le fournisseur d'identité de l'entreprise.\n\nTrois secrets distincts circulent. La **clé d'API du serveur**, générée à l'installation, joue pour les applications le rôle qu'a d'ordinaire une clé Claude. L'**identifiant d'inférence**, détenu par le seul serveur, l'authentifie auprès du fournisseur de modèle. La **clé d'environnement** autorise un worker à consommer la file de travail d'un environnement.\n\nLe réglage `inference.provider` choisit où partent les appels au modèle : `anthropic` (valeur par défaut, l'API Claude), `bedrock` (Amazon Bedrock), `vertex` (Claude Models on Google Cloud, géré par Google), `foundry` (Microsoft Foundry) ou `gateway` (une passerelle de modèles gérée par le client). Les agents continuent de désigner leur modèle par l'identifiant de l'API Claude, par exemple `claude-opus-5-5` ; le serveur le traduit pour le fournisseur.\n\n## En pratique\n\nLa documentation propose un démarrage sur une seule machine avec Docker Compose, réservé au développement : le serveur y parle en HTTP simple sur le port 8400. Une fois l'archive de la version extraite, on se place dans son répertoire `compose` et on crée un fichier `.env` à côté de `docker-compose.yml` :\n\n```bash\ncat > .env <<EOF  # secrets de la pile ; la clé Claude se saisit ensuite à la main\nCMA_PG_PASSWORD=$(openssl rand -hex 32)\nANTHROPIC_API_KEY=sk-ant-...\nCMA_SERVER__API_KEY=$(openssl rand -hex 32)\nCMA_STORE__CREDENTIALS_ENCRYPTION_KEY=$(openssl rand -base64 32)\nEOF\nchmod 600 .env\n\ndocker compose up --build -d                     # construit et démarre la pile\ncurl -s http://127.0.0.1:8400/cma-server/readyz  # vérifie que le serveur est prêt\n```\n\nUn serveur opérationnel répond `\"status\":\"ready\"`. Pour viser ce serveur depuis un second terminal, on renseigne `ANTHROPIC_BASE_URL=http://127.0.0.1:8400` et on place dans `ANTHROPIC_API_KEY` la clé du serveur, pas la clé Claude. La documentation insiste sur ce point : si ces variables atteignent `docker compose`, le serveur finit par s'appeler lui-même au lieu de l'API Claude.\n\nPour faire passer les appels au modèle par Amazon Bedrock, on ajoute au fichier de réglages du serveur un bloc comme celui-ci, repris de la documentation :\n\n```yaml\ninference:\n  provider: bedrock\n  region: us-east-1\n  # Préfixe d'identifiant facultatif, pour une autre famille de profils\n  #model_id_prefix: global.anthropic.\n  # Correspondance facultative entre identifiant Claude et identifiant du compte\n  #model_id_overrides:\n  #  claude-opus-5-5: us.anthropic.claude-opus-5-5\n```\n\nLe serveur signe alors ses requêtes avec la chaîne d'identifiants AWS par défaut (rôle de tâche, identité de pod, ou `AWS_PROFILE` sur un poste de travail). L'identité utilisée doit disposer des droits `bedrock:InvokeModel` et `bedrock:InvokeModelWithResponseStream`, ainsi que `bedrock:ListFoundationModels` et `bedrock:ListInferenceProfiles`, sauf si l'on pose `inference.list_models: false`. Sans préfixe explicite, le serveur ajoute `us.anthropic.` devant chaque identifiant de modèle.\n\n**Cas d'usage.** Une banque doit conserver dans ses propres bases l'historique complet des sessions d'un agent qui analyse des dossiers de crédit, et sa politique cloud impose que les appels au modèle transitent par son compte Bedrock. Avec les seuls bacs à sable auto-hébergés, l'historique resterait chez Anthropic. Ici, le serveur, PostgreSQL et les workers tournent dans son réseau, et le modèle est appelé via Bedrock sans clé Claude.\n\n## Ce que ça change, et où ça s'arrête\n\nL'apport est double : la maîtrise du stockage des agents, sessions et historiques, et le libre choix du fournisseur d'inférence. Le serveur gagne aussi des fonctions absentes du service hébergé : authentification unique OpenID Connect avec rôles `admin`, `developer` et `user`, stockage des secrets de coffre dans un gestionnaire externe, jetons d'identité d'agent signés pour les serveurs MCP.\n\nLe coût est d'abord opérationnel. Le client exploite et sécurise le serveur, la base et les bacs à sable, installe lui-même chaque nouvelle version et assume ce que la documentation des bacs à sable attribuait à Anthropic, dont la détection d'usages anormaux. Les appels au modèle sont facturés par le fournisseur retenu. La documentation ne précise pas le prix de la licence du logiciel serveur. Elle rappelle enfin que l'outil `bash` est un vrai shell doté des permissions du worker : l'isolation dépend entièrement du conteneur ou de la VM qui l'héberge.\n\nLes écarts avec le service hébergé sont nombreux :\n\n- seuls des environnements `self_hosted` existent ; demander un environnement cloud renvoie une erreur 400 ;\n- l'API Messages, l'API Models et l'API Files ne sont pas servies ;\n- pas de déploiements planifiés, de *dreams* ni de webhooks ;\n- les compétences préconstruites `docx`, `pdf`, `pptx` et `xlsx` sont refusées ;\n- en orchestration multi-agent, seuls les sous-agents listés explicitement fonctionnent : ni workflows dynamiques ni conseiller ;\n- les outils `web_search` et `web_fetch` restent désactivés tant que le réglage `web_tools` ne les active pas, et dépendent du fournisseur (`web_fetch` ne fonctionne que sous `anthropic` et `foundry`) ;\n- les serveurs MCP et les dépôts Git exigent une liste d'hôtes autorisés ;\n- une image ou un document transmis par URL est accepté mais jamais vu par le modèle, sans erreur.\n\nCe dernier point illustre un piège récurrent : plusieurs limites se manifestent en silence. Une application qui fonctionne sur le service hébergé doit être retestée contre le serveur avant toute migration. Pour une équipe qui veut seulement exécuter les outils chez elle, la documentation oriente vers les bacs à sable auto-hébergés, beaucoup plus légers à exploiter.",
+  "tags": [
+    "agents",
+    "auto-hébergement",
+    "infrastructure",
+    "api"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Platform — Self-hosted Claude Managed Agents",
+      "url": "https://platform.claude.com/docs/en/managed-agents/self-hosted",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Claude Platform — Get started with self-hosted Claude Managed Agents",
+      "url": "https://platform.claude.com/docs/en/managed-agents/self-hosted/quickstart",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Claude Platform — Inference provider",
+      "url": "https://platform.claude.com/docs/en/managed-agents/self-hosted/inference-provider",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Claude Platform — Differences from the hosted service",
+      "url": "https://platform.claude.com/docs/en/managed-agents/self-hosted/differences",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Claude Platform — Single sign-on (self-hosted)",
+      "url": "https://platform.claude.com/docs/en/managed-agents/self-hosted/configure",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Claude Platform — Release notes (12 novembre 2026)",
+      "url": "https://platform.claude.com/docs/en/release-notes/overview",
+      "consultee": "2026-11-23"
+    }
+  ],
+  "statut": "publie"
+}
