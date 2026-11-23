@@ -1,0 +1,39 @@
+{
+  "slug": "mistral-tests-agents-modele-scripte",
+  "titre": "Mistral : tester un agent avec un modèle scripté (ScriptedModel)",
+  "date": "2026-11-23T08:00:00+01:00",
+  "type": "explication",
+  "labo": "mistral",
+  "fonctionnalite": "tests d'agents avec modèle scripté",
+  "chapeau": "Le SDK d'agents de Mistral remplace le modèle par un script dans les tests : réponses et appels d'outils écrits à l'avance, résultats reproductibles. Fonctionnement, exemple et limites.",
+  "corps": "Tester un agent pose un problème que les tests unitaires classiques ne connaissent pas : la réponse du modèle varie d'une exécution à l'autre, et chaque essai consomme des jetons. Le SDK d'agents Python de Mistral fournit pour cela un module `agents.testing`, qui remplace le modèle par un script. Le test décide à l'avance de ce que « répond » le modèle à chaque appel, et vérifie que l'agent, ses outils et son code réagissent comme prévu.\n\n## Ce que c'est\n\nLe module repose sur une classe, `testing.ScriptedModel`, et trois fonctions qui produisent les étapes du script :\n\n| Élément | Rôle |\n|---|---|\n| `testing.ScriptedModel` | répond à chaque appel au modèle par l'étape suivante du script, dans l'ordre |\n| `testing.reply` | étape où le modèle répond par un texte |\n| `testing.call` | étape où le modèle demande un outil par son nom, avec des arguments |\n| `testing.run_typescript` | étape où le modèle exécute un programme TypeScript dans l'outil intégré `run_typescript` |\n\nLe modèle scripté ne remplace que le modèle : l'agent garde ses outils, ses instructions et sa boucle, et le tour produit le même type de résultat qu'en conditions réelles. Le test peut donc vérifier les appels d'outils enregistrés, le texte final ou le nombre d'étapes, sans dépendre d'un tirage aléatoire du modèle.\n\n## Comment ça marche\n\nOn construit un `ScriptedModel` avec une liste d'étapes, une par appel au modèle. On le branche ensuite sur l'agent avec `Agent.override(model=...)`, qui renvoie une copie de l'agent dont les appels au modèle partent vers le script ; l'agent d'origine n'est pas modifié. On lance enfin le tour avec la méthode habituelle `run`.\n\nUn détail du SDK conditionne la façon d'écrire le script. Par défaut, le modèle n'appelle pas les outils directement : il écrit du code TypeScript dans l'outil intégré `run_typescript` et y invoque les outils sous la forme `tools.<namespace>.<name>(...)`, ce qui lui permet d'enchaîner plusieurs appels en une étape. L'espace de noms par défaut est `client`. Ce mode d'accès se règle outil par outil avec `model_access`, qui accepte `\"programmatic\"` (le défaut), `\"direct\"` ou `\"both\"`. Conséquence pour les tests :\n\n- un outil en accès programmatique se scripte avec `testing.run_typescript`, en écrivant le programme qu'aurait produit le modèle ;\n- seul un outil que le modèle peut appeler directement se scripte avec `testing.call`.\n\nLe script est strict. Un appel au modèle au-delà de la dernière étape échoue, avec un message qui indique la longueur du script. Une étape `testing.call` fait échouer l'appel si l'outil demandé n'est pas proposé au modèle à ce moment. À l'inverse, `assert_consumed()` signale une étape jamais utilisée, ce qui révèle un agent qui s'arrête plus tôt que prévu.\n\n## En pratique\n\nL'exemple suivant reprend l'outil `get_order` du guide des outils et la structure du test donnée par la référence `testing`. Le test est asynchrone, comme `run` ; il s'exécute avec un lanceur de tests qui prend en charge les fonctions `async`.\n\n```python\nfrom mistralai import agents\n\n@agents.tool\nasync def get_order(order_id: str) -> dict[str, str]:\n    \"\"\"Get the status of an order.\"\"\"\n    return {\"order_id\": order_id, \"status\": \"shipped on Monday\"}\n\nagent = agents.Agent(\n    model=\"mistral-large-4\",\n    instructions=\"Answer questions about orders in one plain sentence.\",\n    tools=[get_order],\n)\n\nasync def test_agent_lit_la_commande():\n    # Deux appels au modèle sont scriptés : le premier exécute du\n    # TypeScript qui appelle l'outil, le second rédige la réponse.\n    model = agents.testing.ScriptedModel([\n        agents.testing.run_typescript(\n            \"return await tools.client.get_order({order_id: '1042'})\"\n        ),\n        agents.testing.reply(\"Order 1042 shipped on Monday.\"),\n    ])\n    state = await agent.override(model=model).run(\"Has order 1042 shipped?\")\n\n    # L'outil Python a bien reçu l'argument attendu...\n    assert state.tool_calls[0].arguments == {\"order_id\": \"1042\"}\n    # ... et le texte final est celui du script.\n    assert state.text == \"Order 1042 shipped on Monday.\"\n    # Aucune étape du script n'est restée inutilisée.\n    model.assert_consumed()\n```\n\nCe test vérifie ce qui relève du code de l'équipe : que l'appel d'outil enregistré porte les arguments attendus, que le texte final est bien celui du tour, et que la boucle d'agent conclut après exactement deux appels au modèle. Il ne vérifie pas la qualité du raisonnement du modèle, puisque ce raisonnement est écrit à la main.\n\n**Cas d'usage.** Une équipe maintient un agent de service client dont les outils sont souvent renommés ou réorganisés au fil des versions. Elle veut qu'une réorganisation qui casse un scénario connu soit détectée en intégration continue, avant le déploiement. Avec `ScriptedModel`, chaque scénario se rejoue à l'identique à chaque exécution : une étape qui vise un outil retiré, ou un tour qui consomme plus ou moins d'étapes que prévu, fait échouer le test.\n\n## Ce que ça change, et où ça s'arrête\n\nLe gain principal est la reproductibilité. Un scénario scripté donne toujours le même résultat, ce qui permet de tester des régressions sur les outils, les hooks, les règles de permission ou le traitement des erreurs. La référence indique que la copie surchargée envoie ses appels au modèle scripté, qui ne répond que dans le processus de test. Elle ne précise pas si un tel test exige une clé d'API.\n\nLes limites documentées sont nettes :\n\n- **local seulement** : `override` lève `SdkError` sur un agent déployé, et les commandes `agents serve` et `agents deploy` refusent un agent surchargé avec `UnsupportedAgentFeatureError` ;\n- **un script figé** : il faut connaître à l'avance le nombre d'appels au modèle ; un agent qui ajoute une étape fait échouer le test, ce qui est voulu mais demande de maintenir les scripts ;\n- **le bon type d'étape** : scripter avec `testing.call` un outil resté en accès programmatique fait échouer l'appel ;\n- **pas d'évaluation du modèle** : ces tests contrôlent l'intégration, pas la pertinence des réponses réelles.\n\nMesurer la qualité des réponses du vrai modèle relève d'un autre outillage, comme les évaluations de Mistral Studio. Les tests scriptés verrouillent le comportement du code autour du modèle, pas celui du modèle lui-même.",
+  "tags": [
+    "agents",
+    "tests",
+    "sdk",
+    "outils"
+  ],
+  "sources": [
+    {
+      "titre": "Mistral Docs — Testing (agents.testing)",
+      "url": "https://docs.mistral.ai/studio/agents/reference/testing",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Mistral Docs — Agent (référence, Agent.override)",
+      "url": "https://docs.mistral.ai/studio/agents/reference/agent",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Mistral Docs — Tools (guide)",
+      "url": "https://docs.mistral.ai/studio/agents/learn/agent/tools",
+      "consultee": "2026-11-23"
+    },
+    {
+      "titre": "Mistral Docs — Tools (référence, ToolModelAccess)",
+      "url": "https://docs.mistral.ai/studio/agents/reference/tools",
+      "consultee": "2026-11-23"
+    }
+  ],
+  "statut": "publie"
+}
