@@ -1,0 +1,33 @@
+{
+  "slug": "anthropic-skills-servis-par-mcp-claude-code",
+  "titre": "Claude Code : les serveurs MCP peuvent livrer des skills, en bêta publique",
+  "date": "2026-11-25T08:00:00+01:00",
+  "type": "actu",
+  "labo": "anthropic",
+  "chapeau": "Depuis la version 2.1.332 du 25 novembre, un serveur MCP peut fournir des skills et non seulement des outils. La documentation détaille ce que le format ne porte pas, et qui analyse le contenu.",
+  "corps": "Depuis la version 2.1.332 de Claude Code, publiée le 25 novembre 2026, un serveur MCP peut livrer des *skills* — ces dossiers d'instructions que Claude charge à la demande — au même titre que ses outils. La fonction, nommée « Skills over MCP » dans la documentation, est en bêta publique et réclame au minimum la version 2.1.331, parue le 23 novembre.\n\nJusqu'ici, un skill vivait dans un fichier : un dossier du projet, un dossier personnel, un plugin, ou une synchronisation depuis claude.ai. Le contenu était sur la machine, lisible avant exécution. Avec cette extension, c'est le serveur qui fournit le texte du skill et ses fichiers annexes, que Claude Code lit comme des ressources MCP. Le déplacement est plus qu'un détail de plomberie : il change qui écrit les instructions que le modèle suivra.\n\nPour l'utilisateur, l'entrée se fait par le menu `/` ou par la commande `/skills`. Un skill porte le nom `<serveur>:<skill>` : un serveur `docs` qui expose un skill `pdf` donne `/docs:pdf report.pdf`. Les serveurs issus d'un connecteur ou d'un plugin reçoivent un préfixe, de la forme `claude_ai_Docs:pdf` ou `plugin_my-plugin_docs:pdf`, et dans le nom du serveur tout caractère autre qu'un tiret devient un souligné.\n\n## Ce que le format MCP ne sait pas porter\n\nLa documentation liste précisément ce qui tombe. Comme le contenu vient du serveur, Claude Code ignore les champs de frontmatter `allowed-tools`, `disallowed-tools`, `hooks`, `model`, `effort`, `context`, `agent`, `background`, `shell`, `paths` et `metadata`. Les commandes préfixées par `!` ne s'exécutent pas, les références `@` n'attachent aucun fichier, et les variables `${CLAUDE_PROJECT_DIR}` et `${CLAUDE_SESSION_ID}` ne sont pas substituées. Un skill MCP est donc du texte et des fichiers, pas une configuration exécutable.\n\nLes plafonds sont également donnés : cent skills au maximum par serveur, et pour les skills soumis à l'analyse de sécurité, 100 Ko par fichier texte et 400 Ko par skill. Un skill qui embarque une archive ou un binaire non reconnu — la documentation cite WebP et OTF — ne se charge pas, pas davantage qu'un skill dont du texte réside dans un dossier comme `dist/`.\n\n## Une surface de confiance nouvelle\n\nC'est le volet le plus explicite de la documentation, et le plus inhabituel pour une annonce de fonctionnalité : l'avertissement dit qu'un skill peut amener Claude à exécuter du code, qu'un serveur peut modifier ses skills à tout moment, et qu'il faut n'ajouter que des serveurs de confiance.\n\nL'analyse de sécurité ne couvre pas tout le monde. Anthropic analyse les skills des connecteurs tiers du Directory ajoutés sur claude.ai, et ceux des connecteurs personnalisés tant que l'organisation Enterprise laisse l'option **Skill and plugin security scanning** active. Pour les autres serveurs — y compris les serveurs du Directory ajoutés en ligne de commande avec `claude mcp add` —, il n'y a pas d'analyse.\n\nLe régime d'approbation suit la même logique de délégation. En mode auto, qui est le mode par défaut, aucune invite n'apparaît : c'est le classificateur qui décide si le skill se charge, et la documentation précise qu'il tranche sans lire le skill. En mode manuel ou `acceptEdits`, une invite s'affiche, et l'option **Allow this version** vaut jusqu'à la prochaine modification des fichiers par le serveur. Qui veut une invite systématique doit poser une règle de permission : `ask` sur `Skill(mcp__docs__*)`, ou `deny` sur `Skill(docs:pdf)` pour un seul skill. Ces règles `Skill(mcp__…__*)` réclament elles aussi la 2.1.331. À noter : une règle `deny` n'empêche pas les lectures de ressources ordinaires du serveur ; pour les bloquer, il faut refuser `ReadMcpResourceTool`.\n\n## Qu'est-ce que ça change en pratique\n\nPeu de choses pour l'instant, parce que la liste des contextes non couverts est longue. Les skills MCP ne fonctionnent ni dans les sessions cloud, ni avec `claude -p`, ni en mode serveur de Remote Control, ni dans GitHub Actions, ni dans l'Agent SDK. Ils sont exclus avec un `ANTHROPIC_BASE_URL` personnalisé, un `apiKeyHelper`, un `ANTHROPIC_AUTH_TOKEN` ou un fournisseur cloud, et dans les organisations réglées sur HIPAA ou sur la rétention zéro. Il faut en outre un modèle Fable, ou Claude Opus 4.8, Sonnet 5, Haiku 5.5 ou plus récent.\n\nL'activation dépend aussi du compte. Avec une connexion `/login` sur un forfait Pro, Max ou Ultra, les skills MCP sont actifs ; sur Team ou Enterprise, ils restent inactifs jusqu'à ce que l'organisation les autorise — via **Skills over MCP** côté connecteurs, ou en posant `disableDirectMcpSkills` à `false` dans les réglages gérés pour les autres serveurs. Avec une clé d'API ou une connexion Console, le déploiement est progressif.\n\nReste l'essentiel : un fournisseur de connecteur peut désormais livrer un mode d'emploi, et non seulement des outils. Pour les équipes qui maintenaient un plugin uniquement pour distribuer des skills autour d'un serveur MCP, l'un des deux artefacts devient superflu. La même version ajoute d'ailleurs un garde-fou côté local, l'événement de hook `PreSkillShellCommand`, qui peut refuser les commandes shell qu'un skill ou une commande exécute au chargement — un point aveugle des hooks `PreToolUse`.",
+  "tags": [
+    "mcp",
+    "skills",
+    "claude code",
+    "sécurité"
+  ],
+  "sources": [
+    {
+      "titre": "Claude Code — Journal des versions, 2.1.332",
+      "url": "https://code.claude.com/docs/en/changelog#2-1-332",
+      "consultee": "2026-11-25"
+    },
+    {
+      "titre": "Claude Code — MCP : utiliser les skills d'un serveur MCP",
+      "url": "https://code.claude.com/docs/en/mcp",
+      "consultee": "2026-11-25"
+    },
+    {
+      "titre": "Claude Code — Skills",
+      "url": "https://code.claude.com/docs/en/skills",
+      "consultee": "2026-11-25"
+    }
+  ],
+  "statut": "publie"
+}
