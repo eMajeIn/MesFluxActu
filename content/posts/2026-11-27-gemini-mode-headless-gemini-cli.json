@@ -1,0 +1,44 @@
+{
+  "slug": "gemini-mode-headless-gemini-cli",
+  "titre": "Gemini CLI en mode headless : scripts, JSON et codes de sortie",
+  "date": "2026-11-27T08:00:00+01:00",
+  "type": "explication",
+  "labo": "gemini",
+  "fonctionnalite": "mode headless de gemini cli",
+  "chapeau": "Le mode headless de Gemini CLI exécute une consigne sans interface et renvoie du texte ou du JSON avec un code de sortie. Déclenchement, formats, exemples de scripts et de CI, quotas et pièges des confirmations.",
+  "corps": "Gemini CLI, l'agent de code en terminal de Google, s'utilise d'ordinaire en conversation. Son **mode headless** (« sans interface ») retire cette interface : la CLI reçoit une consigne, travaille, écrit sa réponse sur la sortie standard et se termine avec un code de sortie. C'est ce qui permet de l'appeler depuis un script shell, une tâche planifiée ou une chaîne d'intégration continue.\n\n## Ce que c'est\n\nLe mode headless est une interface programmatique de Gemini CLI. Au lieu de l'affichage interactif du terminal, il renvoie du texte brut ou du JSON structuré, que d'autres programmes peuvent lire.\n\nLa documentation cite trois usages types : l'intégration continue, par exemple l'analyse automatique de *pull requests* ; le traitement par lots, comme le résumé d'un grand nombre de fichiers de journalisation ; et la construction de petits outils personnels qui enveloppent la CLI dans un script.\n\nLe principe reste celui de l'agent : la CLI peut lire des fichiers référencés avec `@`, appeler ses outils et ses serveurs MCP, mais elle le fait en une seule exécution, sans personne pour répondre à une question en cours de route.\n\n## Comment ça marche\n\n### Déclenchement\n\nLe mode headless s'active dans deux cas : quand la CLI tourne hors d'un terminal interactif (environnement *non-TTY*, par exemple quand l'entrée ou la sortie est redirigée), ou quand la consigne est passée avec le drapeau `-p` (forme longue `--prompt`). Une consigne passée en argument positionnel, sans drapeau, ouvre au contraire le mode interactif si l'on est dans un terminal.\n\nL'entrée standard sert de contexte : avec `cat error.log | gemini -p \"...\"`, le contenu du fichier est joint à la consigne. Le texte de `-p` s'ajoute à ce qui arrive par l'entrée standard.\n\n### Formats de sortie\n\nLe drapeau `--output-format` (ou `-o`) accepte trois valeurs :\n\n- `text`, par défaut : la réponse en texte brut ;\n- `json` : un seul objet avec `response` (la réponse finale), `stats` (consommation de jetons et latence de l'API) et, en cas d'échec, `error` ;\n- `stream-json` : un flux d'événements JSON séparés par des sauts de ligne (JSONL), de types `init` (métadonnées de session, dont l'identifiant et le modèle), `message`, `tool_use`, `tool_result`, `error` (avertissements non bloquants et erreurs système) et `result` (bilan final avec statistiques agrégées et détail des jetons par modèle).\n\n### Codes de sortie\n\n| Code | Signification |\n|---|---|\n| `0` | succès |\n| `1` | erreur générale ou échec de l'API |\n| `42` | erreur d'entrée : consigne ou arguments invalides |\n| `53` | limite de tours dépassée |\n\n### Drapeaux utiles en automatisation\n\nLa référence de la CLI liste notamment `--model` (`-m`) pour choisir le modèle, `--approval-mode` (valeurs `default`, `auto_edit`, `yolo`, `plan`) pour régler l'approbation des outils, `--include-directories` pour ajouter des dossiers à l'espace de travail, et `--resume` (`-r`) pour reprendre une session, `\"latest\"` désignant la plus récente. Le drapeau `--yolo` est marqué comme déprécié au profit de `--approval-mode=yolo`.\n\n## En pratique\n\n### Résumer un journal ou rédiger un message de commit\n\nLes deux exemples les plus courts de la documentation reposent sur le tube Unix :\n\n```bash\ncat error.log | gemini -p \"Explain why this failed\"  # expliquer un échec\ngit diff | gemini -p \"Write a commit message for these changes\"  # message de commit\n```\n\n### Extraire du JSON exploitable\n\nPour passer le résultat à un autre outil, on combine `--output-format json` avec `jq` et l'on extrait le champ `response`. Le tutoriel de la documentation lit ainsi un `package.json` :\n\n```bash\n#!/bin/bash\nif [ ! -f \"package.json\" ]; then  # vérifier qu'on est à la racine du projet\n  echo \"Error: package.json not found.\"\n  exit 1\nfi\n\ngemini --output-format json \"Return a raw JSON object with keys 'version' and 'deps' from @package.json\" \\\n  | jq -r '.response' > data.json\n```\n\nLe champ `response` contient le texte produit par le modèle. Ici, la consigne lui demande un objet JSON brut, mais c'est au script de vérifier que le contenu obtenu est bien du JSON valide.\n\n### Réagir aux codes de sortie dans une chaîne CI\n\nDans un script d'intégration continue, les codes documentés permettent de distinguer un échec d'API d'une consigne mal formée ou d'une limite de tours atteinte :\n\n```bash\ngit diff origin/main | gemini -p \"Review this diff and list risky changes\" > review.md\ncode=$?\nif [ \"$code\" -eq 53 ]; then\n  echo \"Limite de tours atteinte, revue incomplète\"\nelif [ \"$code\" -ne 0 ]; then\n  echo \"Échec de Gemini CLI (code $code)\"\n  exit \"$code\"\nfi\n```\n\n### Un cas d'usage\n\nUne petite équipe qui maintient une bibliothèque Python open source veut un compte rendu des modifications à chaque *pull request*. Son job de CI envoie le diff à `gemini -p`, enregistre la réponse dans un fichier joint au rapport de build, et ne fait échouer le job que sur les codes `1` et `42`. Les relecteurs humains lisent ce résumé avant d'ouvrir le diff ; le job tourne avec le mode d'approbation par défaut, sans `yolo`.\n\n## Ce que ça change, et où ça s'arrête\n\n**L'apport.** La même CLI sert au travail interactif et aux scripts, avec ses outils, ses fichiers de contexte et sa configuration. Le JSON et les codes de sortie rendent le résultat exploitable sans analyser du texte libre.\n\n**Le coût.** Les quotas de Gemini CLI s'appliquent selon la méthode d'authentification, et la page qui les décrit ne distingue pas l'usage headless de l'usage interactif. Elle les exprime en requêtes de modèle par utilisateur et par jour : 1 000 avec un compte Google sur Gemini Code Assist pour les particuliers, 250 avec une clé Gemini API au palier gratuit, des valeurs variables en paiement à l'usage. La documentation ne dit pas combien de requêtes de modèle consomme une exécution headless donnée ; le champ `stats` de la sortie JSON permet d'en suivre la consommation en jetons.\n\n**Les limites et les pièges.**\n\n- Personne ne répond aux demandes de confirmation. Dans le moteur de politiques de la CLI, une règle `ask_user` est traitée comme un refus (`deny`) en mode non interactif. Un outil qui exige une confirmation est donc bloqué, sauf règle explicite. Les règles peuvent cibler ce mode avec le champ `interactive = false`.\n- Relâcher les approbations avec `--approval-mode=yolo` autorise toutes les actions sans contrôle : sur un runner de CI qui détient des secrets, c'est à manier avec prudence.\n- Le code `53` signale une limite de tours dépassée : un script doit prévoir ce cas, car le travail de l'agent est alors incomplet.\n\n**Quand ne pas s'en servir.** Une tâche qui nécessite des arbitrages humains au fil de l'eau, ou des confirmations d'outils au cas par cas, relève du mode interactif. Le drapeau `-i` (`--prompt-interactive`) offre un intermédiaire : il exécute une première consigne puis laisse la session ouverte.",
+  "tags": [
+    "cli",
+    "automatisation",
+    "ci",
+    "agents de code"
+  ],
+  "sources": [
+    {
+      "titre": "Gemini CLI — Headless mode reference",
+      "url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/cli/headless.md",
+      "consultee": "2026-11-27"
+    },
+    {
+      "titre": "Gemini CLI — Automate tasks with headless mode",
+      "url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/cli/tutorials/automation.md",
+      "consultee": "2026-11-27"
+    },
+    {
+      "titre": "Gemini CLI — CLI cheatsheet",
+      "url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/cli/cli-reference.md",
+      "consultee": "2026-11-27"
+    },
+    {
+      "titre": "Gemini CLI — Policy engine",
+      "url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/reference/policy-engine.md",
+      "consultee": "2026-11-27"
+    },
+    {
+      "titre": "Gemini CLI — Quotas and pricing",
+      "url": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/resources/quota-and-pricing.md",
+      "consultee": "2026-11-27"
+    }
+  ],
+  "statut": "publie"
+}
